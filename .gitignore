@@ -1,4 +1,69 @@
+# ===================================================================
+#  SOLANA TOOLS – PROFESSIONAL GITIGNORE
+#  Keeps repo clean, secure and lightweight.
+# ===================================================================
+
+# -------------------------------
+# Node.js dependencies
+# -------------------------------
 node_modules/
 **/node_modules/
+
+# -------------------------------
+# Environment / Secrets
+# -------------------------------
 .env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# NEVER commit API keys:
+helius-key.txt
+secret.txt
+
+# -------------------------------
+# Logs
+# -------------------------------
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
+
+# -------------------------------
+# OS files (Windows / Linux / Mac)
+# -------------------------------
 .DS_Store
+Thumbs.db
+desktop.ini
+
+# -------------------------------
+# Editor junk (VSCode, JetBrains, etc.)
+# -------------------------------
+.vscode/
+.idea/
+*.iml
+
+# -------------------------------
+# Build artifacts
+# -------------------------------
+dist/
+build/
+.cache/
+.out/
+tmp/
+temp/
+
+# -------------------------------
+# TypeScript build cache (future tools)
+# -------------------------------
+*.tsbuildinfo
+
+# -------------------------------
+# Misc
+# -------------------------------
+*.swp
+*.swo
+*~
