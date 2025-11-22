@@ -1,5 +1,12 @@
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
-import { Metadata, PROGRAM_ID as TOKEN_METADATA_PROGRAM_ID } from "@metaplex-foundation/mpl-token-metadata";
+import mpl from "@metaplex-foundation/mpl-token-metadata";
+
+// CommonJS-safe exports
+const Metadata = mpl.Metadata ?? mpl?.metadata?.Metadata;
+const TOKEN_METADATA_PROGRAM_ID =
+  mpl.PROGRAM_ID ??
+  mpl.MPL_TOKEN_METADATA_PROGRAM_ID ??
+  new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
 
 // helper: zet raw supply om naar normale units
 function uiAmount(raw, decimals) {
@@ -43,7 +50,7 @@ async function main() {
 
   // 3) metadata lezen (name/symbol)
   const metadataAccount = await connection.getAccountInfo(metadataPda);
-  if (metadataAccount?.data) {
+  if (metadataAccount?.data && Metadata?.deserialize) {
     const [metadata] = Metadata.deserialize(metadataAccount.data);
     name = metadata.data.name.trim();
     symbol = metadata.data.symbol.trim();
@@ -76,3 +83,4 @@ main().catch((err) => {
   console.error("Error:", err);
   process.exit(1);
 });
+
