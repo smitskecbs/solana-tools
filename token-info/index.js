@@ -52,11 +52,9 @@ async function fetchMetaplexMetadata(connection, mint) {
   }
 }
 
-// 2) Token lists (fallback)
+// 2) Legacy token lists (can be incomplete)
 const TOKEN_LIST_URLS = [
-  // Solana Labs token list (community maintained mirror)
   "https://cdn.jsdelivr.net/gh/solana-labs/token-list@main/src/tokens/solana.tokenlist.json",
-  // Jupiter strict list
   "https://token.jup.ag/strict"
 ];
 
@@ -65,8 +63,10 @@ async function fetchTokenListMetadata(mintStr) {
     const json = await safeJsonFetch(url);
     if (!json) continue;
 
-    // Solana token list has { tokens: [...] }
-    const tokens = Array.isArray(json.tokens) ? json.tokens : (Array.isArray(json) ? json : []);
+    const tokens = Array.isArray(json.tokens)
+      ? json.tokens
+      : (Array.isArray(json) ? json : []);
+
     const hit = tokens.find(t => (t.address || t.mintAddress) === mintStr);
     if (hit) {
       return {
@@ -79,6 +79,26 @@ async function fetchTokenListMetadata(mintStr) {
   return null;
 }
 
+// 3) Modern Jupiter Ultra Search (best fallback)
+async function fetchJupiterUltraMetadata(mintStr) {
+  const json = await safeJsonFetch(
+    `https://lite-api.jup.ag/ultra/v1/search?query=${mintStr}`
+  );
+  const tokens = json?.tokens;
+  if (!Array.isArray(tokens)) return null;
+
+  // find exact mint match
+  const exact = tokens.find(t => t?.address === mintStr);
+  const hit = exact || tokens[0];
+  if (!hit) return null;
+
+  return {
+    name: hit.name || "Unknown",
+    symbol: hit.symbol || "Unknown",
+    source: "jupiter-ultra"
+  };
+}
+
 // ---------- price sources ----------
 
 // 1) Jupiter price
@@ -89,28 +109,14 @@ async function fetchJupiterPrice(mintStr) {
   return null;
 }
 
-// 2) Birdeye price (optional, needs API key)
-async function fetchBirdeyePrice(mintStr) {
-  const key = process.env.BIRDEYE_API_KEY;
-  if (!key) return null;
-
-  const json = await safeJsonFetch(
-    `https://public-api.birdeye.so/defi/price?address=${mintStr}`,
-    { headers: { "X-API-KEY": key } }
-  );
-
-  const p = json?.data?.value;
-  if (typeof p === "number") return { price: p, source: "birdeye" };
-  return null;
-}
-
-// 3) DexScreener price (no key)
+// 2) DexScreener price (no key)
 async function fetchDexScreenerPrice(mintStr) {
-  const json = await safeJsonFetch(`https://api.dexscreener.com/latest/dex/tokens/${mintStr}`);
+  const json = await safeJsonFetch(
+    `https://api.dexscreener.com/latest/dex/tokens/${mintStr}`
+  );
   const pairs = json?.pairs;
   if (!Array.isArray(pairs) || pairs.length === 0) return null;
 
-  // Pak de beste pair (meestal hoogste liquidity)
   const best = pairs
     .filter(p => p?.priceUsd)
     .sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
@@ -158,6 +164,13 @@ async function main() {
       name = md2.name;
       symbol = md2.symbol;
       metaSource = md2.source;
+    } else {
+      const md3 = await fetchJupiterUltraMetadata(mintStr);
+      if (md3) {
+        name = md3.name;
+        symbol = md3.symbol;
+        metaSource = md3.source;
+      }
     }
   }
 
@@ -170,16 +183,10 @@ async function main() {
     price = p1.price;
     priceSource = p1.source;
   } else {
-    const p2 = await fetchBirdeyePrice(mintStr);
+    const p2 = await fetchDexScreenerPrice(mintStr);
     if (p2) {
       price = p2.price;
       priceSource = p2.source;
-    } else {
-      const p3 = await fetchDexScreenerPrice(mintStr);
-      if (p3) {
-        price = p3.price;
-        priceSource = p3.source;
-      }
     }
   }
 
@@ -202,4 +209,3 @@ main().catch((err) => {
   console.error("Error:", err);
   process.exit(1);
 });
-
