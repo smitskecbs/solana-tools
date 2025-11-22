@@ -26,7 +26,7 @@ async function safeJsonFetch(url, opts = {}) {
 
 // ---------- metadata sources ----------
 
-// 1) On-chain Metaplex metadata (name/symbol fields)
+// 1) On-chain Metaplex metadata
 async function fetchMetaplexMetadata(connection, mint) {
   try {
     const [metadataPda] = PublicKey.findProgramAddressSync(
@@ -88,8 +88,7 @@ async function fetchTokenListMetadata(mintStr) {
   return null;
 }
 
-// 3) OPTIONAL Helius DAS metadata fallback (needs free API key)
-// This returns onChainMetadata + offChainMetadata + legacyMetadata.
+// 3) OPTIONAL Helius DAS metadata fallback (needs key)
 async function fetchHeliusMetadata(mintStr) {
   const key = process.env.HELIUS_API_KEY;
   if (!key) return null;
@@ -120,11 +119,7 @@ async function fetchHeliusMetadata(mintStr) {
 
   if (!name && !symbol) return null;
 
-  return {
-    name: name || "Unknown",
-    symbol: symbol || "Unknown",
-    source: "helius-das"
-  };
+  return { name: name || "Unknown", symbol: symbol || "Unknown", source: "helius-das" };
 }
 
 // ---------- price sources ----------
@@ -137,7 +132,7 @@ async function fetchJupiterPriceV6(mintStr) {
   return null;
 }
 
-// 1b) Jupiter legacy endpoint
+// 1b) Jupiter legacy
 async function fetchJupiterPriceLegacy(mintStr) {
   const json = await safeJsonFetch(`https://api.jup.ag/price/v2?ids=${mintStr}`);
   const p = json?.data?.[mintStr]?.price;
@@ -160,8 +155,8 @@ async function fetchBirdeyePrice(mintStr) {
   return null;
 }
 
-// 3) DexScreener price (strict filtering)
-async function fetchDexScreenerPrice(mintStr) {
+// 3) DexScreener price (strict)
+async function fetchDexScreenerPriceStrict(mintStr) {
   const json = await safeJsonFetch(
     `https://api.dexscreener.com/latest/dex/tokens/${mintStr}`
   );
@@ -188,6 +183,28 @@ async function fetchDexScreenerPrice(mintStr) {
   return null;
 }
 
+// 4) DexScreener LAST fallback (low-liq allowed)
+async function fetchDexScreenerPriceLowLiq(mintStr) {
+  const json = await safeJsonFetch(
+    `https://api.dexscreener.com/latest/dex/tokens/${mintStr}`
+  );
+  const pairs = json?.pairs;
+  if (!Array.isArray(pairs) || pairs.length === 0) return null;
+
+  const solanaAny = pairs
+    .filter(p => p?.chainId === "solana")
+    .filter(p => p?.priceUsd);
+
+  if (!solanaAny.length) return null;
+
+  const best = solanaAny
+    .sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
+
+  const p = best?.priceUsd ? Number(best.priceUsd) : null;
+  if (p && !Number.isNaN(p)) return { price: p, source: "dexscreener-lowliq" };
+  return null;
+}
+
 // ---------- main ----------
 async function main() {
   const mintStr = process.argv[2];
@@ -197,20 +214,19 @@ async function main() {
   }
 
   const mint = new PublicKey(mintStr);
-
   const rpcUrl = process.env.RPC_URL || clusterApiUrl("mainnet-beta");
   const connection = new Connection(rpcUrl, "confirmed");
 
   console.log("\n🔎 Fetching token info for mint:");
   console.log(mint.toBase58(), "\n");
 
-  // Supply + decimals from chain
+  // Supply
   const supplyInfo = await connection.getTokenSupply(mint);
   const decimals = supplyInfo.value.decimals;
   const rawSupply = supplyInfo.value.amount;
   const totalSupplyUi = uiAmount(rawSupply, decimals);
 
-  // Metadata with fallbacks
+  // Metadata
   let name = "Unknown";
   let symbol = "Unknown";
   let metaSource = "none";
@@ -236,7 +252,7 @@ async function main() {
     }
   }
 
-  // Price with fallbacks
+  // Price
   let price = null;
   let priceSource = "none";
 
@@ -252,42 +268,42 @@ async function main() {
       price = p2.price;
       priceSource = p2.source;
     } else {
-      const p3 = await fetchDexScreenerPrice(mintStr);
+      const p3 = await fetchDexScreenerPriceStrict(mintStr);
       if (p3) {
         price = p3.price;
         priceSource = p3.source;
+      } else {
+        const p4 = await fetchDexScreenerPriceLowLiq(mintStr);
+        if (p4) {
+          price = p4.price;
+          priceSource = p4.source;
+        }
       }
     }
   }
 
-  // Stablecoin sanity check
-  const isStable = ["USDC", "USDT", "PYUSD", "USDS", "UXD"].includes(symbol.toUpperCase());
+  // Stable sanity
+  const isStable = ["USDC","USDT","PYUSD","USDS","UXD"].includes(symbol.toUpperCase());
   if (isStable && price !== null) {
-    const deviation = Math.abs(price - 1);
-    if (deviation > 0.2) {
+    if (Math.abs(price - 1) > 0.2) {
       price = 1;
       priceSource = "stable-sanity";
     }
   }
 
   // Output
-  console.log(
-    "✅ Name:       ",
-    name,
-    metaSource !== "none" ? `(source: ${metaSource})` : ""
-  );
-  console.log(
-    "✅ Symbol:     ",
-    symbol,
-    metaSource !== "none" ? `(source: ${metaSource})` : ""
-  );
+  console.log("✅ Name:       ", name, metaSource !== "none" ? `(source: ${metaSource})` : "");
+  console.log("✅ Symbol:     ", symbol, metaSource !== "none" ? `(source: ${metaSource})` : "");
   console.log("✅ Decimals:   ", decimals);
   console.log("✅ TotalSupply:", totalSupplyUi.toLocaleString());
 
   if (price !== null) {
     console.log("✅ Price:      ", `$${price}`, `(source: ${priceSource})`);
+    if (priceSource === "dexscreener-lowliq") {
+      console.log("⚠️  Note: price from very low-liquidity pair (last fallback).");
+    }
   } else {
-    console.log("ℹ️ Price:      ", "not available (all sources failed)");
+    console.log("ℹ️ Price:      ", "not available (no pairs/feeds yet)");
   }
 
   console.log("\nDone.\n");
