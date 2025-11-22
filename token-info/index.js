@@ -88,6 +88,30 @@ async function fetchTokenListMetadata(mintStr) {
   return null;
 }
 
+// 3) DexScreener metadata fallback (no key)
+async function fetchDexScreenerMetadata(mintStr) {
+  const json = await safeJsonFetch(
+    `https://api.dexscreener.com/latest/dex/tokens/${mintStr}`
+  );
+  const pairs = json?.pairs;
+  if (!Array.isArray(pairs) || pairs.length === 0) return null;
+
+  // kies beste Solana pair op liquidity
+  const best = pairs
+    .filter(p => p?.chainId === "solana")
+    .sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
+
+  const name = best?.baseToken?.name?.trim();
+  const symbol = best?.baseToken?.symbol?.trim();
+  if (!name && !symbol) return null;
+
+  return {
+    name: name || "Unknown",
+    symbol: symbol || "Unknown",
+    source: "dexscreener-meta"
+  };
+}
+
 // ---------- price sources ----------
 
 // 1) Jupiter price (v6)
@@ -135,7 +159,7 @@ async function fetchDexScreenerPrice(mintStr) {
   const solanaPairs = pairs
     .filter(p => p?.chainId === "solana")
     .filter(p => goodDexes.has((p?.dexId || "").toLowerCase()))
-    .filter(p => (p?.liquidity?.usd || 0) >= 2000) // min liquidity
+    .filter(p => (p?.liquidity?.usd || 0) >= 2000)
     .filter(p => {
       const quoteSym = p?.quoteToken?.symbol?.toUpperCase();
       return goodQuotes.has(quoteSym);
@@ -190,6 +214,13 @@ async function main() {
       name = md2.name;
       symbol = md2.symbol;
       metaSource = md2.source;
+    } else {
+      const md3 = await fetchDexScreenerMetadata(mintStr);
+      if (md3) {
+        name = md3.name;
+        symbol = md3.symbol;
+        metaSource = md3.source;
+      }
     }
   }
 
@@ -221,7 +252,7 @@ async function main() {
   const isStable = ["USDC", "USDT", "PYUSD", "USDS", "UXD"].includes(symbol.toUpperCase());
   if (isStable && price !== null) {
     const deviation = Math.abs(price - 1);
-    if (deviation > 0.2) { // >20% weg van $1 is bijna zeker fout pair
+    if (deviation > 0.2) {
       price = 1;
       priceSource = "stable-sanity";
     }
