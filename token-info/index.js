@@ -52,22 +52,33 @@ async function fetchMetaplexMetadata(connection, mint) {
   }
 }
 
-// 2) Legacy token lists (can be incomplete)
+// 2) Token lists (fallback)
 const TOKEN_LIST_URLS = [
+  // Solana token list mirrors (shape: {tokens:[...]})
+  "https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json",
   "https://cdn.jsdelivr.net/gh/solana-labs/token-list@main/src/tokens/solana.tokenlist.json",
-  "https://token.jup.ag/strict"
+  // Jupiter lists (shape: array)
+  "https://token.jup.ag/strict",
+  "https://token.jup.ag/all"
 ];
+
+function normalizeList(json) {
+  if (!json) return [];
+  if (Array.isArray(json)) return json;
+  if (Array.isArray(json.tokens)) return json.tokens;
+  return [];
+}
 
 async function fetchTokenListMetadata(mintStr) {
   for (const url of TOKEN_LIST_URLS) {
     const json = await safeJsonFetch(url);
-    if (!json) continue;
+    const tokens = normalizeList(json);
+    if (!tokens.length) continue;
 
-    const tokens = Array.isArray(json.tokens)
-      ? json.tokens
-      : (Array.isArray(json) ? json : []);
+    const hit = tokens.find(t =>
+      (t.address === mintStr) || (t.mintAddress === mintStr)
+    );
 
-    const hit = tokens.find(t => (t.address || t.mintAddress) === mintStr);
     if (hit) {
       return {
         name: hit.name || "Unknown",
@@ -77,26 +88,6 @@ async function fetchTokenListMetadata(mintStr) {
     }
   }
   return null;
-}
-
-// 3) Modern Jupiter Ultra Search (best fallback)
-async function fetchJupiterUltraMetadata(mintStr) {
-  const json = await safeJsonFetch(
-    `https://lite-api.jup.ag/ultra/v1/search?query=${mintStr}`
-  );
-  const tokens = json?.tokens;
-  if (!Array.isArray(tokens)) return null;
-
-  // find exact mint match
-  const exact = tokens.find(t => t?.address === mintStr);
-  const hit = exact || tokens[0];
-  if (!hit) return null;
-
-  return {
-    name: hit.name || "Unknown",
-    symbol: hit.symbol || "Unknown",
-    source: "jupiter-ultra"
-  };
 }
 
 // ---------- price sources ----------
@@ -109,16 +100,38 @@ async function fetchJupiterPrice(mintStr) {
   return null;
 }
 
-// 2) DexScreener price (no key)
-async function fetchDexScreenerPrice(mintStr) {
+// 2) Birdeye price (optional, needs API key)
+async function fetchBirdeyePrice(mintStr) {
+  const key = process.env.BIRDEYE_API_KEY;
+  if (!key) return null;
+
   const json = await safeJsonFetch(
-    `https://api.dexscreener.com/latest/dex/tokens/${mintStr}`
+    `https://public-api.birdeye.so/defi/price?address=${mintStr}`,
+    { headers: { "X-API-KEY": key } }
   );
+
+  const p = json?.data?.value;
+  if (typeof p === "number") return { price: p, source: "birdeye" };
+  return null;
+}
+
+// 3) DexScreener price (no key) – improved filtering
+async function fetchDexScreenerPrice(mintStr) {
+  const json = await safeJsonFetch(`https://api.dexscreener.com/latest/dex/tokens/${mintStr}`);
   const pairs = json?.pairs;
   if (!Array.isArray(pairs) || pairs.length === 0) return null;
 
-  const best = pairs
-    .filter(p => p?.priceUsd)
+  const goodQuotes = new Set(["USDC", "USDT", "SOL"]);
+
+  const solanaPairs = pairs
+    .filter(p => p?.chainId === "solana")
+    .filter(p => {
+      const quoteSym = p?.quoteToken?.symbol?.toUpperCase();
+      return goodQuotes.has(quoteSym);
+    })
+    .filter(p => p?.priceUsd);
+
+  const best = solanaPairs
     .sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
 
   const p = best?.priceUsd ? Number(best.priceUsd) : null;
@@ -164,13 +177,6 @@ async function main() {
       name = md2.name;
       symbol = md2.symbol;
       metaSource = md2.source;
-    } else {
-      const md3 = await fetchJupiterUltraMetadata(mintStr);
-      if (md3) {
-        name = md3.name;
-        symbol = md3.symbol;
-        metaSource = md3.source;
-      }
     }
   }
 
@@ -183,10 +189,16 @@ async function main() {
     price = p1.price;
     priceSource = p1.source;
   } else {
-    const p2 = await fetchDexScreenerPrice(mintStr);
+    const p2 = await fetchBirdeyePrice(mintStr);
     if (p2) {
       price = p2.price;
       priceSource = p2.source;
+    } else {
+      const p3 = await fetchDexScreenerPrice(mintStr);
+      if (p3) {
+        price = p3.price;
+        priceSource = p3.source;
+      }
     }
   }
 
