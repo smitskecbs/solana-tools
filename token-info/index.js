@@ -26,7 +26,7 @@ async function safeJsonFetch(url, opts = {}) {
 
 // ---------- metadata sources ----------
 
-// 1) On-chain Metaplex metadata
+// 1) On-chain Metaplex metadata (name/symbol fields)
 async function fetchMetaplexMetadata(connection, mint) {
   try {
     const [metadataPda] = PublicKey.findProgramAddressSync(
@@ -52,7 +52,7 @@ async function fetchMetaplexMetadata(connection, mint) {
   }
 }
 
-// 2) Token lists (fallback)
+// 2) Token lists fallback
 const TOKEN_LIST_URLS = [
   "https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json",
   "https://cdn.jsdelivr.net/gh/solana-labs/token-list@main/src/tokens/solana.tokenlist.json",
@@ -88,27 +88,42 @@ async function fetchTokenListMetadata(mintStr) {
   return null;
 }
 
-// 3) DexScreener metadata fallback (no key)
-async function fetchDexScreenerMetadata(mintStr) {
-  const json = await safeJsonFetch(
-    `https://api.dexscreener.com/latest/dex/tokens/${mintStr}`
-  );
-  const pairs = json?.pairs;
-  if (!Array.isArray(pairs) || pairs.length === 0) return null;
+// 3) OPTIONAL Helius DAS metadata fallback (needs free API key)
+// This returns onChainMetadata + offChainMetadata + legacyMetadata.
+async function fetchHeliusMetadata(mintStr) {
+  const key = process.env.HELIUS_API_KEY;
+  if (!key) return null;
 
-  // kies beste Solana pair op liquidity
-  const best = pairs
-    .filter(p => p?.chainId === "solana")
-    .sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
+  const url = `https://api.helius.xyz/v0/token-metadata?api-key=${key}`;
+  const json = await safeJsonFetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mintAccounts: [mintStr] })
+  });
 
-  const name = best?.baseToken?.name?.trim();
-  const symbol = best?.baseToken?.symbol?.trim();
+  const item = Array.isArray(json) ? json[0] : null;
+  if (!item) return null;
+
+  const onChain = item?.onChainMetadata?.metadata;
+  const offChain = item?.offChainMetadata;
+  const legacy = item?.legacyMetadata;
+
+  const name =
+    onChain?.data?.name?.trim() ||
+    offChain?.name?.trim() ||
+    legacy?.name?.trim();
+
+  const symbol =
+    onChain?.data?.symbol?.trim() ||
+    offChain?.symbol?.trim() ||
+    legacy?.symbol?.trim();
+
   if (!name && !symbol) return null;
 
   return {
     name: name || "Unknown",
     symbol: symbol || "Unknown",
-    source: "dexscreener-meta"
+    source: "helius-das"
   };
 }
 
@@ -122,7 +137,7 @@ async function fetchJupiterPriceV6(mintStr) {
   return null;
 }
 
-// 1b) Jupiter legacy endpoint (extra fallback)
+// 1b) Jupiter legacy endpoint
 async function fetchJupiterPriceLegacy(mintStr) {
   const json = await safeJsonFetch(`https://api.jup.ag/price/v2?ids=${mintStr}`);
   const p = json?.data?.[mintStr]?.price;
@@ -130,7 +145,7 @@ async function fetchJupiterPriceLegacy(mintStr) {
   return null;
 }
 
-// 2) Birdeye price (optional, needs API key)
+// 2) Birdeye price (optional)
 async function fetchBirdeyePrice(mintStr) {
   const key = process.env.BIRDEYE_API_KEY;
   if (!key) return null;
@@ -145,7 +160,7 @@ async function fetchBirdeyePrice(mintStr) {
   return null;
 }
 
-// 3) DexScreener price (no key) – strict filtering
+// 3) DexScreener price (strict filtering)
 async function fetchDexScreenerPrice(mintStr) {
   const json = await safeJsonFetch(
     `https://api.dexscreener.com/latest/dex/tokens/${mintStr}`
@@ -160,10 +175,7 @@ async function fetchDexScreenerPrice(mintStr) {
     .filter(p => p?.chainId === "solana")
     .filter(p => goodDexes.has((p?.dexId || "").toLowerCase()))
     .filter(p => (p?.liquidity?.usd || 0) >= 2000)
-    .filter(p => {
-      const quoteSym = p?.quoteToken?.symbol?.toUpperCase();
-      return goodQuotes.has(quoteSym);
-    })
+    .filter(p => goodQuotes.has((p?.quoteToken?.symbol || "").toUpperCase()))
     .filter(p => p?.priceUsd);
 
   if (!solanaPairs.length) return null;
@@ -215,7 +227,7 @@ async function main() {
       symbol = md2.symbol;
       metaSource = md2.source;
     } else {
-      const md3 = await fetchDexScreenerMetadata(mintStr);
+      const md3 = await fetchHeliusMetadata(mintStr);
       if (md3) {
         name = md3.name;
         symbol = md3.symbol;
