@@ -4,16 +4,123 @@ import mpl from "@metaplex-foundation/mpl-token-metadata";
 // CommonJS-safe exports
 const Metadata = mpl.Metadata ?? mpl?.metadata?.Metadata;
 
-// Always use the official Metaplex Token Metadata program id
+// Official Metaplex Token Metadata program id
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
   "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 );
 
-// helper: zet raw supply om naar normale units
+// ---------- helpers ----------
 function uiAmount(raw, decimals) {
   return Number(raw) / Math.pow(10, decimals);
 }
 
+async function safeJsonFetch(url, opts = {}) {
+  try {
+    const res = await fetch(url, opts);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+// ---------- metadata sources ----------
+
+// 1) On-chain Metaplex metadata
+async function fetchMetaplexMetadata(connection, mint) {
+  try {
+    const [metadataPda] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("metadata"),
+        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+        mint.toBuffer()
+      ],
+      TOKEN_METADATA_PROGRAM_ID
+    );
+
+    const account = await connection.getAccountInfo(metadataPda);
+    if (!account?.data || !Metadata?.deserialize) return null;
+
+    const [md] = Metadata.deserialize(account.data);
+    const name = md?.data?.name?.trim();
+    const symbol = md?.data?.symbol?.trim();
+
+    if (!name && !symbol) return null;
+    return { name: name || "Unknown", symbol: symbol || "Unknown", source: "metaplex" };
+  } catch {
+    return null;
+  }
+}
+
+// 2) Token lists (fallback)
+const TOKEN_LIST_URLS = [
+  // Solana Labs token list (community maintained mirror)
+  "https://cdn.jsdelivr.net/gh/solana-labs/token-list@main/src/tokens/solana.tokenlist.json",
+  // Jupiter strict list
+  "https://token.jup.ag/strict"
+];
+
+async function fetchTokenListMetadata(mintStr) {
+  for (const url of TOKEN_LIST_URLS) {
+    const json = await safeJsonFetch(url);
+    if (!json) continue;
+
+    // Solana token list has { tokens: [...] }
+    const tokens = Array.isArray(json.tokens) ? json.tokens : (Array.isArray(json) ? json : []);
+    const hit = tokens.find(t => (t.address || t.mintAddress) === mintStr);
+    if (hit) {
+      return {
+        name: hit.name || "Unknown",
+        symbol: hit.symbol || "Unknown",
+        source: url.includes("jup") ? "jupiter-list" : "solana-list"
+      };
+    }
+  }
+  return null;
+}
+
+// ---------- price sources ----------
+
+// 1) Jupiter price
+async function fetchJupiterPrice(mintStr) {
+  const json = await safeJsonFetch(`https://price.jup.ag/v6/price?ids=${mintStr}`);
+  const p = json?.data?.[mintStr]?.price;
+  if (typeof p === "number") return { price: p, source: "jupiter" };
+  return null;
+}
+
+// 2) Birdeye price (optional, needs API key)
+async function fetchBirdeyePrice(mintStr) {
+  const key = process.env.BIRDEYE_API_KEY;
+  if (!key) return null;
+
+  const json = await safeJsonFetch(
+    `https://public-api.birdeye.so/defi/price?address=${mintStr}`,
+    { headers: { "X-API-KEY": key } }
+  );
+
+  const p = json?.data?.value;
+  if (typeof p === "number") return { price: p, source: "birdeye" };
+  return null;
+}
+
+// 3) DexScreener price (no key)
+async function fetchDexScreenerPrice(mintStr) {
+  const json = await safeJsonFetch(`https://api.dexscreener.com/latest/dex/tokens/${mintStr}`);
+  const pairs = json?.pairs;
+  if (!Array.isArray(pairs) || pairs.length === 0) return null;
+
+  // Pak de beste pair (meestal hoogste liquidity)
+  const best = pairs
+    .filter(p => p?.priceUsd)
+    .sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
+
+  const p = best?.priceUsd ? Number(best.priceUsd) : null;
+  if (p && !Number.isNaN(p)) return { price: p, source: "dexscreener" };
+  return null;
+}
+
+// ---------- main ----------
 async function main() {
   const mintStr = process.argv[2];
   if (!mintStr) {
@@ -23,60 +130,69 @@ async function main() {
 
   const mint = new PublicKey(mintStr);
 
-  // connect to Solana mainnet
   const rpcUrl = process.env.RPC_URL || clusterApiUrl("mainnet-beta");
   const connection = new Connection(rpcUrl, "confirmed");
 
   console.log("\n🔎 Fetching token info for mint:");
   console.log(mint.toBase58(), "\n");
 
-  // 1) supply + decimals
+  // Supply + decimals from chain
   const supplyInfo = await connection.getTokenSupply(mint);
   const decimals = supplyInfo.value.decimals;
-  const rawSupply = supplyInfo.value.amount; // big number string
+  const rawSupply = supplyInfo.value.amount;
   const totalSupplyUi = uiAmount(rawSupply, decimals);
 
-  // 2) Metaplex metadata PDA vinden
-  const [metadataPda] = PublicKey.findProgramAddressSync(
-    [
-      Buffer.from("metadata"),
-      TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-      mint.toBuffer()
-    ],
-    TOKEN_METADATA_PROGRAM_ID
-  );
-
+  // Metadata with fallbacks
   let name = "Unknown";
   let symbol = "Unknown";
+  let metaSource = "none";
 
-  // 3) metadata lezen (name/symbol)
-  const metadataAccount = await connection.getAccountInfo(metadataPda);
-  if (metadataAccount?.data && Metadata?.deserialize) {
-    const [metadata] = Metadata.deserialize(metadataAccount.data);
-    name = metadata.data.name.trim();
-    symbol = metadata.data.symbol.trim();
+  const md1 = await fetchMetaplexMetadata(connection, mint);
+  if (md1) {
+    name = md1.name;
+    symbol = md1.symbol;
+    metaSource = md1.source;
+  } else {
+    const md2 = await fetchTokenListMetadata(mintStr);
+    if (md2) {
+      name = md2.name;
+      symbol = md2.symbol;
+      metaSource = md2.source;
+    }
   }
 
-  // 4) optioneel prijs via Jupiter
+  // Price with fallbacks
   let price = null;
-  try {
-    const res = await fetch(
-      `https://price.jup.ag/v6/price?ids=${mint.toBase58()}`
-    );
-    const json = await res.json();
-    price = json?.data?.[mint.toBase58()]?.price ?? null;
-  } catch {}
+  let priceSource = "none";
+
+  const p1 = await fetchJupiterPrice(mintStr);
+  if (p1) {
+    price = p1.price;
+    priceSource = p1.source;
+  } else {
+    const p2 = await fetchBirdeyePrice(mintStr);
+    if (p2) {
+      price = p2.price;
+      priceSource = p2.source;
+    } else {
+      const p3 = await fetchDexScreenerPrice(mintStr);
+      if (p3) {
+        price = p3.price;
+        priceSource = p3.source;
+      }
+    }
+  }
 
   // Output
-  console.log("✅ Name:       ", name);
-  console.log("✅ Symbol:     ", symbol);
+  console.log("✅ Name:       ", name, metaSource !== "none" ? `(source: ${metaSource})` : "");
+  console.log("✅ Symbol:     ", symbol, metaSource !== "none" ? `(source: ${metaSource})` : "");
   console.log("✅ Decimals:   ", decimals);
   console.log("✅ TotalSupply:", totalSupplyUi.toLocaleString());
 
   if (price !== null) {
-    console.log("✅ Price (JUP):", `$${price}`);
+    console.log("✅ Price:      ", `$${price}`, `(source: ${priceSource})`);
   } else {
-    console.log("ℹ️ Price:      ", "not available (Jupiter optional)");
+    console.log("ℹ️ Price:      ", "not available (all sources failed)");
   }
 
   console.log("\nDone.\n");
@@ -86,3 +202,4 @@ main().catch((err) => {
   console.error("Error:", err);
   process.exit(1);
 });
+
