@@ -1,0 +1,11 @@
+{
+  "name": "wallet-info",
+  "version": "1.0.0",
+  "description": "Solana wallet analysis tool: balances, SPL tokens, transactions, activity summary, Helius-enhanced.",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "@solana/web3.js": "^1.93.0",
+    "bs58": "^5.0.0"
+  }
+}
