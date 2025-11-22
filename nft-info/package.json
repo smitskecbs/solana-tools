@@ -1,0 +1,9 @@
+{
+  "name": "nft-info",
+  "version": "1.0.0",
+  "description": "Solana NFT / Digital Asset inspector using Helius DAS getAsset.",
+  "type": "module",
+  "dependencies": {
+    "@solana/web3.js": "^1.95.2"
+  }
+}
