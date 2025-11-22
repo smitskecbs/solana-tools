@@ -54,10 +54,8 @@ async function fetchMetaplexMetadata(connection, mint) {
 
 // 2) Token lists (fallback)
 const TOKEN_LIST_URLS = [
-  // Solana token list mirrors (shape: {tokens:[...]})
   "https://raw.githubusercontent.com/solana-labs/token-list/main/src/tokens/solana.tokenlist.json",
   "https://cdn.jsdelivr.net/gh/solana-labs/token-list@main/src/tokens/solana.tokenlist.json",
-  // Jupiter lists (shape: array)
   "https://token.jup.ag/strict",
   "https://token.jup.ag/all"
 ];
@@ -75,8 +73,8 @@ async function fetchTokenListMetadata(mintStr) {
     const tokens = normalizeList(json);
     if (!tokens.length) continue;
 
-    const hit = tokens.find(t =>
-      (t.address === mintStr) || (t.mintAddress === mintStr)
+    const hit = tokens.find(
+      (t) => (t.address === mintStr) || (t.mintAddress === mintStr)
     );
 
     if (hit) {
@@ -92,11 +90,19 @@ async function fetchTokenListMetadata(mintStr) {
 
 // ---------- price sources ----------
 
-// 1) Jupiter price
-async function fetchJupiterPrice(mintStr) {
+// 1) Jupiter price (v6)
+async function fetchJupiterPriceV6(mintStr) {
   const json = await safeJsonFetch(`https://price.jup.ag/v6/price?ids=${mintStr}`);
   const p = json?.data?.[mintStr]?.price;
-  if (typeof p === "number") return { price: p, source: "jupiter" };
+  if (typeof p === "number") return { price: p, source: "jupiter-v6" };
+  return null;
+}
+
+// 1b) Jupiter legacy endpoint (extra fallback)
+async function fetchJupiterPriceLegacy(mintStr) {
+  const json = await safeJsonFetch(`https://api.jup.ag/price/v2?ids=${mintStr}`);
+  const p = json?.data?.[mintStr]?.price;
+  if (typeof p === "number") return { price: p, source: "jupiter-legacy" };
   return null;
 }
 
@@ -115,21 +121,28 @@ async function fetchBirdeyePrice(mintStr) {
   return null;
 }
 
-// 3) DexScreener price (no key) – improved filtering
+// 3) DexScreener price (no key) – strict filtering
 async function fetchDexScreenerPrice(mintStr) {
-  const json = await safeJsonFetch(`https://api.dexscreener.com/latest/dex/tokens/${mintStr}`);
+  const json = await safeJsonFetch(
+    `https://api.dexscreener.com/latest/dex/tokens/${mintStr}`
+  );
   const pairs = json?.pairs;
   if (!Array.isArray(pairs) || pairs.length === 0) return null;
 
   const goodQuotes = new Set(["USDC", "USDT", "SOL"]);
+  const goodDexes = new Set(["raydium", "orca", "meteora"]);
 
   const solanaPairs = pairs
     .filter(p => p?.chainId === "solana")
+    .filter(p => goodDexes.has((p?.dexId || "").toLowerCase()))
+    .filter(p => (p?.liquidity?.usd || 0) >= 2000) // min liquidity
     .filter(p => {
       const quoteSym = p?.quoteToken?.symbol?.toUpperCase();
       return goodQuotes.has(quoteSym);
     })
     .filter(p => p?.priceUsd);
+
+  if (!solanaPairs.length) return null;
 
   const best = solanaPairs
     .sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
@@ -184,7 +197,9 @@ async function main() {
   let price = null;
   let priceSource = "none";
 
-  const p1 = await fetchJupiterPrice(mintStr);
+  const p1 = await fetchJupiterPriceV6(mintStr)
+            || await fetchJupiterPriceLegacy(mintStr);
+
   if (p1) {
     price = p1.price;
     priceSource = p1.source;
@@ -202,9 +217,27 @@ async function main() {
     }
   }
 
+  // Stablecoin sanity check
+  const isStable = ["USDC", "USDT", "PYUSD", "USDS", "UXD"].includes(symbol.toUpperCase());
+  if (isStable && price !== null) {
+    const deviation = Math.abs(price - 1);
+    if (deviation > 0.2) { // >20% weg van $1 is bijna zeker fout pair
+      price = 1;
+      priceSource = "stable-sanity";
+    }
+  }
+
   // Output
-  console.log("✅ Name:       ", name, metaSource !== "none" ? `(source: ${metaSource})` : "");
-  console.log("✅ Symbol:     ", symbol, metaSource !== "none" ? `(source: ${metaSource})` : "");
+  console.log(
+    "✅ Name:       ",
+    name,
+    metaSource !== "none" ? `(source: ${metaSource})` : ""
+  );
+  console.log(
+    "✅ Symbol:     ",
+    symbol,
+    metaSource !== "none" ? `(source: ${metaSource})` : ""
+  );
   console.log("✅ Decimals:   ", decimals);
   console.log("✅ TotalSupply:", totalSupplyUi.toLocaleString());
 
