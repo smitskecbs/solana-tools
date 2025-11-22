@@ -1,137 +1,134 @@
-# 📘 Token Info Fetcher — Solana  
-A fast and reliable CLI tool for fetching Solana token information including metadata, supply, and price — with smart multi-layer fallbacks.
+# 🔧 Solana Tools — Open-Source Utilities for Builders
+
+A growing collection of lightweight, open-source tools built to explore and analyze the Solana blockchain.
+
+Created by **Kevin Smits**, this toolkit focuses on clarity, simplicity, and providing devs & analysts with fast terminal-based insights.
 
 ---
 
-## 🚀 Installation
+## 🚀 Tools Included
+
+### ### 1. **Token Info** — SPL Token Analyzer  
+Fetches token metadata, supply, decimals, and price with multi-source fallback.
+
+📁 Folder: `token-info/`  
+▶ Run:
+```bash
+cd token-info
+node index.js <MINT_ADDRESS>
+```
+
+✨ Features  
+- Metaplex metadata fetch  
+- Total supply (UI amount)  
+- Decimals  
+- Price via Dexscreener (with low-liquidity fallback)  
+- Helius DAS metadata fallback  
+- Stablecoin sanity check  
+
+---
+
+### ### 2. **Wallet Info** — Wallet Analyzer  
+Inspects any Solana wallet: balances, SPL tokens, NFTs, and decoded transactions.
+
+📁 Folder: `wallet-info/`  
+▶ Run:
+```bash
+cd wallet-info
+node index.js <WALLET_ADDRESS>
+```
+
+✨ Features  
+- SOL balance  
+- SPL token balances (UI format)  
+- NFT detection  
+- Last 10 transactions  
+- Automatic retry for rate-limited RPCs  
+- Optional **Helius Enhanced Mode**:  
+  - DAS metadata  
+  - Decoded transaction actions  
+  - Friendly labels (swap, mint, burn, transfer, etc.)
+
+To enable Helius:
+```bash
+export HELIUS_API_KEY="your_key_here"
+```
+
+---
+
+## 🛠 Installation
+
+Requires **Node.js 18+**.
+
+Clone the repo:
 
 ```bash
 git clone https://github.com/smitskecbs/solana-tools.git
-cd solana-tools/token-info
+cd solana-tools
+```
+
+Each tool has its own folder with a `package.json`.  
+Install per tool:
+
+```bash
+cd token-info
+npm install
+
+cd ../wallet-info
 npm install
 ```
 
 ---
 
-## ▶️ Usage
-
-```bash
-node index.js <MINT_ADDRESS>
-```
-
-Example:
-
-```bash
-node index.js B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk
-```
-
----
-
-## 🔑 Optional API Keys
-
-### Helius (best metadata fallback)
-
-```bash
-export HELIUS_API_KEY="YOUR_KEY"
-```
-
-Helius provides:
-- On-chain metadata  
-- Off-chain metadata  
-- Legacy token-list metadata  
-(Almost always returns a correct name + symbol)
-
-### Birdeye (optional price source)
-
-```bash
-export BIRDEYE_API_KEY="YOUR_KEY"
-```
-
----
-
-## 📡 What This Tool Returns
-
-- **Name & Symbol**  
-  Fallback order:  
-  1. Metaplex on-chain  
-  2. Solana token lists  
-  3. Helius DAS (optional)  
-
-- **Decimals**
-
-- **Total Supply (UI amount)**
-
-- **Price**  
-  Fallback order:  
-  1. Jupiter v6  
-  2. Jupiter legacy  
-  3. Birdeye  
-  4. DexScreener (strict)  
-  5. DexScreener (low-liquidity fallback)  
-  6. Stablecoin sanity check ($1 lock)
-
-If all price sources fail:
-```
-ℹ️ Price: not available (no feeds)
-```
-
----
-
-## 🧪 Examples
-
-### CBS Coin (low liquidity)
-```
-Name: CBS Coin (helius-das)
-Price: $0.00005935 (dexscreener-lowliq)
-```
-
-### BONK
-```
-Name: Bonk (helius-das)
-Price: $0.0000086 (dexscreener)
-```
-
-### USDC
-```
-Name: USD Coin (solana-list)
-Price: $1 (stable-sanity)
-```
-
----
-
-## 📁 Project Structure
+## 📂 Repository Structure
 
 ```
 solana-tools/
- └── token-info/
-      ├── index.js
-      ├── package.json
-      └── README.md
+│
+├── token-info/        # SPL token analyzer
+│   ├── index.js
+│   ├── package.json
+│   └── README.md
+│
+├── wallet-info/       # Wallet inspector tool
+│   ├── index.js
+│   ├── package.json
+│   └── README.md
+│
+└── README.md          # (this file)
 ```
 
 ---
 
-## ⚙️ Requirements
+## 🧭 Roadmap
 
-- Node.js 18+  
-- Internet connection  
-- Optional: Helius & Birdeye API keys  
+Planned future tools:
 
----
+- 📊 **Token Holder Analyzer**  
+- 🧪 **LP Pool Inspector** (Raydium/Orca)  
+- 🎨 **NFT Metadata Fetcher**  
+- 🪂 **Airdrop Helper**  
+- 📈 **Small dashboard components** (CLI based)  
+- 💱 **Swap activity / token flow analyzer**  
+- 🔍 **Wallet risk scoring**  
 
-## ✔ Status
-
-This tool is **production-ready**, featuring:
-- Safe and layered fallbacks  
-- Robust HTTP requests  
-- Multiple metadata providers  
-- Clean, readable CLI output  
-
-Ideal for Solana developers, dashboards, explorers, and automation scripts.
+Feedback welcome!
 
 ---
 
-## 🔥 Author
+## 🤝 Contributing
 
-Built by **Kevin Smits**  
-Part of **CBS Coin — Community Builds Sovereignty**
+Pull requests from Solana builders are welcome.  
+Feel free to open issues, suggest improvements, or add new tools.
+
+---
+
+## 📜 License
+This project is open-source under the **MIT License**.  
+Use freely in your own Solana tooling or dashboards.
+
+---
+
+Thanks for checking out **Solana Tools** — more utilities coming soon.
+Inspired by curiosity. Built for the community. 🚀
+
