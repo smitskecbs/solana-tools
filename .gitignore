@@ -67,3 +67,14 @@ temp/
 *.swp
 *.swo
 *~
+
+# deps
+node_modules/
+packages/*/node_modules/
+
+# builds
+dist/
+packages/*/dist/
+
+# env
+.env
