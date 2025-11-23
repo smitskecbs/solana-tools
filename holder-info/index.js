@@ -17,10 +17,7 @@ function parseArgs(argv) {
 
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
-    if (!args.mint && !a.startsWith("--")) {
-      args.mint = a;
-      continue;
-    }
+    if (!args.mint && !a.startsWith("--")) { args.mint = a; continue; }
     if (a === "--json") args.json = true;
     else if (a === "--top") args.top = Number(argv[++i] || 10);
     else if (a === "--min") args.min = Number(argv[++i] || 0);
@@ -61,43 +58,45 @@ function readU64LE(buf, start) {
 function uiAmount(raw, decimals) {
   const s = raw.toString();
   if (decimals === 0) return Number(s);
-
   const pad = decimals - s.length + 1;
   const t = pad > 0 ? "0".repeat(pad) + s : s;
-
   const i = t.slice(0, -decimals);
   const f = t.slice(-decimals).replace(/0+$/, "");
   return Number(f ? `${i}.${f}` : i);
 }
 
 // Helius getProgramAccountsV2 paginator (big-mint safe)
-// We slice only owner+amount to keep payload tiny.
+// We slice only owner+amount: offset 32 length 40.
 async function heliusGetAllTokenAccountsV2(mintPk, heliusKey) {
   const url = `https://mainnet.helius-rpc.com/?api-key=${heliusKey}`;
-  let paginationKey = undefined; // IMPORTANT: do NOT send null on first call
+  let paginationKey = undefined; // do NOT send null on first call
   const all = [];
+  let pageNum = 0;
+  const MAX_PAGES = 50000; // safety stop
 
   while (true) {
+    pageNum++;
+    if (pageNum > MAX_PAGES) {
+      console.log("⚠️  Max pages reached, stopping pagination to avoid infinite loop.");
+      break;
+    }
+
     const cfg = {
       encoding: "base64",
-      limit: 5000,
+      limit: 1000,
       filters: [
         { dataSize: 165 },
         { memcmp: { offset: 0, bytes: mintPk.toBase58() } }
       ],
       dataSlice: { offset: 32, length: 40 }
     };
-
     if (paginationKey) cfg.paginationKey = paginationKey;
 
     const body = {
       jsonrpc: "2.0",
       id: "holder-info",
       method: "getProgramAccountsV2",
-      params: [
-        TOKEN_PROGRAM_ID.toBase58(),
-        cfg
-      ]
+      params: [TOKEN_PROGRAM_ID.toBase58(), cfg]
     };
 
     const j = await safeJsonFetch(url, {
@@ -111,14 +110,21 @@ async function heliusGetAllTokenAccountsV2(mintPk, heliusKey) {
     }
 
     const r = j.result || {};
-    const page = r.accounts || [];
+    const page = r.accounts || r.value || []; // accept both shapes
 
-    if (!Array.isArray(page) || page.length === 0) break;
+    if (!Array.isArray(page) || page.length === 0) {
+      console.log(`✅ Pagination done. Pages: ${pageNum - 1}, accounts: ${all.length}`);
+      break;
+    }
 
     all.push(...page);
+    console.log(`… page ${pageNum}: +${page.length} accounts (total ${all.length})`);
 
     paginationKey = r.paginationKey;
-    if (!paginationKey) break;
+    if (!paginationKey) {
+      console.log(`✅ No paginationKey left. Pages: ${pageNum}, accounts: ${all.length}`);
+      break;
+    }
 
     await sleep(120);
   }
@@ -129,7 +135,6 @@ async function heliusGetAllTokenAccountsV2(mintPk, heliusKey) {
 // ---------- main ----------
 async function main() {
   const args = parseArgs(process.argv);
-
   if (!args.mint) {
     console.log("Usage: node index.js <MINT_ADDRESS> [--top N] [--min X] [--exclude owner1,owner2] [--json]");
     process.exit(1);
@@ -146,12 +151,10 @@ async function main() {
 
   console.log(`\n👥 Fetching holder info for mint:\n${args.mint}\n`);
 
-  // supply + decimals
   const supplyInfo = await connection.getTokenSupply(mintPk);
   const decimals = supplyInfo.value.decimals;
   const totalSupplyUi = Number(supplyInfo.value.uiAmountString || 0);
 
-  // fetch accounts
   let accounts;
   if (heliusKey) {
     console.log("✅ Using Helius getProgramAccountsV2 pagination (big-mint safe)\n");
@@ -167,7 +170,6 @@ async function main() {
     });
   }
 
-  // Aggregate balances by OWNER
   const holdersMap = new Map(); // owner -> raw BigInt
 
   for (const acc of accounts) {
@@ -181,7 +183,7 @@ async function main() {
 
     const data = Buffer.from(b64, "base64");
 
-    // slice = offset 32, length 40 => owner(0..32) + amount(32..40)
+    // slice => owner(0..32) amount(32..40)
     const ownerBytes = data.subarray(0, 32);
     const owner = new PublicKey(ownerBytes).toBase58();
     const raw = readU64LE(data, 32);
@@ -225,12 +227,10 @@ async function main() {
     return;
   }
 
-  console.log(`✅ Decimals:       ${decimals}`);
+  console.log(`\n✅ Decimals:       ${decimals}`);
   console.log(`✅ Total Supply:   ${totalSupplyUi.toLocaleString()}`);
   console.log(`✅ Holder Count:   ${holderCount.toLocaleString()}`);
   console.log(`✅ Token Accounts: ${accounts.length.toLocaleString()}`);
-  if (args.exclude.size) console.log(`✅ Excluded:       ${[...args.exclude].join(", ")}`);
-  if (args.min > 0) console.log(`✅ Min Filter:     ${args.min}`);
 
   console.log(`\n🏆 Top ${args.top} holders:`);
   topN.forEach((h, i) => {
