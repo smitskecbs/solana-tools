@@ -5,6 +5,7 @@ const TOKEN_PROGRAM_ID = new PublicKey(
   "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
 );
 
+// ---------- cli args ----------
 function parseArgs(argv) {
   const args = {
     mint: null,
@@ -13,21 +14,28 @@ function parseArgs(argv) {
     json: false,
     min: 0
   };
+
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
-    if (!args.mint && !a.startsWith("--")) { args.mint = a; continue; }
+    if (!args.mint && !a.startsWith("--")) {
+      args.mint = a;
+      continue;
+    }
     if (a === "--json") args.json = true;
     else if (a === "--top") args.top = Number(argv[++i] || 10);
     else if (a === "--min") args.min = Number(argv[++i] || 0);
     else if (a === "--exclude") {
       const list = (argv[++i] || "")
-        .split(",").map(x => x.trim()).filter(Boolean);
+        .split(",")
+        .map(x => x.trim())
+        .filter(Boolean);
       list.forEach(x => args.exclude.add(x));
     }
   }
   return args;
 }
 
+// ---------- helpers ----------
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 async function safeJsonFetch(url, opts = {}) {
@@ -43,7 +51,9 @@ async function safeJsonFetch(url, opts = {}) {
 // u64 little-endian → BigInt
 function readU64LE(buf, start) {
   let v = 0n;
-  for (let i = 0; i < 8; i++) v += BigInt(buf[start + i]) << (8n * BigInt(i));
+  for (let i = 0; i < 8; i++) {
+    v += BigInt(buf[start + i]) << (8n * BigInt(i));
+  }
   return v;
 }
 
@@ -51,37 +61,42 @@ function readU64LE(buf, start) {
 function uiAmount(raw, decimals) {
   const s = raw.toString();
   if (decimals === 0) return Number(s);
+
   const pad = decimals - s.length + 1;
   const t = pad > 0 ? "0".repeat(pad) + s : s;
+
   const i = t.slice(0, -decimals);
   const f = t.slice(-decimals).replace(/0+$/, "");
   return Number(f ? `${i}.${f}` : i);
 }
 
-// Helius getProgramAccountsV2 paginator (BIG MINT SAFE)
+// Helius getProgramAccountsV2 paginator (big-mint safe)
 // We slice only owner+amount to keep payload tiny.
 async function heliusGetAllTokenAccountsV2(mintPk, heliusKey) {
   const url = `https://mainnet.helius-rpc.com/?api-key=${heliusKey}`;
-  let paginationKey = null;
+  let paginationKey = undefined; // IMPORTANT: do NOT send null on first call
   const all = [];
 
   while (true) {
+    const cfg = {
+      encoding: "base64",
+      limit: 5000,
+      filters: [
+        { dataSize: 165 },
+        { memcmp: { offset: 0, bytes: mintPk.toBase58() } }
+      ],
+      dataSlice: { offset: 32, length: 40 }
+    };
+
+    if (paginationKey) cfg.paginationKey = paginationKey;
+
     const body = {
       jsonrpc: "2.0",
       id: "holder-info",
       method: "getProgramAccountsV2",
       params: [
         TOKEN_PROGRAM_ID.toBase58(),
-        {
-          encoding: "base64",
-          limit: 1000,
-          paginationKey,
-          filters: [
-            { dataSize: 165 },
-            { memcmp: { offset: 0, bytes: mintPk.toBase58() } }
-          ],
-          dataSlice: { offset: 32, length: 40 }
-        }
+        cfg
       ]
     };
 
@@ -96,26 +111,25 @@ async function heliusGetAllTokenAccountsV2(mintPk, heliusKey) {
     }
 
     const r = j.result || {};
-    const page =
-      r.value ||          // ✅ Helius V2 returns accounts here
-      r.accounts ||       // fallback if shape ever changes
-      (Array.isArray(r) ? r : []);
+    const page = r.accounts || [];
 
     if (!Array.isArray(page) || page.length === 0) break;
 
     all.push(...page);
 
-    paginationKey = r.paginationKey || null;
+    paginationKey = r.paginationKey;
     if (!paginationKey) break;
 
-    await sleep(150);
+    await sleep(120);
   }
 
   return all;
 }
 
+// ---------- main ----------
 async function main() {
   const args = parseArgs(process.argv);
+
   if (!args.mint) {
     console.log("Usage: node index.js <MINT_ADDRESS> [--top N] [--min X] [--exclude owner1,owner2] [--json]");
     process.exit(1);
@@ -124,15 +138,20 @@ async function main() {
   const mintPk = new PublicKey(args.mint);
   const heliusKey = process.env.HELIUS_API_KEY || null;
 
-  const rpcUrl = process.env.RPC_URL || clusterApiUrl("mainnet-beta");
+  const rpcUrl =
+    process.env.RPC_URL ||
+    clusterApiUrl("mainnet-beta");
+
   const connection = new Connection(rpcUrl, "confirmed");
 
   console.log(`\n👥 Fetching holder info for mint:\n${args.mint}\n`);
 
+  // supply + decimals
   const supplyInfo = await connection.getTokenSupply(mintPk);
   const decimals = supplyInfo.value.decimals;
   const totalSupplyUi = Number(supplyInfo.value.uiAmountString || 0);
 
+  // fetch accounts
   let accounts;
   if (heliusKey) {
     console.log("✅ Using Helius getProgramAccountsV2 pagination (big-mint safe)\n");
@@ -148,6 +167,7 @@ async function main() {
     });
   }
 
+  // Aggregate balances by OWNER
   const holdersMap = new Map(); // owner -> raw BigInt
 
   for (const acc of accounts) {
@@ -161,7 +181,7 @@ async function main() {
 
     const data = Buffer.from(b64, "base64");
 
-    // slice is offset 32, length 40 => owner(0..32) + amount(32..40)
+    // slice = offset 32, length 40 => owner(0..32) + amount(32..40)
     const ownerBytes = data.subarray(0, 32);
     const owner = new PublicKey(ownerBytes).toBase58();
     const raw = readU64LE(data, 32);
