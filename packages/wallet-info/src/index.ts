@@ -1,8 +1,8 @@
+import "dotenv/config";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
-import bs58 from "bs58";
 
 // safe JSON fetch
-async function safeFetch(url, opts = {}) {
+async function safeFetch(url: string, opts: RequestInit = {}) {
   try {
     const res = await fetch(url, opts);
     if (!res.ok) return null;
@@ -18,7 +18,7 @@ const HELIUS_KEY = process.env.HELIUS_API_KEY || null;
 // read cli arg
 const addrStr = process.argv[2];
 if (!addrStr) {
-  console.log("Usage: node index.js <WALLET_ADDRESS>");
+  console.log("Usage: npm run dev -w ./packages/wallet-info -- <WALLET_ADDRESS>");
   process.exit(1);
 }
 
@@ -46,9 +46,9 @@ async function getSplBalances() {
 
     return accounts.value
       .map((acc) => {
-        const info = acc.account.data.parsed.info;
-        const amount = info.tokenAmount.uiAmount;
-        const mint = info.mint;
+        const info: any = acc.account.data.parsed.info;
+        const amount = info.tokenAmount.uiAmount as number;
+        const mint = info.mint as string;
         return { mint, amount };
       })
       .filter((t) => t.amount > 0);
@@ -60,7 +60,12 @@ async function getSplBalances() {
 async function getTransactions() {
   try {
     const sigs = await connection.getSignaturesForAddress(wallet, { limit: 10 });
-    const txs = [];
+    const txs: {
+      signature: string;
+      solChange: number;
+      type: string;
+      time: string;
+    }[] = [];
 
     for (const sig of sigs) {
       const tx = await connection.getTransaction(sig.signature, {
@@ -69,18 +74,23 @@ async function getTransactions() {
       if (!tx) continue;
 
       const meta = tx.meta;
-      const pre = meta.preBalances;
-      const post = meta.postBalances;
+      if (!meta) continue; // guard for TS + safety
 
-      const solChange = (post[0] - pre[0]) / 1e9;
+      const pre = meta.preBalances ?? [];
+      const post = meta.postBalances ?? [];
+
+      const solChange =
+        pre.length && post.length ? (post[0] - pre[0]) / 1e9 : 0;
+
       const blockTime = tx.blockTime
         ? new Date(tx.blockTime * 1000).toLocaleString()
         : "unknown";
 
-      // detect type
+      // detect type (innerInstructions vary in shape, so treat as any)
       let type = "transfer";
-      if (meta.innerInstructions?.length) {
-        const ix = meta.innerInstructions.flatMap((i) => i.instructions);
+      const inner: any[] = meta.innerInstructions ?? [];
+      if (inner.length) {
+        const ix: any[] = inner.flatMap((i) => i.instructions ?? []);
         if (ix.some((i) => i.program === "spl-token")) type = "token";
         if (ix.some((i) => i.programId === "ComputeBudget111111111111111111111111111111")) type = "swap";
       }
@@ -122,10 +132,7 @@ async function getHeliusEnhanced() {
   const spl = await getSplBalances();
   console.log(`📦 SPL Tokens (${spl.length}):`);
   if (spl.length === 0) console.log("  (none)");
-  else
-    spl.forEach((t) =>
-      console.log(`  • ${t.amount} of ${t.mint}`)
-    );
+  else spl.forEach((t) => console.log(`  • ${t.amount} of ${t.mint}`));
 
   const txs = await getTransactions();
   console.log(`\n📜 Last ${txs.length} transactions:`);
@@ -144,7 +151,10 @@ async function getHeliusEnhanced() {
     console.log("  Received:    ", h.totalReceived, "lamports");
     console.log("  Sent:        ", h.totalSent, "lamports");
     console.log("  Owner type:  ", h.ownerType);
-    console.log("  Created:     ", h.createdAt ? new Date(h.createdAt * 1000).toLocaleString() : "unknown");
+    console.log(
+      "  Created:     ",
+      h.createdAt ? new Date(h.createdAt * 1000).toLocaleString() : "unknown"
+    );
   } else {
     console.log("\n🔎 Helius Enhanced: (not used — no API key)");
   }
