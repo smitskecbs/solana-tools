@@ -1,61 +1,50 @@
-# nft-info 🖼️  
-Solana NFT / Digital Asset inspector using Helius DAS + Solana Kit.
+# nft-info
+
+Inspect NFTs / Digital Assets using:
+- **Helius DAS getAsset API (v1)** → `index.ts`
+- **Solana Kit v2 (native Kit Asset)** → `index.kit.ts`
+
+Shows:
+- name, symbol, description  
+- JSON metadata URI & image  
+- creators  
+- authorities  
+- compression data  
+
+Created by **Kevin Smits** — free & open-source.
 
 ---
 
-## 📌 Features
-- Fetch full DAS asset info  
-- Extract:
-  - Name  
-  - Symbol  
-  - Description  
-  - JSON metadata  
-  - Image URL  
-  - Mint authority  
-  - Creators & shares  
-  - Royalty  
-  - Compression status  
-- Supports web3.js & Kit (Solana v2)
+## 🔧 Usage
 
----
-
-## ▶️ Run (web3.js v1)
-
-```
+### Web3.js/DAS (TS)
+```bash
 npm run dev -w ./packages/nft-info -- <ASSET_ID>
 ```
 
-## ▶️ Run (Solana Kit v2)
-
-```
+### Solana Kit v2 (TS)
+```bash
 npm run dev:kit -w ./packages/nft-info -- <ASSET_ID>
 ```
 
-Example:
-```
-npm run dev:kit -w ./packages/nft-info -- B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk
+---
+
+## 📦 Install (root repo)
+```bash
+git clone https://github.com/smitskecbs/solana-tools.git
+cd solana-tools
+npm install
 ```
 
 ---
 
-## 📦 Output Includes
-- All metadata fields  
-- Royalty & creators  
-- Compression info  
-- Owner (if not hidden)  
-- JSON URI + image URI  
-
----
-
-## ⚙️ Requirements
-- Node 18+  
-- Helius RPC recommended  
-- `.env`:
-```
+## ⚙️ Optional .env
+```env
 RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
+HELIUS_API_KEY=YOUR_HELIUS_KEY
 ```
 
 ---
 
-## 📜 License  
-MIT
+## 🆓 License
+MIT — free to use.
