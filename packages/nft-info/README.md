@@ -1,98 +1,61 @@
-# 🖼️ NFT Info — Solana Digital Asset Inspector
-A simple CLI tool to fetch full Solana NFT / Digital Asset information using the Helius DAS `getAsset` method.
-
-Works for:
-- Standard Metaplex NFTs  
-- pNFTs  
-- Compressed NFTs (cNFTs)  
-- Any DAS-compatible Solana asset  
+# nft-info 🖼️  
+Solana NFT / Digital Asset inspector using Helius DAS + Solana Kit.
 
 ---
 
-## 🚀 Install
+## 📌 Features
+- Fetch full DAS asset info  
+- Extract:
+  - Name  
+  - Symbol  
+  - Description  
+  - JSON metadata  
+  - Image URL  
+  - Mint authority  
+  - Creators & shares  
+  - Royalty  
+  - Compression status  
+- Supports web3.js & Kit (Solana v2)
 
-```bash
-cd solana-tools/nft-info
-npm install
+---
+
+## ▶️ Run (web3.js v1)
+
+```
+npm run dev -w ./packages/nft-info -- <ASSET_ID>
 ```
 
----
+## ▶️ Run (Solana Kit v2)
 
-## ▶️ Usage
-
-```bash
-node index.js <NFT_MINT_OR_ASSET_ID>
+```
+npm run dev:kit -w ./packages/nft-info -- <ASSET_ID>
 ```
 
 Example:
-
-```bash
-node index.js 7YkQ...YourMintHere...
+```
+npm run dev:kit -w ./packages/nft-info -- B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk
 ```
 
 ---
 
-## 🔑 Required: Helius API Key
-
-This tool uses Helius DAS, so you need a key:
-
-```bash
-export HELIUS_API_KEY="YOUR_KEY_HERE"
-```
-
-Then run again:
-
-```bash
-node index.js <NFT_MINT_OR_ASSET_ID>
-```
+## 📦 Output Includes
+- All metadata fields  
+- Royalty & creators  
+- Compression info  
+- Owner (if not hidden)  
+- JSON URI + image URI  
 
 ---
 
-## 🧪 Raw JSON Mode
-
-If you want the full DAS response:
-
-```bash
-node index.js <NFT_MINT_OR_ASSET_ID> --raw
+## ⚙️ Requirements
+- Node 18+  
+- Helius RPC recommended  
+- `.env`:
+```
+RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
 ```
 
 ---
 
-## ✅ Output Includes
-
-- Name, symbol, description  
-- Owner & delegate  
-- Compressed vs standard NFT  
-- Merkle tree + leaf data (for cNFTs)  
-- Creators + verified status  
-- Collection address  
-- Royalty basis points (%)  
-- Metadata JSON URI  
-- Image URL  
-- Attributes / traits  
-
----
-
-## 📁 Folder Structure
-
-```
-solana-tools/
- ├ token-info/
- ├ wallet-info/
- └ nft-info/
-     ├ index.js
-     ├ package.json
-     └ README.md
-```
-
----
-
-## 📜 License
-
-MIT — free to use and modify.
-
----
-
-## 🤝 Contribute
-
-Pull requests welcome. Improve trait parsing, add collection checks, or extend DAS support.
+## 📜 License  
+MIT
