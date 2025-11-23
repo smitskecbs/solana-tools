@@ -1,94 +1,55 @@
-# 👥 Holder Info — Solana SPL Holder Analyzer  
-A CLI tool to analyze SPL token holder distribution on Solana.
-
-Fetches:
-- holder count  
-- top holders  
-- supply distribution  
-- optional excludes (LP/burn/team wallets)  
-- JSON export for dashboards
+# holder-info 🔍  
+Inspect SPL token holders — top holders, balances & token accounts.
 
 ---
 
-## 🚀 Install
+## 📌 Features
+- Fetch all token accounts for a mint  
+- Decode raw token account data  
+- Sort by largest holders  
+- Works with:
+  - `web3.js v1`
+  - `Solana Kit v2`
 
-```bash
-cd solana-tools/holder-info
-npm install
+---
+
+## ▶️ Run (web3.js v1)
+
+```
+npm run dev -w ./packages/holder-info -- <MINT>
 ```
 
----
+## ▶️ Run (Solana Kit v2)
 
-## ▶️ Usage
-
-```bash
-node index.js <MINT_ADDRESS>
+```
+npm run dev:kit -w ./packages/holder-info -- <MINT>
 ```
 
 Example:
-
-```bash
-node index.js DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263
+```
+npm run dev:kit -w ./packages/holder-info -- B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk
 ```
 
 ---
 
-## ⚙️ Options
+## 📦 Output
+- Top 50 holders  
+- Owner addresses  
+- Raw U64 token amount  
+- Token account addresses  
+- Non-zero holder count  
 
-### Top holders (default 10)
-```bash
-node index.js <MINT> --top 25
+---
+
+## ⚙️ Requirements
+- Node 18+
+- `.env` (optional)
 ```
-
-### Minimum balance filter
-Only count holders with at least X tokens:
-```bash
-node index.js <MINT> --min 1
-```
-
-### Exclude specific owners
-Useful for ignoring LP pools, burn wallets, team wallets:
-```bash
-node index.js <MINT> --exclude owner1,owner2,owner3
-```
-
-### JSON output
-Perfect for websites or scripts:
-```bash
-node index.js <MINT> --json
-```
-
-### Raw mode (prints raw list)
-```bash
-node index.js <MINT> --raw
+RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
 ```
 
 ---
 
-## ✅ Output Includes
-- decimals  
-- total supply  
-- total token accounts  
-- holder count  
-- top N holders with %  
-- top N distribution vs rest  
-- excludes + min filter summary  
+## 📜 License  
+MIT
 
----
-
-## 📁 Fits Into Solana Tools
-
-```
-solana-tools/
- ├ token-info/
- ├ wallet-info/
- ├ nft-info/
- └ holder-info/
-```
-
----
-
-## 📜 License
-MIT — free to use and modify.
-
-PRs welcome!
