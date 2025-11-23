@@ -20,7 +20,8 @@ function parseArgs(argv) {
     else if (a === "--top") args.top = Number(argv[++i] || 10);
     else if (a === "--min") args.min = Number(argv[++i] || 0);
     else if (a === "--exclude") {
-      const list = (argv[++i] || "").split(",").map(x => x.trim()).filter(Boolean);
+      const list = (argv[++i] || "")
+        .split(",").map(x => x.trim()).filter(Boolean);
       list.forEach(x => args.exclude.add(x));
     }
   }
@@ -58,11 +59,11 @@ function uiAmount(raw, decimals) {
 }
 
 // Helius getProgramAccountsV2 paginator (BIG MINT SAFE)
-// We slice only owner+amount to keep payload tiny
+// We slice only owner+amount to keep payload tiny.
 async function heliusGetAllTokenAccountsV2(mintPk, heliusKey) {
   const url = `https://mainnet.helius-rpc.com/?api-key=${heliusKey}`;
   let paginationKey = null;
-  let all = [];
+  const all = [];
 
   while (true) {
     const body = {
@@ -75,12 +76,10 @@ async function heliusGetAllTokenAccountsV2(mintPk, heliusKey) {
           encoding: "base64",
           limit: 1000,
           paginationKey,
-          // mint filter + token account size
           filters: [
             { dataSize: 165 },
             { memcmp: { offset: 0, bytes: mintPk.toBase58() } }
           ],
-          // only bytes 32..72 (owner+amount)
           dataSlice: { offset: 32, length: 40 }
         }
       ]
@@ -96,14 +95,20 @@ async function heliusGetAllTokenAccountsV2(mintPk, heliusKey) {
       throw new Error(`Helius V2 error (${j.status}): ${j.text}`);
     }
 
-    const result = j.result || {};
-    const accounts = result.accounts || result; // safety: sometimes result is array
-    if (!Array.isArray(accounts) || accounts.length === 0) break;
+    const r = j.result || {};
+    const page =
+      r.value ||          // ✅ Helius V2 returns accounts here
+      r.accounts ||       // fallback if shape ever changes
+      (Array.isArray(r) ? r : []);
 
-    all.push(...accounts);
-    paginationKey = result.paginationKey || null;
-    if (!paginationKey) break; // end
-    await sleep(150); // gentle pacing
+    if (!Array.isArray(page) || page.length === 0) break;
+
+    all.push(...page);
+
+    paginationKey = r.paginationKey || null;
+    if (!paginationKey) break;
+
+    await sleep(150);
   }
 
   return all;
@@ -124,13 +129,11 @@ async function main() {
 
   console.log(`\n👥 Fetching holder info for mint:\n${args.mint}\n`);
 
-  // supply + decimals
   const supplyInfo = await connection.getTokenSupply(mintPk);
   const decimals = supplyInfo.value.decimals;
   const totalSupplyUi = Number(supplyInfo.value.uiAmountString || 0);
 
   let accounts;
-
   if (heliusKey) {
     console.log("✅ Using Helius getProgramAccountsV2 pagination (big-mint safe)\n");
     accounts = await heliusGetAllTokenAccountsV2(mintPk, heliusKey);
@@ -141,23 +144,24 @@ async function main() {
         { dataSize: 165 },
         { memcmp: { offset: 0, bytes: mintPk.toBase58() } }
       ],
-      // also slice to reduce payload
       dataSlice: { offset: 32, length: 40 }
     });
   }
 
-  // Aggregate balances by OWNER
   const holdersMap = new Map(); // owner -> raw BigInt
 
   for (const acc of accounts) {
-    const dataB64 = acc.account?.data?.[0];
-    const data =
-      dataB64 ? Buffer.from(dataB64, "base64")
-              : acc.account?.data; // fallback if web3.js shape
+    const dataField = acc.account?.data;
+    let b64 = null;
 
-    if (!data) continue;
+    if (Array.isArray(dataField)) b64 = dataField[0];
+    else if (typeof dataField === "string") b64 = dataField;
 
-    // because we sliced from offset 32: owner=0..32, amount=32..40 in this slice
+    if (!b64) continue;
+
+    const data = Buffer.from(b64, "base64");
+
+    // slice is offset 32, length 40 => owner(0..32) + amount(32..40)
     const ownerBytes = data.subarray(0, 32);
     const owner = new PublicKey(ownerBytes).toBase58();
     const raw = readU64LE(data, 32);
