@@ -1,55 +1,42 @@
-# holder-info 🔍  
-Inspect SPL token holders — top holders, balances & token accounts.
+# holder-info
+
+Inspect SPL token holders (top holders, accounts, amounts) using:
+- **web3.js (TypeScript)** → `index.ts`
+- **Solana Kit v2** → `index.kit.ts`
+
+Created by **Kevin Smits** — free & open-source.
 
 ---
 
-## 📌 Features
-- Fetch all token accounts for a mint  
-- Decode raw token account data  
-- Sort by largest holders  
-- Works with:
-  - `web3.js v1`
-  - `Solana Kit v2`
+## 🔧 Usage
 
----
-
-## ▶️ Run (web3.js v1)
-
-```
+### Web3.js (TS)
+```bash
 npm run dev -w ./packages/holder-info -- <MINT>
 ```
 
-## ▶️ Run (Solana Kit v2)
-
-```
+### Solana Kit (TS)
+```bash
 npm run dev:kit -w ./packages/holder-info -- <MINT>
 ```
 
-Example:
-```
-npm run dev:kit -w ./packages/holder-info -- B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk
+---
+
+## 📦 Install (root repo)
+```bash
+git clone https://github.com/smitskecbs/solana-tools.git
+cd solana-tools
+npm install
 ```
 
 ---
 
-## 📦 Output
-- Top 50 holders  
-- Owner addresses  
-- Raw U64 token amount  
-- Token account addresses  
-- Non-zero holder count  
-
----
-
-## ⚙️ Requirements
-- Node 18+
-- `.env` (optional)
-```
+## ⚙️ Optional .env
+```env
 RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
 ```
 
 ---
 
-## 📜 License  
-MIT
-
+## 🆓 License
+MIT — free to use.
