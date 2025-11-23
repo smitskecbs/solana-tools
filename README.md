@@ -1,9 +1,13 @@
 # solana-tools 🛠️  
-Modern TypeScript monorepo by **Kevin Smits** — free, open-source Solana CLI tools for builders.
+Modern TypeScript monorepo by **Kevin Smits** — free, open-source Solana CLI utilities.
 
-Supports both:
-- **web3.js v1**
-- **Solana Kit v2 (@solana/kit)**
+All tools are written **100% in TypeScript** and support:
+- **web3.js (v1 API) in TypeScript**
+- **Solana Kit (v2 API)**
+
+Each tool has:
+- `index.ts` → web3.js version (TypeScript)
+- `index.kit.ts` → Solana Kit version (TypeScript)
 
 ---
 
@@ -17,6 +21,8 @@ npm run dev -w ./packages/holder-info -- <MINT>
 npm run dev:kit -w ./packages/holder-info -- <MINT>
 ```
 
+---
+
 ### **token-info**  
 Fetch SPL token mint info + on-chain metadata (name, symbol, URI, authorities, supply).  
 **Run:**  
@@ -25,16 +31,20 @@ npm run dev -w ./packages/token-info -- <MINT>
 npm run dev:kit -w ./packages/token-info -- <MINT>
 ```
 
+---
+
 ### **wallet-info**  
-Analyze wallet balances, SPL tokens, recent transactions, optional Helius enhancements.  
+Analyze balances, SPL tokens, recent transactions, optional Helius enhanced info.  
 **Run:**  
 ```bash
 npm run dev -w ./packages/wallet-info -- <WALLET>
 npm run dev:kit -w ./packages/wallet-info -- <WALLET>
 ```
 
+---
+
 ### **nft-info**  
-Inspect any NFT / Digital Asset via Helius DAS getAsset (v1) and Kit (v2).  
+Inspect any NFT / Digital Asset via Helius DAS getAsset and via Solana Kit.  
 **Run:**  
 ```bash
 npm run dev -w ./packages/nft-info -- <ASSET_ID>
@@ -57,8 +67,6 @@ npm install
 RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
 HELIUS_API_KEY=YOUR_HELIUS_KEY
 ```
-- RPC is used by all tools  
-- Helius key adds richer metadata for nft-info & wallet-info (optional)
 
 ---
 
@@ -74,13 +82,14 @@ npm run build -w ./packages/nft-info
 
 ## 🤝 Contributing
 PRs welcome.  
-Every tool must have:
-- `index.ts` (web3.js v1)
-- `index.kit.ts` (@solana/kit v2)  
-No `node_modules` or `dist` in Git.
+Each tool must keep both versions:
+- `index.ts` (web3.js TS)
+- `index.kit.ts` (Solana Kit TS)
+
+No `node_modules` and no `dist` folders in Git.
 
 ---
 
 ## 🆓 License
 MIT — free for anyone.  
-Credit to **Kevin Smits (smitskecbs)** appreciated.
+Created by **Kevin Smits (smitskecbs)**.
