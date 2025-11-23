@@ -1,29 +1,57 @@
-# Token Info Fetcher
+# token-info 🧬  
+SPL Token inspector: mint layout, supply, metadata & authorities.
 
-Fetches basic SPL token information from Solana:
-- name + symbol (Metaplex metadata)
-- decimals
-- total supply
-- optional price via Jupiter
+---
 
-## Install
+## 📌 Features
+- Reads mint account layout (web3.js v1)  
+- Reads metadata PDA  
+- Borsh string decoding (name, symbol, URI)  
+- Reads:
+  - Decimals  
+  - Supply  
+  - Mint authority  
+  - Freeze authority  
+  - Update authority  
+  - On-chain metadata  
 
-Run this command in your terminal (inside this folder):
+---
 
-npm install
+## ▶️ Run (web3.js v1)
 
-## Run
+```
+npm run dev -w ./packages/token-info -- <MINT>
+```
 
-Run this command in your terminal to fetch info for any token mint:
+## ▶️ Run (Solana Kit v2)
 
-node index.js <MINT_ADDRESS>
+```
+npm run dev:kit -w ./packages/token-info -- <MINT>
+```
 
-### Example (CBS mint)
+Example:
+```
+npm run dev:kit -w ./packages/token-info -- B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk
+```
 
-node index.js B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk
+---
 
-## Notes
+## 📦 Output
+- Full decoded mint account  
+- Human-readable supply  
+- All authorities  
+- Token metadata (name, symbol, URI)  
 
-- Do NOT paste these commands into this file.
-- They are meant to be run in your terminal.
-- Uses Solana mainnet by default.
+---
+
+## ⚙️ Requirements
+- Node 18+  
+- `.env` (optional):
+```
+RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
+```
+
+---
+
+## 📜 License  
+MIT
