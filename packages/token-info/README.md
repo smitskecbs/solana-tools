@@ -1,57 +1,42 @@
-# token-info 🧬  
-SPL Token inspector: mint layout, supply, metadata & authorities.
+# token-info
+
+Fetch SPL token mint info + on-chain metadata using:
+- **web3.js (TypeScript)** → `index.ts`
+- **Solana Kit v2** → `index.kit.ts`
+
+Created by **Kevin Smits** — fully free & open-source.
 
 ---
 
-## 📌 Features
-- Reads mint account layout (web3.js v1)  
-- Reads metadata PDA  
-- Borsh string decoding (name, symbol, URI)  
-- Reads:
-  - Decimals  
-  - Supply  
-  - Mint authority  
-  - Freeze authority  
-  - Update authority  
-  - On-chain metadata  
+## 🔧 Usage
 
----
-
-## ▶️ Run (web3.js v1)
-
-```
+### Web3.js (TS)
+```bash
 npm run dev -w ./packages/token-info -- <MINT>
 ```
 
-## ▶️ Run (Solana Kit v2)
-
-```
+### Solana Kit (TS)
+```bash
 npm run dev:kit -w ./packages/token-info -- <MINT>
 ```
 
-Example:
-```
-npm run dev:kit -w ./packages/token-info -- B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk
+---
+
+## 📦 Install (root repo)
+```bash
+git clone https://github.com/smitskecbs/solana-tools.git
+cd solana-tools
+npm install
 ```
 
 ---
 
-## 📦 Output
-- Full decoded mint account  
-- Human-readable supply  
-- All authorities  
-- Token metadata (name, symbol, URI)  
-
----
-
-## ⚙️ Requirements
-- Node 18+  
-- `.env` (optional):
-```
+## ⚙️ Optional .env
+```env
 RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
 ```
 
 ---
 
-## 📜 License  
-MIT
+## 🆓 License
+MIT — free to use.
