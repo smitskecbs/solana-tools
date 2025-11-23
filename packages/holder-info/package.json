@@ -1,9 +1,13 @@
 {
-  "name": "holder-info",
-  "version": "1.0.0",
-  "description": "Solana SPL Token Holder Analyzer CLI (holder count, top holders, distribution, optional excludes).",
-  "type": "module",
+  "name": "@smitskecbs/holder-info",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "dev:kit": "tsx src/index.kit.ts"
+  },
   "dependencies": {
-    "@solana/web3.js": "^1.95.2"
+    "@solana/web3.js": "^1.95.2",
+    "dotenv": "^16.4.5"
   }
 }

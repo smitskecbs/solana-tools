@@ -5,12 +5,16 @@
     "packages/*"
   ],
   "devDependencies": {
-    "typescript": "^5.6.3",
+    "@types/node": "^22.9.0",
     "ts-node": "^10.9.2",
-    "@types/node": "^22.9.0"
+    "tsx": "^4.20.6",
+    "typescript": "^5.6.3"
   },
   "scripts": {
     "build": "npm -ws run build",
     "dev": "npm -ws run dev"
+  },
+  "dependencies": {
+    "@solana/kit": "^5.0.0"
   }
 }
