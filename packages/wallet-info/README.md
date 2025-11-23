@@ -1,64 +1,49 @@
-# wallet-info 👛  
-Solana wallet analyzer: SOL, SPL tokens, transactions & Helius insights.
+# wallet-info
+
+Analyze Solana wallets:
+- SOL balance
+- SPL tokens
+- Recent transactions
+- Optional enhanced Helius DAS lookups
+
+Two modes:
+- **web3.js (TS)** → `index.ts`
+- **Solana Kit v2** → `index.kit.ts`
+
+Built by **Kevin Smits** — free & open-source.
 
 ---
 
-## 📌 Features
-- SOL balance  
-- SPL token balances  
-- Detect tx type (swap / token / transfer)  
-- Fetch last 10 transactions  
-- Helius enhanced API:
-  - Labels  
-  - Total received  
-  - Total sent  
-  - Owner type  
-  - Creation time  
+## 🔧 Usage
 
-Supports web3.js v1 + Solana Kit v2.
-
----
-
-## ▶️ Run (web3.js v1)
-
-```
+### Web3.js (TS)
+```bash
 npm run dev -w ./packages/wallet-info -- <WALLET>
 ```
 
-## ▶️ Run (Solana Kit v2)
-
-```
+### Solana Kit (TS)
+```bash
 npm run dev:kit -w ./packages/wallet-info -- <WALLET>
 ```
 
-Example:
-```
-npm run dev:kit -w ./packages/wallet-info -- 8Y7wEBB15f8mpQ7H5Wa1pVdo1TNSg2KE7rLKApHUk5Zd
+---
+
+## 📦 Install (root repo)
+```bash
+git clone https://github.com/smitskecbs/solana-tools.git
+cd solana-tools
+npm install
 ```
 
 ---
 
-## 📦 Output
-- SOL balance  
-- SPL tokens  
-- Last 10 tx with:
-  - timestamp  
-  - type  
-  - SOL change  
-  - signature  
-- Helius account enrichment (if API key provided)
-
----
-
-## ⚙️ Requirements
-- Node 18+  
-- Optional `.env`:
-```
+## ⚙️ Optional .env
+```env
 RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
-HELIUS_API_KEY=YOUR_KEY
+HELIUS_API_KEY=YOUR_HELIUS_KEY
 ```
 
 ---
 
-## 📜 License  
-MIT
+## 🆓 License
+MIT — free to use.
