@@ -1,75 +1,86 @@
-# solana-tools 🛠️
+# solana-tools 🛠️  
+Modern TypeScript monorepo by **Kevin Smits** — free, open-source Solana CLI tools for builders.
 
-A modern TypeScript monorepo with multiple Solana CLI utilities, built by **Kevin Smits**.  
-Everything here is **free to use**, open-source, and made for builders who want quick, readable on-chain insights.
-
-Each tool supports:
-- **web3.js v1** (classic, widely used)
-- **@solana/kit v2** (newer, typed, future-proof)
+Supports both:
+- **web3.js v1**
+- **Solana Kit v2 (@solana/kit)**
 
 ---
 
-## ✅ Tools Included
+## 🚀 Tools Included
 
-### **holder-info**
-Inspect SPL token holders (top holders, amounts, token accounts).
-
-**Run:**
+### **holder-info**  
+Inspect SPL token holders (top holders, token accounts, amounts).  
+**Run:**  
 ```bash
-npm run dev     -w ./packages/holder-info -- <MINT>
+npm run dev -w ./packages/holder-info -- <MINT>
 npm run dev:kit -w ./packages/holder-info -- <MINT>
+```
 
-token-info
-
-Fetch SPL token mint info + on-chain metadata
-(name / symbol / uri / authorities / supply).
-
-Run: npm run dev     -w ./packages/token-info -- <MINT>
+### **token-info**  
+Fetch SPL token mint info + on-chain metadata (name, symbol, URI, authorities, supply).  
+**Run:**  
+```bash
+npm run dev -w ./packages/token-info -- <MINT>
 npm run dev:kit -w ./packages/token-info -- <MINT>
+```
 
-wallet-info
+### **wallet-info**  
+Analyze wallet balances, SPL tokens, recent transactions, optional Helius enhancements.  
+**Run:**  
+```bash
+npm run dev -w ./packages/wallet-info -- <WALLET>
+npm run dev:kit -w ./packages/wallet-info -- <WALLET>
+```
 
-Analyze a wallet: SOL balance, SPL tokens, and recent transactions
-(with optional Helius enriched labels if you provide a key).
-
-Run:npm run dev     -w ./packages/wallet-info -- <WALLET_ADDRESS>
-npm run dev:kit -w ./packages/wallet-info -- <WALLET_ADDRESS>
-
-nft-info
-
-Inspect an NFT / digital asset using Helius DAS getAsset
-(works for standard NFTs, pNFTs, and fungible tokens too).
-
-Run:npm run dev     -w ./packages/nft-info -- <ASSET_ID>
+### **nft-info**  
+Inspect any NFT / Digital Asset via Helius DAS getAsset (v1) and Kit (v2).  
+**Run:**  
+```bash
+npm run dev -w ./packages/nft-info -- <ASSET_ID>
 npm run dev:kit -w ./packages/nft-info -- <ASSET_ID>
+```
 
-📦 Install
+---
+
+## 📦 Install
+```bash
 git clone https://github.com/smitskecbs/solana-tools.git
 cd solana-tools
 npm install
-⚙️ Optional Environment Setup
+```
 
-Create a .env in the repo root if you want custom RPC / Helius features: RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
+---
+
+## ⚙️ Optional .env
+```env
+RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
 HELIUS_API_KEY=YOUR_HELIUS_KEY
-RPC_URL is used by all tools.
+```
+- RPC is used by all tools  
+- Helius key adds richer metadata for nft-info & wallet-info (optional)
 
-HELIUS_API_KEY is only needed for extra labeling/enrichment in nft-info and wallet-info.
-🧱 Build (dist/)
+---
 
-Each package can be built to dist/ with tsup:npm run build -w ./packages/holder-info
+## 🧱 Build all packages
+```bash
+npm run build -w ./packages/holder-info
 npm run build -w ./packages/token-info
 npm run build -w ./packages/wallet-info
 npm run build -w ./packages/nft-info
-🤝 Contributing
+```
 
-PRs are welcome. Keep changes clean and readable:
+---
 
-add both index.ts (v1) and index.kit.ts (v2) when relevant
+## 🤝 Contributing
+PRs welcome.  
+Every tool must have:
+- `index.ts` (web3.js v1)
+- `index.kit.ts` (@solana/kit v2)  
+No `node_modules` or `dist` in Git.
 
-avoid committing node_modules/ or build output
+---
 
-📜 License
-
-MIT — use it, fork it, improve it.
-If this repo helps you, a shoutout to Kevin Smits / smitskecbs is appreciated.
-::contentReference[oaicite:0]{index=0}
+## 🆓 License
+MIT — free for anyone.  
+Credit to **Kevin Smits (smitskecbs)** appreciated.
