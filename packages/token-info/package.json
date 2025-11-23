@@ -1,18 +1,16 @@
 {
-  "name": "token-info",
-  "version": "1.0.0",
-  "description": "Fetch SPL token metadata + supply + optional Jupiter price.",
-  "type": "module",
-  "main": "index.js",
+  "name": "@smitskecbs/token-info",
+  "version": "0.1.0",
+  "description": "Fetch SPL token metadata + supply.",
+  "main": "dist/index.js",
   "scripts": {
-  "dev": "tsx src/index.ts",
-  "dev:kit": "tsx src/index.kit.ts"
-}
-
-    "start": "node index.js"
+    "dev": "tsx src/index.ts",
+    "dev:kit": "tsx src/index.kit.ts"
   },
   "dependencies": {
     "@solana/web3.js": "^1.95.0",
-    "@metaplex-foundation/mpl-token-metadata": "^3.2.0"
+    "@solana/kit": "^2.0.0",
+    "@metaplex-foundation/mpl-token-metadata": "^3.2.0",
+    "dotenv": "^16.4.5"
   }
 }
