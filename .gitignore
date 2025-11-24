@@ -78,3 +78,7 @@ packages/*/dist/
 
 # env
 .env
+
+# local scratch
+solana-tools/
+

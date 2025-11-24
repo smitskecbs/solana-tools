@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx src/index.ts",
-    "dev:kit": "tsx src/index.kit.ts"
+    "dev:kit": "tsx src/index.kit.ts",
+    "build": "tsup src/index.ts src/index.kit.ts --format esm --dts --out-dir dist"
   },
   "dependencies": {
     "@solana/web3.js": "^1.95.0",

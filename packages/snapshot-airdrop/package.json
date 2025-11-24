@@ -1,0 +1,23 @@
+{
+  "name": "@smitskecbs/snapshot-airdrop",
+  "version": "0.1.0",
+  "description": "Snapshot SPL holders for a mint and export CSV/JSON for airdrops. Kit-first (v2) + web3 fallback.",
+  "main": "dist/index.mjs",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "dev:kit": "tsx src/index.kit.ts",
+    "build": "tsup src/index.ts src/index.kit.ts --format esm --dts --out-dir dist"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.95.2",
+    "@solana/kit": "^2.0.0",
+    "dotenv": "^16.4.5",
+    "bs58": "^5.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
