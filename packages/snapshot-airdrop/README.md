@@ -1,84 +1,99 @@
-# snapshot-airdrop
+# @smitskecbs/snapshot-airdrop
 
-A builder-grade Solana CLI to snapshot SPL token holders and export CSV/JSON for fair airdrops.
+Snapshot SPL token holders for any Solana mint and export **CSV + JSON** for airdrops.
 
-This tool is **Kit-first (Solana v2)** with a **web3.js fallback (v1)**, so it works on any RPC.
+- **Kit-first (Solana v2)** using `@solana/kit`
+- Automatic **web3.js fallback (v1)** if your RPC doesn’t return Kit-shaped data
+- Outputs clean holder lists with on-chain balances
 
-**Author / Builder:** Kevin Smits (smitskecbs)  
-**License:** Free to use & modify. Credit appreciated.
-
----
-
-## What it does
-
-- Fetches **all token accounts for a mint**
-- Aggregates balances per **unique holder**
-- Filters:
-  - minimum balance (`--min`)
-  - excluded wallets (`--exclude`)
-- Exports:
-  - **JSON** (airdrop scripts, dashboards)
-  - **CSV** (easy import)
-- Prints **Top holders** summary
+Built by **Kevin Smits (@smitskecbs)**.  
+Free to use by the Solana community — attribution appreciated.
 
 ---
 
-## Usage
+## Install (workspace)
 
-### Kit version (recommended)
-```bash
-npm run dev:kit -w ./packages/snapshot-airdrop
-With options
-bash
-Code kopiëren
-npm run dev:kit -w ./packages/snapshot-airdrop -- \
-  --mint B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk \
-  --min 1 \
-  --exclude wallet1,wallet2 \
-  --top 50 \
-  --out snapshots
-web3 fallback
-bash
-Code kopiëren
-npm run dev -w ./packages/snapshot-airdrop -- --mint <MINT>
-Outputs
-Snapshots are saved to:
+From the repo root:
 
-pgsql
-Code kopiëren
-snapshots/<MINT>/
-  snapshot-<timestamp>.json
-  snapshot-<timestamp>.csv
-JSON stores amountRaw as a string so BigInt never breaks export.
+    npm install
 
-Env (optional)
-Create .env in repo root:
+---
 
-ini
-Code kopiëren
-RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
-MINT=<default mint>
-Notes
-For huge mints (100k+ holders), use a fast RPC (Helius / Triton / QuickNode).
+## Run
 
-This tool reads on-chain truth only — no indexing shortcuts.
+Default (uses .env or CBS mint):
 
-CBS Coin / Solana tools — Community Builds Sovereignty.
-MD
+    npm run dev:kit -w ./packages/snapshot-airdrop
 
-echo "✅ snapshot-airdrop upgraded to REAL tool."
+With options:
 
-6) install + build
-npm install
-npm run build -w ./packages/snapshot-airdrop
+    npm run dev:kit -w ./packages/snapshot-airdrop -- \
+      --mint B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk \
+      --min 1 \
+      --exclude wallet1,wallet2 \
+      --out snapshots
 
-markdown
-Code kopiëren
+You can also run the web3 fallback version directly:
 
-Als je dit plakt:
-- alles is in één keer strak
-- build + dts werkt
-- README is Engels + Kevin Smits credit + free to use
+    npm run dev -w ./packages/snapshot-airdrop -- --mint <MINT>
 
-Wil je dat ik hierna ook **een README-blok voor de root repo** maak die alle tools samen netjes toont (ook één blok, copy-paste klaar)?
-::contentReference[oaicite:0]{index=0}
+---
+
+## Options
+
+Flag | Description | Example
+---|---|---
+--mint | SPL token mint address | --mint <MINT>
+--rpc | Custom RPC endpoint | --rpc https://…
+--min | Minimum **UI** balance required | --min 1
+--exclude | Comma-separated wallets to skip | --exclude w1,w2
+--out | Output folder (default `snapshots/`) | --out snapshots
+--top | Print top N holders (default 20) | --top 50
+
+---
+
+## Output
+
+Creates a timestamped snapshot inside:
+
+    snapshots/<MINT>/
+      snapshot-<timestamp>.json
+      snapshot-<timestamp>.csv
+
+JSON fields:
+
+    [
+      {
+        "owner": "walletPubkey",
+        "tokenAccount": "tokenAccountPubkey",
+        "amountRaw": "123456789000000000",
+        "amountUi": 123.456789
+      }
+    ]
+
+Note: `amountRaw` is stored as a **string** to avoid BigInt JSON issues.
+
+---
+
+## What this is for
+
+Use this tool when you want to:
+
+- Take a **holder snapshot** for an airdrop or whitelist
+- Exclude wallets (team, LP, burn, bots)
+- Export a ready-to-use CSV/JSON list for scripts or spreadsheets
+
+---
+
+## Disclaimer
+
+This tool only reads public on-chain data.  
+Always verify snapshots before sending funds/tokens.  
+Use at your own risk.
+
+---
+
+## License / Usage
+
+MIT-style free use.  
+If you ship or fork it, a small credit to **Kevin Smits / @smitskecbs** is appreciated.
