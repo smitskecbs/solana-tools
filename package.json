@@ -7,9 +7,9 @@
   "scripts": {
     "build": "npm -ws run build",
     "dev": "npm -ws run dev",
-
     "dev:kit": "npm run dev -w @smitskecbs/snapshot-airdrop",
-    "raydium:analyze": "tsx packages/raydium-analyzer/src/index.ts"
+    "raydium:analyze": "tsx packages/raydium-analyzer/src/index.ts",
+    "token-safety": "tsx packages/token-safety-check/src/index.ts"
   },
   "dependencies": {
     "@solana/kit": "^5.0.0"
@@ -22,4 +22,3 @@
     "typescript": "^5.6.3"
   }
 }
-

@@ -1,0 +1,17 @@
+{
+  "name": "@smitskecbs/token-safety-check",
+  "version": "0.1.0",
+  "description": "CLI to quickly check basic safety properties of a Solana SPL token (mint authority, freeze authority, holder concentration, Raydium liquidity via DexScreener).",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.95.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.0",
+    "typescript": "^5.6.0"
+  }
+}
