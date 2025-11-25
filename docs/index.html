@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Solana Tools — by Kevin Smits (@smitskecbs)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Open-source Solana CLI tools built by Kevin Smits (@smitskecbs): holder-info, token-info, wallet-info, nft-info, snapshot-airdrop, raydium-analyzer, token-safety-check." />
+
+  <style>
+    :root {
+      --bg: #020617;
+      --bg2: #020819;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.12);
+      --danger: #f97373;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2933;
+      --card: #030a1f;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #111827 0, #020617 45%, #000 100%);
+      color: var(--text);
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 960px;
+    }
+
+    .header {
+      margin-bottom: 32px;
+      padding: 20px 24px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.14), rgba(56, 189, 248, 0.04));
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+    }
+
+    .title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 0.98rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .meta {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .meta strong {
+      color: var(--accent);
+    }
+
+    .pill-row {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: var(--muted);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .pill--accent {
+      border-color: rgba(34, 197, 94, 0.7);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      margin-top: 12px;
+    }
+
+    .section-subtitle {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .tool-card {
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.08), #020617 55%);
+      padding: 16px 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .tool-name {
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .tool-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .tool-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: var(--muted);
+    }
+
+    .badge--ok {
+      border-color: rgba(34, 197, 94, 0.7);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .badge--warn {
+      border-color: rgba(234, 179, 8, 0.7);
+      color: #facc15;
+      background: rgba(250, 204, 21, 0.08);
+    }
+
+    .badge--danger {
+      border-color: rgba(248, 113, 113, 0.8);
+      color: var(--danger);
+      background: rgba(248, 113, 113, 0.08);
+    }
+
+    .cmd-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-top: 8px;
+      margin-bottom: 4px;
+    }
+
+    .cmd-box {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.8rem;
+      background: #020617;
+      border-radius: 8px;
+      border: 1px solid #111827;
+      padding: 8px 10px;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .footer {
+      margin-top: 26px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="title">solana-tools</div>
+      <div class="subtitle">
+        Open-source Solana CLI toolbox built by <strong>Kevin Smits (@smitskecbs)</strong>.<br />
+        All tools are written in TypeScript and run from this monorepo.
+      </div>
+      <div class="meta">
+        Repo:&nbsp;
+        <a href="https://github.com/smitskecbs/solana-tools" target="_blank" rel="noreferrer">
+          github.com/smitskecbs/solana-tools
+        </a>
+      </div>
+      <div class="pill-row">
+        <span class="pill pill--accent">TypeScript</span>
+        <span class="pill">Solana web3.js</span>
+        <span class="pill">Solana Kit (v2)</span>
+        <span class="pill">Helius / custom RPC ready</span>
+      </div>
+    </header>
+
+    <main>
+      <section>
+        <h2 class="section-title">How to use</h2>
+        <p class="section-subtitle">
+          Clone the repo, install once, then run any tool you like from your terminal.
+          For best performance always use your own RPC (e.g. Helius).
+        </p>
+
+        <div class="tool-card" style="margin-bottom:16px;">
+          <div class="tool-name">
+            <span>Quick start</span>
+          </div>
+          <div class="cmd-title">Clone & install</div>
+          <div class="cmd-box">
+git clone https://github.com/smitskecbs/solana-tools.git
+cd solana-tools
+npm install
+          </div>
+          <div class="cmd-title">Recommended: set your RPC</div>
+          <div class="cmd-box">
+RPC_URL="https://mainnet.helius-rpc.com/?api-key=YOUR_HELIUS_KEY"
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="section-title">Available tools</h2>
+        <p class="section-subtitle">
+          Each tool lives in <code>packages/&lt;tool-name&gt;</code> with its own README and examples.
+          Below is a quick overview plus the main command to run each one.
+        </p>
+
+        <div class="grid">
+          <!-- holder-info -->
+          <article class="tool-card">
+            <div class="tool-name">
+              <span>holder-info</span>
+              <span class="tool-label">SPL holders overview</span>
+            </div>
+            <p class="tool-desc">
+              Inspect SPL token holders: token accounts, balances and top holders for any mint.
+              Useful for supply analysis, whale tracking and early research.
+            </p>
+            <div class="badge-row">
+              <span class="badge">web3.js</span>
+              <span class="badge">TypeScript</span>
+              <span class="badge">RPC required</span>
+            </div>
+            <div class="cmd-title">Run</div>
+            <div class="cmd-box">
+npm run dev -w ./packages/holder-info -- &lt;MINT&gt;
+            </div>
+          </article>
+
+          <!-- token-info -->
+          <article class="tool-card">
+            <div class="tool-name">
+              <span>token-info</span>
+              <span class="tool-label">On-chain token metadata</span>
+            </div>
+            <p class="tool-desc">
+              Fetch SPL mint info (decimals, supply, authorities) plus metadata (name, symbol, URI) directly from chain.
+            </p>
+            <div class="badge-row">
+              <span class="badge">web3.js</span>
+              <span class="badge">Metadata</span>
+            </div>
+            <div class="cmd-title">Run</div>
+            <div class="cmd-box">
+npm run dev -w ./packages/token-info -- &lt;MINT&gt;
+            </div>
+          </article>
+
+          <!-- wallet-info -->
+          <article class="tool-card">
+            <div class="tool-name">
+              <span>wallet-info</span>
+              <span class="tool-label">Wallet overview</span>
+            </div>
+            <p class="tool-desc">
+              Show SOL balance, SPL token holdings and basic wallet activity. Good for quick wallet inspection.
+            </p>
+            <div class="badge-row">
+              <span class="badge">web3.js</span>
+              <span class="badge">Balances</span>
+            </div>
+            <div class="cmd-title">Run</div>
+            <div class="cmd-box">
+npm run dev -w ./packages/wallet-info -- &lt;WALLET_ADDRESS&gt;
+            </div>
+          </article>
+
+          <!-- nft-info -->
+          <article class="tool-card">
+            <div class="tool-name">
+              <span>nft-info</span>
+              <span class="tool-label">NFT / DAS inspector</span>
+            </div>
+            <p class="tool-desc">
+              Inspect any NFT or digital asset using Helius DAS or Solana Kit. Ideal for checking collections and single assets.
+            </p>
+            <div class="badge-row">
+              <span class="badge">Helius DAS</span>
+              <span class="badge">NFTs</span>
+            </div>
+            <div class="cmd-title">Run</div>
+            <div class="cmd-box">
+npm run dev -w ./packages/nft-info -- &lt;ASSET_ID&gt;
+            </div>
+          </article>
+
+          <!-- snapshot-airdrop -->
+          <article class="tool-card">
+            <div class="tool-name">
+              <span>snapshot-airdrop</span>
+              <span class="tool-label">Holder snapshot → CSV/JSON</span>
+            </div>
+            <p class="tool-desc">
+              Snapshot SPL token holders into CSV + JSON, with min-balance filter and exclude list.
+              Perfect for fair airdrops and reward distributions.
+            </p>
+            <div class="badge-row">
+              <span class="badge">Solana Kit</span>
+              <span class="badge">Airdrops</span>
+            </div>
+            <div class="cmd-title">Run</div>
+            <div class="cmd-box">
+npm run dev:kit -w ./packages/snapshot-airdrop -- --mint &lt;MINT&gt; --min 1 --out snapshots
+            </div>
+          </article>
+
+          <!-- raydium-analyzer -->
+          <article class="tool-card">
+            <div class="tool-name">
+              <span>raydium-analyzer</span>
+              <span class="tool-label">Raydium pool inspector</span>
+            </div>
+            <p class="tool-desc">
+              Query DexScreener for a given SPL mint and show Raydium pools, liquidity, 24h volume and price change.
+            </p>
+            <div class="badge-row">
+              <span class="badge">DexScreener API</span>
+              <span class="badge">Raydium</span>
+            </div>
+            <div class="cmd-title">Run</div>
+            <div class="cmd-box">
+npm run raydium:analyze -- --mint &lt;MINT&gt;
+            </div>
+          </article>
+
+          <!-- token-safety-check -->
+          <article class="tool-card">
+            <div class="tool-name">
+              <span>token-safety-check</span>
+              <span class="tool-label">Token risk overview</span>
+            </div>
+            <p class="tool-desc">
+              Combines on-chain mint data, holder concentration and Raydium liquidity into a quick safety summary for any SPL token.
+            </p>
+            <div class="badge-row">
+              <span class="badge badge--ok">Mint authority</span>
+              <span class="badge badge--warn">Liquidity</span>
+              <span class="badge badge--danger">Concentration</span>
+            </div>
+            <div class="cmd-title">Recommended (with your RPC)</div>
+            <div class="cmd-box">
+RPC_URL="https://mainnet.helius-rpc.com/?api-key=YOUR_HELIUS_KEY" \
+  npm run token-safety -- --mint &lt;MINT&gt;
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <footer class="footer">
+        Built and maintained by Kevin Smits (<a href="https://x.com/smitskecbs" target="_blank" rel="noreferrer">@smitskecbs</a>).  
+        Fully open source. PRs and feedback are welcome.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
