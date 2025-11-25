@@ -2,45 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Solana Token Safety Checker — solana-tools by Kevin Smits</title>
+  <title>Solana Tools – Token Safety Viewer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta
-    name="description"
-    content="Interactive Solana token safety checker built on top of the solana-tools repo by Kevin Smits (@smitskecbs). Enter a mint address and see mint authority, freeze authority, holder concentration and Raydium liquidity."
-  />
-
   <style>
-    :root {
-      --bg: #020617;
-      --bg2: #020819;
-      --accent: #22c55e;
-      --accent-soft: rgba(34, 197, 94, 0.12);
-      --danger: #f97373;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --border: #1f2933;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
+      margin: 0;
+      padding: 24px;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: radial-gradient(circle at top, #111827 0, #020617 45%, #000 100%);
-      color: var(--text);
-      padding: 24px;
+      color: #e5e7eb;
       display: flex;
       justify-content: center;
     }
-
     .page {
       width: 100%;
       max-width: 960px;
     }
-
     .header {
       margin-bottom: 24px;
       padding: 18px 20px;
@@ -49,161 +26,94 @@
       border: 1px solid rgba(34, 197, 94, 0.4);
       box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
     }
-
     .title {
-      font-size: 1.8rem;
+      font-size: 1.7rem;
       font-weight: 700;
       margin-bottom: 4px;
     }
-
     .subtitle {
-      font-size: 0.96rem;
-      color: var(--muted);
-      margin-bottom: 8px;
+      font-size: 0.95rem;
+      color: #9ca3af;
     }
-
-    .meta {
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
-
     .meta a {
-      color: var(--accent);
+      color: #22c55e;
       text-decoration: none;
     }
-
-    .meta a:hover {
-      text-decoration: underline;
-    }
-
-    .pill-row {
-      margin-top: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .pill {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      padding: 3px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      color: var(--muted);
-      background: rgba(15, 23, 42, 0.9);
-    }
-
-    .pill--accent {
-      border-color: rgba(34, 197, 94, 0.7);
-      color: var(--accent);
-      background: var(--accent-soft);
-    }
-
     .layout {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 18px;
+      gap: 16px;
     }
-
     @media (min-width: 900px) {
       .layout {
-        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+        grid-template-columns: 1.05fr 1.1fr;
       }
     }
-
     .card {
       border-radius: 14px;
-      border: 1px solid var(--border);
+      border: 1px solid #1f2933;
       background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.08), #020617 55%);
-      padding: 16px 16px 14px;
+      padding: 16px;
       box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
     }
-
     .card-title {
       font-size: 1rem;
       font-weight: 600;
       margin-bottom: 8px;
     }
-
     .card-subtitle {
       font-size: 0.88rem;
-      color: var(--muted);
-      margin-bottom: 12px;
+      color: #9ca3af;
+      margin-bottom: 10px;
     }
-
     label {
       font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: var(--muted);
+      color: #9ca3af;
       display: block;
       margin-bottom: 4px;
     }
-
-    input[type="text"] {
+    input {
       width: 100%;
       padding: 8px 10px;
       border-radius: 8px;
       border: 1px solid #111827;
       background: #020617;
-      color: var(--text);
+      color: #e5e7eb;
       font-size: 0.9rem;
-    }
-
-    input[type="text"]::placeholder {
-      color: #4b5563;
-    }
-
-    .field {
       margin-bottom: 10px;
     }
-
     button {
-      margin-top: 6px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       padding: 7px 14px;
       border-radius: 999px;
       border: none;
-      background: var(--accent);
+      background: #22c55e;
       color: #020617;
       font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
     }
-
     button:disabled {
       opacity: 0.6;
       cursor: default;
     }
-
-    .hint {
-      font-size: 0.78rem;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    .result-section {
-      margin-bottom: 10px;
-    }
-
     .result-title {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: var(--muted);
+      color: #9ca3af;
+      margin-top: 6px;
       margin-bottom: 3px;
-      margin-top: 4px;
     }
-
     .result-body {
-      font-size: 0.87rem;
+      font-size: 0.88rem;
       white-space: pre-wrap;
       word-break: break-word;
     }
-
     .badge-row {
       display: flex;
       flex-wrap: wrap;
@@ -211,553 +121,270 @@
       margin-top: 4px;
       margin-bottom: 4px;
     }
-
     .badge {
       font-size: 0.7rem;
       padding: 2px 8px;
       border-radius: 999px;
       border: 1px solid rgba(148, 163, 184, 0.5);
-      color: var(--muted);
+      color: #9ca3af;
     }
-
-    .badge--ok {
+    .badge-ok {
       border-color: rgba(34, 197, 94, 0.7);
-      color: var(--accent);
-      background: var(--accent-soft);
+      color: #22c55e;
+      background: rgba(34, 197, 94, 0.12);
     }
-
-    .badge--warn {
+    .badge-warn {
       border-color: rgba(234, 179, 8, 0.7);
       color: #facc15;
       background: rgba(250, 204, 21, 0.08);
     }
-
-    .badge--danger {
+    .badge-danger {
       border-color: rgba(248, 113, 113, 0.8);
-      color: var(--danger);
+      color: #f97373;
       background: rgba(248, 113, 113, 0.08);
     }
-
     .log {
-      font-size: 0.78rem;
-      color: var(--muted);
-      margin-top: 4px;
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: #9ca3af;
       white-space: pre-wrap;
     }
-
-    .footer {
-      margin-top: 22px;
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .footer a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    .footer a:hover {
-      text-decoration: underline;
-    }
-
     .error {
-      color: var(--danger);
+      color: #f97373;
     }
   </style>
 </head>
 <body>
   <div class="page">
     <header class="header">
-      <div class="title">Solana Token Safety Checker</div>
+      <div class="title">Solana Token Safety Viewer</div>
       <div class="subtitle">
-        Interactive demo built on top of the <strong>solana-tools</strong> repo by
-        <strong>Kevin Smits (@smitskecbs)</strong>.<br />
-        Enter any SPL token mint on Solana and see mint authority, freeze authority, holder concentration and Raydium liquidity.
+        Web UI on top of the <strong>solana-tools</strong> CLI by Kevin Smits (@smitskecbs).  
+        Enter a mint to see authorities, holder concentration and Raydium liquidity – like a lightweight Solscan for devs & degen researchers.
       </div>
       <div class="meta">
-        Repo:&nbsp;
-        <a href="https://github.com/smitskecbs/solana-tools" target="_blank" rel="noreferrer">
-          github.com/smitskecbs/solana-tools
-        </a>
-      </div>
-      <div class="pill-row">
-        <span class="pill pill--accent">Runs fully in your browser</span>
-        <span class="pill">No wallet needed</span>
-        <span class="pill">RPC pluggable (Helius ready)</span>
+        Repo: <a href="https://github.com/smitskecbs/solana-tools" target="_blank">github.com/smitskecbs/solana-tools</a>
       </div>
     </header>
 
     <main class="layout">
-      <!-- Left: form -->
       <section class="card">
-        <h2 class="card-title">Check a token</h2>
-        <p class="card-subtitle">
-          Paste a Solana SPL mint address. Optionally set your own RPC URL (recommended: Helius).
-          Nothing is sent to any backend — all calls happen directly from your browser.
-        </p>
-
-        <form id="safety-form">
-          <div class="field">
-            <label for="mint-input">Mint address</label>
-            <input
-              id="mint-input"
-              type="text"
-              placeholder="e.g. B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk"
-              required
-            />
-          </div>
-
-          <div class="field">
-            <label for="rpc-input">RPC URL (optional)</label>
-            <input
-              id="rpc-input"
-              type="text"
-              placeholder="https://mainnet.helius-rpc.com/?api-key=YOUR_KEY"
-            />
-            <div class="hint">
-              If empty, it will use the public RPC:
-              <code>https://api.mainnet-beta.solana.com</code> (may be rate limited).
-            </div>
-          </div>
-
-          <button id="run-button" type="submit">Run safety check</button>
-          <div id="log" class="log"></div>
-        </form>
+        <div class="card-title">Check a token</div>
+        <div class="card-subtitle">
+          Paste any SPL mint on Solana mainnet.  
+          The backend uses your configured Helius RPC (server-side), so it works even if public RPCs block the browser.
+        </div>
+        <label for="mint-input">Mint address</label>
+        <input
+          id="mint-input"
+          type="text"
+          placeholder="e.g. B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk"
+        />
+        <button id="run-button">Run safety check</button>
+        <div id="log" class="log"></div>
       </section>
 
-      <!-- Right: results -->
       <section class="card">
-        <h2 class="card-title">Result</h2>
-        <p class="card-subtitle">
-          Summary of what the tool found on-chain and via DexScreener (Raydium only).
-        </p>
+        <div class="card-title">Result</div>
+        <div id="badges" class="badge-row"></div>
 
-        <div class="badge-row" id="risk-badges">
-          <!-- badges injected here -->
-        </div>
+        <div class="result-title">Mint info</div>
+        <div id="mint-info" class="result-body">No data yet.</div>
 
-        <div class="result-section">
-          <div class="result-title">Mint info</div>
-          <div id="mint-info" class="result-body">No data yet.</div>
-        </div>
+        <div class="result-title">Holders</div>
+        <div id="holder-info" class="result-body">No data yet.</div>
 
-        <div class="result-section">
-          <div class="result-title">Holders</div>
-          <div id="holder-info" class="result-body">No data yet.</div>
-        </div>
+        <div class="result-title">Raydium / DexScreener</div>
+        <div id="dex-info" class="result-body">No data yet.</div>
 
-        <div class="result-section">
-          <div class="result-title">Raydium / DexScreener</div>
-          <div id="dex-info" class="result-body">No data yet.</div>
-        </div>
-
-        <div class="result-section">
-          <div class="result-title">Risk summary</div>
-          <div id="risk-summary" class="result-body">No data yet.</div>
-        </div>
+        <div class="result-title">Risk summary</div>
+        <div id="risk-info" class="result-body">No data yet.</div>
       </section>
     </main>
-
-    <footer class="footer">
-      Built and maintained by <a href="https://x.com/smitskecbs" target="_blank" rel="noreferrer">Kevin Smits (@smitskecbs)</a>.  
-      Open source, no backend — feel free to inspect the code in <code>docs/index.html</code>.
-    </footer>
   </div>
 
   <script>
-    const form = document.getElementById("safety-form");
-    const mintInput = document.getElementById("mint-input");
-    const rpcInput = document.getElementById("rpc-input");
-    const logEl = document.getElementById("log");
-    const runButton = document.getElementById("run-button");
+    const API_BASE = ""; // zelfde domain (Vercel)
 
+    const mintInput = document.getElementById("mint-input");
+    const runButton = document.getElementById("run-button");
+    const logEl = document.getElementById("log");
     const mintInfoEl = document.getElementById("mint-info");
     const holderInfoEl = document.getElementById("holder-info");
     const dexInfoEl = document.getElementById("dex-info");
-    const riskSummaryEl = document.getElementById("risk-summary");
-    const riskBadgesEl = document.getElementById("risk-badges");
-
-    const DEXSCREENER_URL = "https://api.dexscreener.com/latest/dex/tokens";
+    const riskInfoEl = document.getElementById("risk-info");
+    const badgesEl = document.getElementById("badges");
 
     function setLog(msg, isError = false) {
       logEl.textContent = msg;
       logEl.classList.toggle("error", isError);
     }
 
-    function appendLog(msg) {
-      logEl.textContent = logEl.textContent
-        ? logEl.textContent + "\\n" + msg
-        : msg;
-    }
-
-    async function rpcRequest(rpcUrl, method, params) {
-      const body = {
-        jsonrpc: "2.0",
-        id: 1,
-        method,
-        params
-      };
-      const res = await fetch(rpcUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-      });
-      if (!res.ok) {
-        throw new Error("RPC HTTP " + res.status + " " + res.statusText);
-      }
-      const json = await res.json();
-      if (json.error) {
-        throw new Error("RPC error: " + (json.error.message || "unknown"));
-      }
-      return json.result;
-    }
-
-    function formatNumber(num, maxDecimals = 4) {
-      if (typeof num !== "number" || Number.isNaN(num)) return "unknown";
-      return num.toLocaleString(undefined, {
-        maximumFractionDigits: maxDecimals
-      });
-    }
-
-    function mark(status) {
-      if (status === "ok") return "✅";
-      if (status === "warning") return "⚠️";
-      return "❌";
-    }
-
-    function renderBadges(flags) {
-      riskBadgesEl.innerHTML = "";
-
-      const mintBadge = document.createElement("span");
-      mintBadge.className =
+    function badge(text, level) {
+      const span = document.createElement("span");
+      span.className =
         "badge " +
-        (flags.mintAuthorityRisk === "ok"
-          ? "badge--ok"
-          : "badge--warn");
-      mintBadge.textContent = "Mint authority: " + flags.mintAuthorityRisk;
-
-      const freezeBadge = document.createElement("span");
-      freezeBadge.className =
-        "badge " +
-        (flags.freezeAuthorityRisk === "ok"
-          ? "badge--ok"
-          : "badge--warn");
-      freezeBadge.textContent = "Freeze: " + flags.freezeAuthorityRisk;
-
-      const concBadge = document.createElement("span");
-      concBadge.className =
-        "badge " +
-        (flags.concentrationRisk === "ok"
-          ? "badge--ok"
-          : flags.concentrationRisk === "warning"
-          ? "badge--warn"
-          : "badge--danger");
-      concBadge.textContent = "Concentration: " + flags.concentrationRisk;
-
-      const liqBadge = document.createElement("span");
-      liqBadge.className =
-        "badge " +
-        (flags.liquidityRisk === "ok" ? "badge--ok" : "badge--warn");
-      liqBadge.textContent = "Liquidity: " + flags.liquidityRisk;
-
-      riskBadgesEl.appendChild(mintBadge);
-      riskBadgesEl.appendChild(freezeBadge);
-      riskBadgesEl.appendChild(concBadge);
-      riskBadgesEl.appendChild(liqBadge);
+        (level === "ok"
+          ? "badge-ok"
+          : level === "warn"
+          ? "badge-warn"
+          : "badge-danger");
+      span.textContent = text;
+      return span;
     }
 
-    async function runSafetyCheck(mintAddress, rpcUrl) {
-      setLog("Fetching on-chain data...");
-      mintInfoEl.textContent = "Loading...";
-      holderInfoEl.textContent = "Loading...";
-      dexInfoEl.textContent = "Loading...";
-      riskSummaryEl.textContent = "Loading...";
-      riskBadgesEl.innerHTML = "";
-
-      const mintInfoResult = await rpcRequest(rpcUrl, "getParsedAccountInfo", [
-        mintAddress,
-        { commitment: "confirmed" }
-      ]);
-
-      const mintAccount = mintInfoResult.value;
-      if (!mintAccount || !mintAccount.data || !mintAccount.data.parsed) {
-        throw new Error("Mint account not found or not parsed.");
+    function renderResult(json) {
+      // Mint info
+      if (json.mintInfo) {
+        const mi = json.mintInfo;
+        mintInfoEl.textContent =
+          "Decimals:           " + (mi.decimals ?? "unknown") + "\\n" +
+          "Supply (approx UI): " + (mi.supplyUi != null ? mi.supplyUi.toLocaleString() : "unknown") + "\\n" +
+          "Mint authority:     " + (mi.isMintAuthorityDisabled ? "DISABLED (renounced)" : (mi.mintAuthority || "unknown")) + "\\n" +
+          "Freeze authority:   " + (mi.hasFreezeAuthority ? (mi.freezeAuthority || "present") : "none");
+      } else {
+        mintInfoEl.textContent = "No mint info.";
       }
 
-      const info = mintAccount.data.parsed.info;
-      const decimals =
-        typeof info.decimals === "number"
-          ? info.decimals
-          : Number(info.decimals ?? 0);
-      const supplyStr = info.supply;
-      let supplyUi = null;
-      if (typeof supplyStr === "string") {
-        const raw = Number(supplyStr);
-        if (!Number.isNaN(raw)) {
-          supplyUi = raw / 10 ** decimals;
-        }
-      }
-
-      const mintAuthority = info.mintAuthority ?? null;
-      const freezeAuthority = info.freezeAuthority ?? null;
-      const isMintAuthorityDisabled = mintAuthority === null;
-      const hasFreezeAuthority = freezeAuthority !== null;
-
-      mintInfoEl.textContent =
-        "Decimals:           " +
-        (Number.isFinite(decimals) ? decimals : "unknown") +
-        "\\n" +
-        "Supply (approx UI): " +
-        (supplyUi !== null ? formatNumber(supplyUi) : "unknown") +
-        "\\n" +
-        "Mint authority:     " +
-        (isMintAuthorityDisabled
-          ? "DISABLED (renounced)"
-          : mintAuthority || "unknown") +
-        "\\n" +
-        "Freeze authority:   " +
-        (hasFreezeAuthority ? freezeAuthority || "present" : "none");
-
-      appendLog("Fetching largest holders...");
-
-      let holdersSummary = null;
-      try {
-        const largest = await rpcRequest(
-          rpcUrl,
-          "getTokenLargestAccounts",
-          [mintAddress, { commitment: "confirmed" }]
-        );
-
-        const accounts = largest.value || [];
-        if (accounts.length) {
-          const factor = 10 ** decimals;
-          const totalRaw = accounts.reduce((sum, acc) => {
-            const amt = acc.amount ? Number(acc.amount) : 0;
-            return sum + (Number.isNaN(amt) ? 0 : amt);
-          }, 0);
-
-          const totalSupplyApprox =
-            factor !== 0 ? totalRaw / factor : 0;
-
-          const top = accounts.slice(0, 10).map((acc) => {
-            const raw = acc.amount ? Number(acc.amount) : 0;
-            const uiAmount = factor !== 0 ? raw / factor : 0;
-            const sharePercent =
-              totalRaw > 0 ? (raw / totalRaw) * 100 : 0;
-            return {
-              address: acc.address,
-              uiAmount,
-              sharePercent
-            };
-          });
-
-          const top10SharePercent = top.reduce(
-            (sum, h) => sum + h.sharePercent,
-            0
-          );
-
-          holdersSummary = {
-            totalSupplyApprox,
-            top10SharePercent,
-            topHolders: top
-          };
-
-          let holdersText =
-            "Total supply (approx): " +
-            formatNumber(totalSupplyApprox) +
-            "\\n" +
-            "Top 10 share:          " +
-            top10SharePercent.toFixed(2) +
-            "%\\n" +
-            "Top holders:\\n";
-
-          top.forEach((h) => {
-            holdersText +=
+      // Holders
+      if (json.holders && !json.holders.error) {
+        const h = json.holders;
+        let txt =
+          "Total supply (approx): " +
+          (h.totalSupplyApprox != null
+            ? h.totalSupplyApprox.toLocaleString()
+            : "unknown") +
+          "\\n" +
+          "Top 10 share:          " +
+          (h.top10SharePercent != null
+            ? h.top10SharePercent.toFixed(2) + "%"
+            : "unknown") +
+          "\\n" +
+          "Top holders:\\n";
+        if (h.topHolders && h.topHolders.length) {
+          h.topHolders.forEach((th) => {
+            txt +=
               "  - " +
-              h.address +
+              th.address +
               "  ~" +
-              formatNumber(h.uiAmount) +
+              th.uiAmount.toLocaleString() +
               " (" +
-              h.sharePercent.toFixed(2) +
+              th.sharePercent.toFixed(2) +
               "%)\\n";
           });
-
-          holderInfoEl.textContent = holdersText.trimEnd();
-        } else {
-          holderInfoEl.textContent =
-            "No largest holders returned for this mint.";
         }
-      } catch (err) {
-        console.error(err);
-        holderInfoEl.textContent =
-          "Could not fetch largest holders (RPC or token issue).";
+        holderInfoEl.textContent = txt.trimEnd();
+      } else if (json.holders && json.holders.error) {
+        holderInfoEl.textContent = json.holders.error;
+      } else {
+        holderInfoEl.textContent = "No holder info.";
       }
 
-      appendLog("Fetching DexScreener / Raydium data...");
-      let dexResult = null;
-      try {
-        const res = await fetch(DEXSCREENER_URL + "/" + mintAddress);
-        if (res.ok) {
-          const json = await res.json();
-          const pairs = (json.pairs || []).filter(
-            (p) =>
-              p.chainId === "solana" &&
-              typeof p.dexId === "string" &&
-              p.dexId.toLowerCase().includes("raydium")
-          );
-          pairs.sort(
-            (a, b) => (b.liquidity?.usd ?? 0) - (a.liquidity?.usd ?? 0)
-          );
-          dexResult = { pairs };
-
-          if (!pairs.length) {
-            dexInfoEl.textContent =
-              "No Raydium pools found on DexScreener.";
-          } else {
-            const best = pairs[0];
-            const liq = best.liquidity?.usd ?? 0;
-            const vol = best.volume?.h24 ?? 0;
-            const change = best.priceChange?.h24;
-
-            let dexText =
-              "Best pool: " +
-              (best.baseToken?.symbol || "?") +
-              "/" +
-              (best.quoteToken?.symbol || "?") +
-              "\\n" +
-              "URL:       " +
-              (best.url || "n/a") +
-              "\\n" +
-              "Liquidity: " +
-              (liq
-                ? "$" +
-                  formatNumber(liq, 2)
-                : "unknown") +
-              "\\n" +
-              "Volume 24h: " +
-              (vol
-                ? "$" +
-                  formatNumber(vol, 2)
-                : "unknown") +
-              "\\n" +
-              "Price change 24h: " +
-              (typeof change === "number"
-                ? change.toFixed(2) + "%"
-                : "unknown");
-
-            dexInfoEl.textContent = dexText;
-          }
-        } else {
-          dexInfoEl.textContent =
-            "DexScreener returned HTTP " +
-            res.status +
-            " " +
-            res.statusText;
-        }
-      } catch (err) {
-        console.error(err);
+      // Dex
+      if (json.dex && json.dex.bestPool) {
+        const d = json.dex.bestPool;
         dexInfoEl.textContent =
-          "Could not fetch DexScreener data (network/CORS issue).";
+          "Best pool: " +
+          (d.base || "?") +
+          "/" +
+          (d.quote || "?") +
+          "\\n" +
+          "URL:       " +
+          (d.url || "n/a") +
+          "\\n" +
+          "Liquidity: " +
+          (d.liquidityUsd != null
+            ? "$" + d.liquidityUsd.toLocaleString(undefined, { maximumFractionDigits: 2 })
+            : "unknown") +
+          "\\n" +
+          "Volume 24h: " +
+          (d.volume24hUsd != null
+            ? "$" + d.volume24hUsd.toLocaleString(undefined, { maximumFractionDigits: 2 })
+            : "unknown") +
+          "\\n" +
+          "Price change 24h: " +
+          (typeof d.priceChange24h === "number"
+            ? d.priceChange24h.toFixed(2) + "%"
+            : "unknown");
+      } else if (json.dex && json.dex.error) {
+        dexInfoEl.textContent = json.dex.error;
+      } else if (json.dex && json.dex.message) {
+        dexInfoEl.textContent = json.dex.message;
+      } else {
+        dexInfoEl.textContent = "No Dex info.";
       }
 
-      const flags = {
-        mintAuthorityRisk: isMintAuthorityDisabled ? "ok" : "warning",
-        freezeAuthorityRisk: hasFreezeAuthority ? "warning" : "ok",
-        concentrationRisk: "ok",
-        liquidityRisk: "warning"
-      };
-
-      if (holdersSummary) {
-        if (holdersSummary.top10SharePercent > 90) {
-          flags.concentrationRisk = "high";
-        } else if (holdersSummary.top10SharePercent > 70) {
-          flags.concentrationRisk = "warning";
-        } else {
-          flags.concentrationRisk = "ok";
+      // Risk
+      if (json.risk) {
+        riskInfoEl.textContent = json.risk.text || "No risk summary.";
+        badgesEl.innerHTML = "";
+        const f = json.risk.flags;
+        if (f) {
+          badgesEl.appendChild(
+            badge("Mint: " + f.mintAuthorityRisk, f.mintAuthorityRisk === "ok" ? "ok" : "warn")
+          );
+          badgesEl.appendChild(
+            badge("Freeze: " + f.freezeAuthorityRisk, f.freezeAuthorityRisk === "ok" ? "ok" : "warn")
+          );
+          badgesEl.appendChild(
+            badge(
+              "Concentration: " + f.concentrationRisk,
+              f.concentrationRisk === "ok"
+                ? "ok"
+                : f.concentrationRisk === "warning"
+                ? "warn"
+                : "danger"
+            )
+          );
+          badgesEl.appendChild(
+            badge(
+              "Liquidity: " + f.liquidityRisk,
+              f.liquidityRisk === "ok" ? "ok" : "warn"
+            )
+          );
         }
+      } else {
+        riskInfoEl.textContent = "No risk summary.";
       }
-
-      if (dexResult && dexResult.pairs && dexResult.pairs.length) {
-        const liq = dexResult.pairs[0].liquidity?.usd ?? 0;
-        flags.liquidityRisk = liq >= 5000 ? "ok" : "warning";
-      }
-
-      renderBadges(flags);
-
-      let riskText = "";
-      riskText +=
-        "Mint authority : " +
-        mark(flags.mintAuthorityRisk) +
-        " " +
-        (flags.mintAuthorityRisk === "ok"
-          ? "Mint authority disabled (cannot mint more)."
-          : "Mint authority still present – owner can mint more tokens.") +
-        "\\n";
-      riskText +=
-        "Freeze authority: " +
-        mark(flags.freezeAuthorityRisk) +
-        " " +
-        (flags.freezeAuthorityRisk === "ok"
-          ? "No freeze authority."
-          : "Freeze authority present – accounts can be frozen.") +
-        "\\n";
-      riskText +=
-        "Concentration  : " +
-        mark(flags.concentrationRisk) +
-        " " +
-        (!holdersSummary
-          ? "Could not evaluate concentration."
-          : flags.concentrationRisk === "ok"
-          ? "Holder distribution looks healthy (top 10 < 70%)."
-          : flags.concentrationRisk === "warning"
-          ? "Top 10 holders own > 70% of supply."
-          : "Top 10 holders own > 90% of supply – very high concentration.") +
-        "\\n";
-      riskText +=
-        "Liquidity      : " +
-        mark(flags.liquidityRisk) +
-        " " +
-        (!dexResult || !dexResult.pairs || !dexResult.pairs.length
-          ? "No Raydium liquidity found."
-          : flags.liquidityRisk === "ok"
-          ? "Liquidity >= $5k on Raydium."
-          : "Liquidity < $5k on Raydium.");
-
-      riskSummaryEl.textContent = riskText.trimEnd();
-
-      setLog("Done.");
     }
 
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const mintAddress = mintInput.value.trim();
-      const rpcUrl =
-        rpcInput.value.trim() || "https://api.mainnet-beta.solana.com";
-
-      if (!mintAddress) {
+    async function run() {
+      const mint = mintInput.value.trim();
+      if (!mint) {
         setLog("Please enter a mint address.", true);
         return;
       }
 
-      setLog("");
+      setLog("Loading...");
       runButton.disabled = true;
+      badgesEl.innerHTML = "";
+      mintInfoEl.textContent = "Loading...";
+      holderInfoEl.textContent = "Loading...";
+      dexInfoEl.textContent = "Loading...";
+      riskInfoEl.textContent = "Loading...";
 
       try {
-        await runSafetyCheck(mintAddress, rpcUrl);
-      } catch (err) {
-        console.error(err);
-        setLog("Error: " + (err.message || String(err)), true);
+        const res = await fetch(API_BASE + "/api/token-safety?mint=" + encodeURIComponent(mint));
+        const json = await res.json();
+        if (!res.ok) {
+          throw new Error(json.error || "Unknown error from API");
+        }
+        renderResult(json);
+        setLog("Done.");
+      } catch (e) {
+        console.error(e);
+        setLog("Error: " + (e.message || String(e)), true);
         mintInfoEl.textContent = "Error while fetching mint info.";
         holderInfoEl.textContent = "Error while fetching holders.";
         dexInfoEl.textContent = "Error while fetching Dex data.";
-        riskSummaryEl.textContent = "No risk summary available.";
-        riskBadgesEl.innerHTML = "";
+        riskInfoEl.textContent = "No risk summary available.";
+        badgesEl.innerHTML = "";
       } finally {
         runButton.disabled = false;
       }
-    });
+    }
+
+    runButton.addEventListener("click", run);
   </script>
 </body>
 </html>
