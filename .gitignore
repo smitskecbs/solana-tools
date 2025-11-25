@@ -82,3 +82,4 @@ packages/*/dist/
 # local scratch
 solana-tools/
 
+packages/snapshot-airdrop/snapshots/

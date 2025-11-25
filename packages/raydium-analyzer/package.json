@@ -1,0 +1,21 @@
+{
+  "name": "@smitskecbs/raydium-analyzer",
+  "version": "0.1.0",
+  "description": "CLI to analyze Raydium pools for a given SPL mint on Solana.",
+  "main": "dist/index.js",
+  "bin": {
+    "raydium-analyzer": "dist/index.js"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.95.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.16.0",
+    "typescript": "^5.6.0"
+  }
+}
