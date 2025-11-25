@@ -1,0 +1,13 @@
+{
+  "name": "solana-tools-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Web UI for Solana token safety tools by Kevin Smits (@smitskecbs)",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.95.2"
+  }
+}
