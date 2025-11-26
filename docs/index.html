@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>DEGEN TOKEN SCANNER – solana-tools</title>
+  <title>Degen Token Scanner – solana-tools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta
     name="description"
     content="Ultra degen Solana token safety meme scanner. Built on solana-tools by Kevin Smits (@smitskecbs)."
   />
 
-  <!-- Fonts -->
+  <!-- Meme fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Fredoka:wght@500;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Bangers&family=Baloo+2:wght@500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap"
     rel="stylesheet"
   />
 
@@ -26,7 +26,7 @@
       --green: #22c55e;
       --blue: #38bdf8;
       --red: #fb7185;
-      --card: rgba(15, 23, 42, 0.92);
+      --card: rgba(15, 23, 42, 0.95);
       --border: rgba(148, 163, 184, 0.7);
     }
 
@@ -46,7 +46,7 @@
       display: flex;
       justify-content: center;
       align-items: stretch;
-      padding: 16px;
+      padding: 14px;
       overflow-x: hidden;
     }
 
@@ -56,8 +56,8 @@
       pointer-events: none;
       z-index: -1;
       background:
-        radial-gradient(circle at 10% 20%, rgba(251, 55, 255, 0.18), transparent 55%),
-        radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.18), transparent 55%);
+        radial-gradient(circle at 10% 20%, rgba(251, 55, 255, 0.16), transparent 60%),
+        radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.18), transparent 60%);
       opacity: 1;
     }
 
@@ -66,42 +66,42 @@
       max-width: 1180px;
       display: flex;
       flex-direction: column;
-      gap: 18px;
     }
 
     .shell {
       border-radius: 26px;
-      border: 2px solid rgba(250, 204, 21, 0.6);
+      border: 2px solid rgba(250, 204, 21, 0.7);
       background:
-        radial-gradient(circle at top, rgba(56, 189, 248, 0.12), transparent 60%),
-        radial-gradient(circle at bottom, rgba(34, 197, 94, 0.12), transparent 60%),
-        rgba(15, 23, 42, 0.96);
+        radial-gradient(circle at top, rgba(56, 189, 248, 0.14), transparent 60%),
+        radial-gradient(circle at bottom, rgba(34, 197, 94, 0.14), transparent 60%),
+        rgba(15, 23, 42, 0.98);
       box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.9),
+        0 22px 70px rgba(0, 0, 0, 1),
         0 0 0 1px rgba(15, 23, 42, 1);
-      padding: 20px 20px 16px;
+      padding: 18px 18px 12px;
       position: relative;
       overflow: hidden;
     }
 
     .shell::after {
-      content: "DEGEN MODE";
+      content: "DEGEN ONLY ZONE";
       position: absolute;
-      right: -40px;
+      right: -52px;
       top: 8px;
-      font-family: "Fredoka", system-ui;
-      font-size: 12px;
+      font-family: "Baloo 2", system-ui;
+      font-size: 11px;
       letter-spacing: 0.35em;
       text-transform: uppercase;
-      color: rgba(252, 211, 77, 0.18);
-      transform: rotate(-10deg);
+      color: rgba(252, 211, 77, 0.2);
+      transform: rotate(-12deg);
     }
 
-    /* Header meme */
+    /* HEADER */
+
     .header {
       display: grid;
       grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-      gap: 14px;
+      gap: 12px;
       align-items: center;
       margin-bottom: 10px;
     }
@@ -125,34 +125,36 @@
     }
 
     .logo-bubble {
-      width: 46px;
-      height: 46px;
-      border-radius: 18px;
+      width: 52px;
+      height: 52px;
+      border-radius: 20px;
       background:
-        radial-gradient(circle at 30% 20%, #f9a8ff, #fb37ff, #7c2d99);
+        conic-gradient(from 180deg, #fbbf24, #fb37ff, #22c55e, #38bdf8, #f97316, #fb37ff);
       box-shadow:
-        0 0 0 3px rgba(248, 250, 252, 0.08),
+        0 0 0 3px rgba(248, 250, 252, 0.1),
         0 0 30px rgba(251, 55, 255, 0.9);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 26px;
+      font-size: 28px;
     }
 
     .title-main {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
 
     .title-main h1 {
       margin: 0;
-      font-family: "Fredoka", system-ui;
-      font-size: 28px;
-      letter-spacing: 0.06em;
+      font-family: "Bangers", system-ui;
+      font-size: 30px;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       color: #f9fafb;
-      text-shadow: 0 0 20px rgba(56, 189, 248, 0.8);
+      text-shadow:
+        0 0 18px rgba(56, 189, 248, 1),
+        0 0 40px rgba(250, 204, 21, 0.8);
     }
 
     .subtitle-chip-row {
@@ -166,11 +168,12 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 9px;
+      padding: 3px 9px;
       border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.6);
-      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.75);
+      background: rgba(15, 23, 42, 0.98);
       color: #9ca3af;
+      font-family: "Baloo 2", system-ui;
     }
 
     .chip span.dot {
@@ -183,12 +186,12 @@
 
     .chip.pink span.dot {
       background: var(--pink);
-      box-shadow: 0 0 12px rgba(251, 55, 255, 0.8);
+      box-shadow: 0 0 12px rgba(251, 55, 255, 0.9);
     }
 
     .chip.yellow span.dot {
       background: var(--yellow);
-      box-shadow: 0 0 12px rgba(250, 204, 21, 0.8);
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.9);
     }
 
     .subtitle-text {
@@ -221,17 +224,17 @@
     }
 
     .hero-badge {
-      padding: 7px 12px;
+      padding: 7px 13px;
       border-radius: 999px;
       background: linear-gradient(135deg, #22c55e, #4ade80);
       color: #022c22;
-      font-family: "Fredoka", system-ui;
+      font-family: "Baloo 2", system-ui;
       font-size: 12px;
       display: inline-flex;
       align-items: center;
       gap: 8px;
       box-shadow:
-        0 12px 30px rgba(22, 163, 74, 0.85),
+        0 14px 38px rgba(22, 163, 74, 0.95),
         0 0 0 1px rgba(15, 23, 42, 1);
     }
 
@@ -240,14 +243,16 @@
     }
 
     .hero-text-small {
-      opacity: 0.8;
+      opacity: 0.85;
+      font-size: 11px;
     }
 
-    /* Main grid */
+    /* MAIN GRID */
+
     .main-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.3fr);
-      gap: 14px;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.35fr);
+      gap: 13px;
       margin-top: 4px;
     }
 
@@ -259,11 +264,11 @@
 
     .card {
       position: relative;
-      border-radius: 20px;
-      border: 2px solid rgba(148, 163, 184, 0.8);
+      border-radius: 22px;
+      border: 2px solid rgba(148, 163, 184, 0.85);
       background: var(--card);
       box-shadow:
-        0 18px 45px rgba(0, 0, 0, 0.9),
+        0 18px 50px rgba(0, 0, 0, 1),
         0 0 0 1px rgba(15, 23, 42, 1);
       overflow: hidden;
     }
@@ -273,16 +278,16 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(circle at top left, rgba(251, 55, 255, 0.18), transparent 55%),
+        radial-gradient(circle at top left, rgba(251, 55, 255, 0.16), transparent 55%),
         radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.18), transparent 55%);
-      opacity: 0.6;
+      opacity: 0.8;
       pointer-events: none;
     }
 
     .card-inner {
       position: relative;
       z-index: 1;
-      padding: 14px 14px 12px;
+      padding: 13px 14px 11px;
     }
 
     .card-headerline {
@@ -290,24 +295,24 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      margin-bottom: 8px;
+      margin-bottom: 9px;
     }
 
     .card-title {
-      font-family: "Fredoka", system-ui;
+      font-family: "Baloo 2", system-ui;
       font-size: 16px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #f9fafb;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
     .card-title span.tag {
       font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.14em;
       color: rgba(148, 163, 184, 0.95);
     }
 
@@ -315,18 +320,21 @@
       font-size: 11px;
       padding: 3px 8px;
       border-radius: 999px;
-      border: 1px dashed rgba(148, 163, 184, 0.8);
+      border: 1px dashed rgba(148, 163, 184, 0.85);
       color: #e5e7eb;
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(15, 23, 42, 0.96);
+      font-family: "Space Grotesk", system-ui;
     }
 
-    /* Input side */
+    /* INPUT SIDE */
+
     .field-label {
       font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.18em;
       color: #9ca3af;
       margin-bottom: 5px;
+      font-family: "Baloo 2", system-ui;
     }
 
     .input-wrapper {
@@ -337,10 +345,10 @@
     input[type="text"] {
       width: 100%;
       border-radius: 999px;
-      border: 2px solid rgba(148, 163, 184, 0.7);
+      border: 2px solid rgba(148, 163, 184, 0.8);
       background: rgba(15, 23, 42, 0.98);
       color: #f9fafb;
-      padding: 10px 14px 10px 14px;
+      padding: 11px 15px;
       font-family: "Space Grotesk", system-ui, sans-serif;
       font-size: 13px;
       outline: none;
@@ -356,10 +364,10 @@
     }
 
     input[type="text"]:focus {
-      border-color: rgba(250, 204, 21, 0.95);
+      border-color: rgba(250, 204, 21, 0.98);
       box-shadow:
-        0 0 0 1px rgba(250, 204, 21, 0.75),
-        0 0 25px rgba(250, 204, 21, 0.6);
+        0 0 0 1px rgba(250, 204, 21, 0.9),
+        0 0 25px rgba(250, 204, 21, 0.7);
       transform: translateY(-1px);
     }
 
@@ -376,55 +384,62 @@
       gap: 10px;
     }
 
+    @keyframes wiggle {
+      0% { transform: translateY(-1px) rotate(-1deg); }
+      50% { transform: translateY(-1px) rotate(1deg); }
+      100% { transform: translateY(-1px) rotate(-1deg); }
+    }
+
     .btn-primary {
       border-radius: 999px;
       border: none;
-      padding: 9px 18px;
-      font-family: "Fredoka", system-ui;
+      padding: 10px 19px;
+      font-family: "Baloo 2", system-ui;
       font-size: 13px;
-      letter-spacing: 0.07em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      background: linear-gradient(135deg, #22c55e, #4ade80);
+      background: linear-gradient(135deg, #22c55e, #4ade80, #bbf7d0);
       color: #022c22;
       display: inline-flex;
       align-items: center;
       gap: 8px;
       cursor: pointer;
       box-shadow:
-        0 14px 40px rgba(34, 197, 94, 0.9),
+        0 16px 45px rgba(34, 197, 94, 0.9),
         0 0 0 1px rgba(15, 23, 42, 1);
       transition:
-        transform 130ms ease-out,
-        box-shadow 130ms ease-out,
-        filter 130ms ease-out,
-        opacity 130ms ease-out;
+        transform 120ms ease-out,
+        box-shadow 120ms ease-out,
+        filter 120ms ease-out,
+        opacity 120ms ease-out;
     }
 
     .btn-primary span.icon {
-      font-size: 16px;
+      font-size: 18px;
     }
 
     .btn-primary:hover {
-      transform: translateY(-1px) scale(1.02);
+      filter: brightness(1.05);
       box-shadow:
-        0 18px 55px rgba(34, 197, 94, 1),
+        0 22px 58px rgba(34, 197, 94, 1),
         0 0 0 1px rgba(15, 23, 42, 1);
-      filter: brightness(1.03);
+      animation: wiggle 0.25s ease-in-out;
     }
 
     .btn-primary:active {
-      transform: translateY(0) scale(0.99);
+      transform: translateY(0) scale(0.98);
       box-shadow:
-        0 10px 30px rgba(21, 128, 61, 0.9),
+        0 11px 30px rgba(21, 128, 61, 0.95),
         0 0 0 1px rgba(15, 23, 42, 1);
     }
 
     .btn-primary:disabled {
-      opacity: 0.45;
+      opacity: 0.4;
       cursor: default;
       transform: none;
+      animation: none;
       box-shadow:
-        0 8px 25px rgba(15, 23, 42, 0.95),
+        0 9px 26px rgba(15, 23, 42, 0.95),
         0 0 0 1px rgba(15, 23, 42, 1);
     }
 
@@ -469,18 +484,20 @@
       color: #fb7185;
     }
 
-    /* Result side */
+    /* RESULT SIDE */
+
     .meme-banner {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 10px;
       font-size: 12px;
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(15, 23, 42, 0.96);
       border-radius: 999px;
-      border: 1px dashed rgba(148, 163, 184, 0.8);
-      padding: 5px 10px;
+      border: 1px dashed rgba(148, 163, 184, 0.9);
+      padding: 5px 11px;
       margin-bottom: 8px;
+      font-family: "Baloo 2", system-ui;
     }
 
     .meme-banner span.left {
@@ -490,7 +507,7 @@
     }
 
     .meme-banner span.emoji {
-      font-size: 16px;
+      font-size: 18px;
     }
 
     .risk-badges {
@@ -504,28 +521,29 @@
       font-size: 11px;
       padding: 4px 9px;
       border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.7);
-      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.85);
+      background: rgba(15, 23, 42, 0.96);
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      font-family: "Baloo 2", system-ui;
     }
 
     .risk-chip.ok {
-      border-color: rgba(34, 197, 94, 0.9);
-      background: rgba(22, 163, 74, 0.18);
+      border-color: rgba(34, 197, 94, 1);
+      background: rgba(22, 163, 74, 0.22);
       color: #bbf7d0;
     }
 
     .risk-chip.warn {
-      border-color: rgba(234, 179, 8, 0.95);
-      background: rgba(234, 179, 8, 0.18);
+      border-color: rgba(234, 179, 8, 1);
+      background: rgba(234, 179, 8, 0.22);
       color: #facc15;
     }
 
     .risk-chip.danger {
-      border-color: rgba(248, 113, 113, 0.95);
-      background: rgba(248, 113, 113, 0.2);
+      border-color: rgba(248, 113, 113, 1);
+      background: rgba(248, 113, 113, 0.25);
       color: #fecaca;
     }
 
@@ -550,17 +568,18 @@
 
     .result-card {
       border-radius: 14px;
-      border: 1px solid rgba(148, 163, 184, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.9);
       background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.98), #020617);
       padding: 8px 9px 7px;
     }
 
     .result-title {
       font-size: 11px;
-      letter-spacing: 0.16em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
       color: #9ca3af;
       margin-bottom: 4px;
+      font-family: "Baloo 2", system-ui;
     }
 
     .result-body {
@@ -570,12 +589,14 @@
       color: #e5e7eb;
       white-space: pre-wrap;
       word-break: break-word;
-      line-height: 1.5;
+      line-height: 1.45;
     }
 
     .result-body.muted {
       color: #6b7280;
     }
+
+    /* FOOTER */
 
     .footer {
       margin-top: 8px;
@@ -608,13 +629,14 @@
     .tg-pill {
       padding: 4px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(56, 189, 248, 0.9);
-      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(56, 189, 248, 0.95);
+      background: rgba(15, 23, 42, 0.98);
       color: #bae6fd;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       font-size: 11px;
+      font-family: "Baloo 2", system-ui;
     }
 
     .tg-pill span.icon {
@@ -626,7 +648,7 @@
         padding: 10px;
       }
       .shell {
-        padding: 16px 14px 12px;
+        padding: 16px 12px 11px;
       }
       .footer {
         flex-direction: column;
@@ -643,7 +665,7 @@
       <header class="header">
         <div class="title-block">
           <div class="logo-row">
-            <div class="logo-bubble">🧪</div>
+            <div class="logo-bubble">🐸</div>
             <div class="title-main">
               <h1>DEGEN TOKEN SCANNER</h1>
               <div class="subtitle-chip-row">
@@ -651,17 +673,18 @@
                   <span class="dot"></span> Solana mainnet only
                 </div>
                 <div class="chip pink">
-                  <span class="dot"></span> SPL tokens
+                  <span class="dot"></span> SPL token enjoyers
                 </div>
                 <div class="chip yellow">
-                  <span class="dot"></span> Built on solana-tools
+                  <span class="dot"></span> Powered by solana-tools
                 </div>
               </div>
             </div>
           </div>
           <p class="subtitle-text">
-            Is je bag <strong>safe</strong> of <strong>rekt</strong>?  
-            Deze viewer checkt mint authority, holder spread en Raydium liquidity – powered by
+            Paste a mint, smash <strong>SCAN</strong> and get instant vibes:
+            mint authority, holder spread and Raydium liquidity –
+            all built on top of
             <a href="https://github.com/smitskecbs/solana-tools" target="_blank" rel="noreferrer">
               solana-tools
             </a>.
@@ -670,11 +693,11 @@
 
         <div class="hero-right">
           <div class="hero-badge">
-            <span class="emoji">🚀</span>
-            <span>ON-CHAIN ONLY – NO WALLET CONNECT</span>
+            <span class="emoji">🧪</span>
+            <span>READ-ONLY – NO WALLET CONNECT</span>
           </div>
           <div class="hero-text-small">
-            Perfect voor serieuze builders, degens en mods die niet eerst 10 tabs willen openen.
+            Good for serious builders, mods and terminally online degens who don’t want 12 tabs open.
           </div>
         </div>
       </header>
@@ -685,7 +708,7 @@
           <div class="card-inner">
             <div class="card-headerline">
               <div class="card-title">
-                TOKEN IN
+                INPUT
                 <span class="tag">PLAYER 1</span>
               </div>
               <div class="card-pill">Helius RPC + DexScreener</div>
@@ -698,11 +721,11 @@
                 type="text"
                 autocomplete="off"
                 spellcheck="false"
-                placeholder="Paste SPL mint…"
+                placeholder="Paste SPL mint here and pray…"
               />
             </div>
             <div class="hint">
-              We lezen alleen publieke on-chain data. Geen keys, geen wallet connect, geen magie.
+              We only touch public on-chain data. No keys, no wallet connect, no spooky stuff.
             </div>
 
             <div class="controls-row" style="margin-top: 8px;">
@@ -713,7 +736,7 @@
 
               <div class="status-line">
                 <span id="status-dot" class="status-dot"></span>
-                <span id="status-text">Idle. Paste a mint & press scan.</span>
+                <span id="status-text">Idle. Paste a mint & smash scan.</span>
               </div>
             </div>
 
@@ -729,13 +752,13 @@
                 RESULT
                 <span class="tag">PLAYER 2</span>
               </div>
-              <div class="card-pill">Read-only vibes only 🧊</div>
+              <div class="card-pill">Signals, not financial advice 🧠</div>
             </div>
 
             <div class="meme-banner">
               <span class="left">
-                <span class="emoji">🧠</span>
-                DYOR. Dit is geen financieel advies – alleen signalen.
+                <span class="emoji">⚠️</span>
+                DYOR. This page shows red flags & green lights – you still press the buy button yourself.
               </span>
               <span class="emoji">📊</span>
             </div>
@@ -1031,12 +1054,12 @@
     async function runSafetyCheck() {
       const mint = mintInput.value.trim();
       if (!mint) {
-        setLog("Please paste a mint first.", true);
+        setLog("Paste a mint first, anon.", true);
         return;
       }
 
       runButton.disabled = true;
-      setStatus("Scanning on-chain + Raydium…", "idle");
+      setStatus("Scanning on-chain + Dex…", "idle");
       setLog("Talking to Solana + Helius + DexScreener…");
       setLoading();
 
@@ -1051,11 +1074,11 @@
         }
 
         renderResult(data);
-        setStatus("Scan complete. Now DYOR 🧠", "ok");
-        setLog("Signals loaded. Combine with your own brain.");
+        setStatus("Scan complete. Time to use your brain 🧠", "ok");
+        setLog("Signals loaded. Combine with your own conviction.");
       } catch (err) {
         console.error(err);
-        setStatus("Error during scan.", "error");
+        setStatus("Error while scanning.", "error");
         setLog("Error: " + (err.message || String(err)), true);
 
         mintInfoEl.textContent = "Error while fetching mint info.";
@@ -1084,3 +1107,4 @@
   </script>
 </body>
 </html>
+
