@@ -1,274 +1,288 @@
 // api/token-safety.js
-// Vercel serverless function – doet de echte RPC calls met jouw Helius endpoint.
+// Vercel serverless function – wraps Helius RPC + DexScreener
+// so your docs/index.html can show mint, holders & Raydium liquidity.
 
-const { Connection, PublicKey } = require("@solana/web3.js");
-
-// Zorg dat je in Vercel een env var zet:
-// HELIUS_RPC_URL = https://mainnet.helius-rpc.com/?api-key=JOUW_KEY
-const RPC_URL =
-  process.env.HELIUS_RPC_URL || "https://api.mainnet-beta.solana.com";
-
-const DEXSCREENER_URL =
-  "https://api.dexscreener.com/latest/dex/tokens/";
-
-function formatNumber(num, maxDecimals = 4) {
-  if (typeof num !== "number" || Number.isNaN(num)) return "unknown";
-  return num.toLocaleString(undefined, { maximumFractionDigits: maxDecimals });
-}
-
-function mark(status) {
-  if (status === "ok") return "✅";
-  if (status === "warning") return "⚠️";
-  return "❌";
-}
-
-module.exports = async (req, res) => {
-  // CORS zodat je frontend er vanaf GitHub of elders bij kan
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET,OPTIONS"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type"
-  );
-
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
-  const { mint } = req.query;
-
-  if (!mint) {
-    return res
-      .status(400)
-      .json({ error: "Missing ?mint= parameter in query." });
-  }
-
-  let connection;
+export default async function handler(req, res) {
   try {
-    connection = new Connection(RPC_URL, "confirmed");
-  } catch (e) {
-    console.error("Failed to create Connection", e);
-    return res
-      .status(500)
-      .json({ error: "Failed to create Solana connection." });
-  }
+    const { mint } = req.query;
 
-  const result = {
-    mint,
-    mintInfo: null,
-    holders: null,
-    dex: null,
-    risk: null
-  };
-
-  try {
-    const mintPubkey = new PublicKey(mint);
-    const mintAccount = await connection.getParsedAccountInfo(mintPubkey, "confirmed");
-
-    if (!mintAccount.value || !mintAccount.value.data || !mintAccount.value.data.parsed) {
-      throw new Error("Mint account not found or not parsed.");
+    if (!mint || typeof mint !== "string") {
+      res.status(400).json({ error: "Missing ?mint=<SPL_MINT_ADDRESS>" });
+      return;
     }
 
-    const info = mintAccount.value.data.parsed.info;
-    const decimals =
-      typeof info.decimals === "number"
-        ? info.decimals
-        : Number(info.decimals ?? 0);
-    const supplyStr = info.supply;
-    let supplyUi = null;
-    if (typeof supplyStr === "string") {
-      const raw = Number(supplyStr);
-      if (!Number.isNaN(raw)) {
-        supplyUi = raw / 10 ** decimals;
+    const heliusRpcUrl =
+      process.env.HELIUS_RPC_URL ||
+      "https://api.mainnet-beta.solana.com";
+
+    async function heliusRpc(method, params = []) {
+      const body = JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method,
+        params,
+      });
+
+      const resp = await fetch(heliusRpcUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body,
+      });
+
+      if (!resp.ok) {
+        throw new Error(`RPC HTTP ${resp.status}`);
       }
+      const json = await resp.json();
+      if (json.error) {
+        throw new Error(json.error.message || "RPC error");
+      }
+      return json.result;
     }
 
-    const mintAuthority = info.mintAuthority ?? null;
-    const freezeAuthority = info.freezeAuthority ?? null;
-    const isMintAuthorityDisabled = mintAuthority === null;
-    const hasFreezeAuthority = freezeAuthority !== null;
+    // --------------------
+    // 1) Mint info
+    // --------------------
+    let mintInfo = null;
 
-    result.mintInfo = {
-      decimals,
-      supplyUi,
-      mintAuthority,
-      freezeAuthority,
-      isMintAuthorityDisabled,
-      hasFreezeAuthority
-    };
-
-    // Holders
     try {
-      const largest = await connection.getTokenLargestAccounts(
-        mintPubkey,
-        "confirmed"
-      );
-      const accounts = largest.value || [];
+      const acc = await heliusRpc("getAccountInfo", [
+        mint,
+        { encoding: "jsonParsed", commitment: "confirmed" },
+      ]);
 
-      if (accounts.length) {
-        const factor = 10 ** decimals;
-        const totalRaw = accounts.reduce((sum, acc) => {
-          const amt = acc.amount ? Number(acc.amount) : 0;
-          return sum + (Number.isNaN(amt) ? 0 : amt);
-        }, 0);
+      const parsed = acc?.value?.data?.parsed?.info;
+      if (parsed) {
+        const decimals = parsed.decimals ?? 0;
+        const rawSupply = BigInt(parsed.supply ?? "0");
+        const supplyUi = Number(rawSupply) / 10 ** decimals;
 
-        const totalSupplyApprox = factor !== 0 ? totalRaw / factor : 0;
+        const mintAuthority = parsed.mintAuthority ?? null;
+        const freezeAuthority = parsed.freezeAuthority ?? null;
 
-        const top = accounts.slice(0, 10).map((acc) => {
-          const raw = acc.amount ? Number(acc.amount) : 0;
-          const uiAmount = factor !== 0 ? raw / factor : 0;
-          const sharePercent = totalRaw > 0 ? (raw / totalRaw) * 100 : 0;
-          return {
-            address: acc.address,
-            uiAmount,
-            sharePercent
-          };
-        });
+        mintInfo = {
+          decimals,
+          supplyUi,
+          mintAuthority,
+          freezeAuthority,
+          isMintAuthorityDisabled: mintAuthority === null,
+          hasFreezeAuthority: freezeAuthority !== null,
+        };
+      }
+    } catch (e) {
+      console.error("Mint info error:", e);
+    }
 
-        const top10SharePercent = top.reduce(
-          (sum, h) => sum + h.sharePercent,
+    // --------------------
+    // 2) Holders info
+    // --------------------
+    let holders = null;
+
+    try {
+      const largest = await heliusRpc("getTokenLargestAccounts", [
+        mint,
+        { commitment: "confirmed" },
+      ]);
+
+      const value = largest?.value ?? [];
+      const decimals =
+        mintInfo?.decimals ??
+        (value[0]?.decimals != null ? value[0].decimals : 0);
+
+      // totalSupplyApprox via getTokenSupply
+      let totalSupplyApprox = null;
+      try {
+        const supplyRes = await heliusRpc("getTokenSupply", [mint]);
+        const uiAmount = supplyRes?.value?.uiAmount;
+        if (typeof uiAmount === "number") {
+          totalSupplyApprox = uiAmount;
+        }
+      } catch (e) {
+        console.error("getTokenSupply error:", e);
+      }
+
+      const topHolders = value.slice(0, 10).map((entry) => {
+        const raw = BigInt(entry.amount ?? "0");
+        const uiAmount = Number(raw) / 10 ** decimals;
+        return {
+          address: entry.address,
+          uiAmount,
+          sharePercent: 0, // we vullen zo
+        };
+      });
+
+      if (totalSupplyApprox == null) {
+        totalSupplyApprox = topHolders.reduce(
+          (sum, h) => sum + h.uiAmount,
           0
         );
+      }
 
-        result.holders = {
-          totalSupplyApprox,
-          top10SharePercent,
-          topHolders: top
-        };
+      let top10Total = 0;
+      for (const h of topHolders) {
+        top10Total += h.uiAmount;
+      }
+      let top10SharePercent = 0;
+      if (totalSupplyApprox > 0) {
+        top10SharePercent = (top10Total / totalSupplyApprox) * 100;
+      }
+
+      for (const h of topHolders) {
+        h.sharePercent =
+          totalSupplyApprox > 0
+            ? (h.uiAmount / totalSupplyApprox) * 100
+            : 0;
+      }
+
+      holders = {
+        totalSupplyApprox,
+        top10SharePercent,
+        topHolders,
+      };
+    } catch (e) {
+      console.error("Holders error:", e);
+      holders = { error: "Error while fetching holders." };
+    }
+
+    // --------------------
+    // 3) DexScreener / Raydium
+    // --------------------
+    let dex = null;
+
+    try {
+      const dsUrl = `https://api.dexscreener.com/latest/dex/tokens/${mint}`;
+      const resp = await fetch(dsUrl);
+      if (!resp.ok) {
+        throw new Error(`DexScreener HTTP ${resp.status}`);
+      }
+      const data = await resp.json();
+      const pairs = Array.isArray(data.pairs) ? data.pairs : [];
+
+      const raydiumPairs = pairs.filter(
+        (p) =>
+          p.chainId === "solana" &&
+          p.dexId === "raydium" &&
+          p.liquidity?.usd != null
+      );
+
+      if (!raydiumPairs.length) {
+        dex = { message: "No Raydium pools found on DexScreener." };
       } else {
-        result.holders = {
-          totalSupplyApprox: null,
-          top10SharePercent: null,
-          topHolders: []
+        raydiumPairs.sort(
+          (a, b) => (b.liquidity.usd || 0) - (a.liquidity.usd || 0)
+        );
+        const best = raydiumPairs[0];
+        dex = {
+          bestPool: {
+            base: best.baseToken?.symbol || "BASE",
+            quote: best.quoteToken?.symbol || "QUOTE",
+            url: best.url,
+            liquidityUsd: best.liquidity?.usd ?? null,
+            volume24hUsd: best.volume?.h24 ?? null,
+            priceChange24h: best.priceChange?.h24 ?? null,
+          },
         };
       }
     } catch (e) {
-      console.error("Error fetching holders", e);
-      result.holders = {
-        error: "Could not fetch largest holders (RPC or token issue)."
-      };
+      console.error("Dex error:", e);
+      dex = { error: "Error while fetching Dex data." };
     }
 
-    // DexScreener / Raydium
-    try {
-      const dsRes = await fetch(DEXSCREENER_URL + mint);
-      if (dsRes.ok) {
-        const json = await dsRes.json();
-        const pairs = (json.pairs || []).filter(
-          (p) =>
-            p.chainId === "solana" &&
-            typeof p.dexId === "string" &&
-            p.dexId.toLowerCase().includes("raydium")
-        );
-        pairs.sort(
-          (a, b) => (b.liquidity?.usd ?? 0) - (a.liquidity?.usd ?? 0)
-        );
+    // --------------------
+    // 4) Risk summary
+    // --------------------
+    let risk = null;
 
-        if (pairs.length) {
-          const best = pairs[0];
-          result.dex = {
-            bestPool: {
-              base: best.baseToken?.symbol || "?",
-              quote: best.quoteToken?.symbol || "?",
-              url: best.url || null,
-              liquidityUsd: best.liquidity?.usd ?? null,
-              volume24hUsd: best.volume?.h24 ?? null,
-              priceChange24h: best.priceChange?.h24 ?? null
-            }
-          };
+    try {
+      const flags = {
+        mintAuthorityRisk: "unknown",
+        freezeAuthorityRisk: "unknown",
+        concentrationRisk: "unknown",
+        liquidityRisk: "unknown",
+      };
+
+      if (mintInfo) {
+        flags.mintAuthorityRisk = mintInfo.isMintAuthorityDisabled
+          ? "ok"
+          : "warning";
+        flags.freezeAuthorityRisk = mintInfo.hasFreezeAuthority
+          ? "warning"
+          : "ok";
+      }
+
+      if (holders && !holders.error) {
+        const share = holders.top10SharePercent ?? 0;
+        if (share > 90) {
+          flags.concentrationRisk = "danger";
+        } else if (share > 70) {
+          flags.concentrationRisk = "warning";
         } else {
-          result.dex = {
-            message: "No Raydium pools found on DexScreener."
-          };
+          flags.concentrationRisk = "ok";
+        }
+      }
+
+      if (dex?.bestPool?.liquidityUsd != null) {
+        const liq = dex.bestPool.liquidityUsd;
+        if (liq >= 10000) {
+          flags.liquidityRisk = "ok";
+        } else if (liq >= 5000) {
+          flags.liquidityRisk = "warning";
+        } else {
+          flags.liquidityRisk = "warning";
         }
       } else {
-        result.dex = {
-          error:
-            "DexScreener returned HTTP " +
-            dsRes.status +
-            " " +
-            dsRes.statusText
-        };
+        flags.liquidityRisk = "warning";
       }
+
+      let text = "Risk summary based on mint, holders and liquidity.\n";
+
+      if (flags.mintAuthorityRisk === "ok") {
+        text += "- Mint authority disabled (cannot mint more).\n";
+      } else if (flags.mintAuthorityRisk === "warning") {
+        text +=
+          "- Mint authority still active – owner can mint more tokens.\n";
+      }
+
+      if (flags.freezeAuthorityRisk === "ok") {
+        text += "- No freeze authority.\n";
+      } else if (flags.freezeAuthorityRisk === "warning") {
+        text +=
+          "- Freeze authority present – token accounts can be frozen.\n";
+      }
+
+      if (flags.concentrationRisk === "danger") {
+        text +=
+          "- Top 10 holders own > 90% of supply – very high concentration.\n";
+      } else if (flags.concentrationRisk === "warning") {
+        text +=
+          "- Top 10 holders own 70–90% of supply – high concentration.\n";
+      } else if (flags.concentrationRisk === "ok") {
+        text += "- Holder distribution looks more balanced.\n";
+      }
+
+      if (flags.liquidityRisk === "ok") {
+        text += "- Liquidity on Raydium looks good (>= $10k).\n";
+      } else if (flags.liquidityRisk === "warning") {
+        text +=
+          "- Liquidity on Raydium is low (< $10k) or no pool found.\n";
+      }
+
+      risk = { text: text.trim(), flags };
     } catch (e) {
-      console.error("Error fetching Dex data", e);
-      result.dex = {
-        error: "Could not fetch Dex data."
-      };
+      console.error("Risk summary error:", e);
     }
 
-    // Risk summary flags
-    const flags = {
-      mintAuthorityRisk: isMintAuthorityDisabled ? "ok" : "warning",
-      freezeAuthorityRisk: hasFreezeAuthority ? "warning" : "ok",
-      concentrationRisk: "unknown",
-      liquidityRisk: "unknown"
-    };
-
-    if (result.holders && result.holders.top10SharePercent != null) {
-      const pct = result.holders.top10SharePercent;
-      if (pct > 90) flags.concentrationRisk = "high";
-      else if (pct > 70) flags.concentrationRisk = "warning";
-      else flags.concentrationRisk = "ok";
-    }
-
-    if (result.dex && result.dex.bestPool && result.dex.bestPool.liquidityUsd != null) {
-      const liq = result.dex.bestPool.liquidityUsd;
-      flags.liquidityRisk = liq >= 5000 ? "ok" : "warning";
-    }
-
-    let riskText = "";
-    riskText +=
-      "Mint authority : " +
-      mark(flags.mintAuthorityRisk) +
-      " " +
-      (flags.mintAuthorityRisk === "ok"
-        ? "Mint authority disabled (cannot mint more)."
-        : "Mint authority still present – owner can mint more tokens.") +
-      "\\n";
-    riskText +=
-      "Freeze authority: " +
-      mark(flags.freezeAuthorityRisk) +
-      " " +
-      (flags.freezeAuthorityRisk === "ok"
-        ? "No freeze authority."
-        : "Freeze authority present – accounts can be frozen.") +
-      "\\n";
-    riskText +=
-      "Concentration  : " +
-      mark(flags.concentrationRisk) +
-      " " +
-      (!result.holders || result.holders.top10SharePercent == null
-        ? "Could not evaluate concentration."
-        : flags.concentrationRisk === "ok"
-        ? "Holder distribution looks healthy (top 10 < 70%)."
-        : flags.concentrationRisk === "warning"
-        ? "Top 10 holders own > 70% of supply."
-        : "Top 10 holders own > 90% of supply – very high concentration.") +
-      "\\n";
-    riskText +=
-      "Liquidity      : " +
-      mark(flags.liquidityRisk) +
-      " " +
-      (!result.dex || !result.dex.bestPool
-        ? "No Raydium liquidity found."
-        : flags.liquidityRisk === "ok"
-        ? "Liquidity >= $5k on Raydium."
-        : "Liquidity < $5k on Raydium.");
-
-    result.risk = {
-      flags,
-      text: riskText
-    };
-
-    return res.status(200).json(result);
-  } catch (e) {
-    console.error("token-safety error", e);
-    return res.status(500).json({
-      error: e.message || "Unknown error while running token-safety."
+    res.status(200).json({
+      mintInfo,
+      holders,
+      dex,
+      risk,
     });
+  } catch (e) {
+    console.error("token-safety handler error:", e);
+    res
+      .status(500)
+      .json({ error: e.message || "Unexpected server error." });
   }
-};
+}
