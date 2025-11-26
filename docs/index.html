@@ -2,17 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Solana Token Safety Viewer – solana-tools</title>
+  <title>DEGEN TOKEN SCANNER – solana-tools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta
     name="description"
-    content="Modern Solana token safety viewer built on top of solana-tools by Kevin Smits (@smitskecbs). Check mint authority, holder concentration and Raydium liquidity."
+    content="Ultra degen Solana token safety meme scanner. Built on solana-tools by Kevin Smits (@smitskecbs)."
   />
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Fredoka:wght@500;700&display=swap"
     rel="stylesheet"
   />
 
@@ -20,19 +21,13 @@
     :root {
       color-scheme: dark;
       --bg: #020617;
-      --bg-elevated: rgba(15, 23, 42, 0.9);
-      --outline: rgba(148, 163, 184, 0.5);
-      --accent: #22c55e;
-      --accent-soft: rgba(34, 197, 94, 0.15);
-      --accent-2: #38bdf8;
-      --danger: #fb7185;
-      --danger-soft: rgba(248, 113, 113, 0.12);
-      --warn: #eab308;
-      --warn-soft: rgba(234, 179, 8, 0.12);
-      --border-radius-lg: 18px;
-      --border-radius-md: 14px;
-      --border-radius-sm: 10px;
-      --transition-fast: 150ms ease-out;
+      --pink: #fb37ff;
+      --yellow: #facc15;
+      --green: #22c55e;
+      --blue: #38bdf8;
+      --red: #fb7185;
+      --card: rgba(15, 23, 42, 0.92);
+      --border: rgba(148, 163, 184, 0.7);
     }
 
     * {
@@ -45,58 +40,76 @@
       font-family: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont,
         "Segoe UI", sans-serif;
       background:
-        radial-gradient(circle at top, #0f172a 0, #020617 35%, #000 100%),
+        radial-gradient(circle at top left, #0f172a 0, #020617 45%, #000 100%),
         #020617;
       color: #e5e7eb;
       display: flex;
       justify-content: center;
       align-items: stretch;
-      padding: 20px;
+      padding: 16px;
+      overflow-x: hidden;
+    }
+
+    .bg-memes {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(251, 55, 255, 0.18), transparent 55%),
+        radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.18), transparent 55%);
+      opacity: 1;
     }
 
     .page {
       width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
+      max-width: 1180px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
-    }
-
-    /* subtle glow */
-    .page::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(circle at 10% 0, rgba(56, 189, 248, 0.12), transparent 55%),
-        radial-gradient(circle at 90% 100%, rgba(34, 197, 94, 0.12), transparent 55%);
-      opacity: 0.9;
-      z-index: -1;
+      gap: 18px;
     }
 
     .shell {
       border-radius: 26px;
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.09), transparent 55%),
-        radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.07), transparent 55%),
-        rgba(15, 23, 42, 0.93);
+      border: 2px solid rgba(250, 204, 21, 0.6);
+      background:
+        radial-gradient(circle at top, rgba(56, 189, 248, 0.12), transparent 60%),
+        radial-gradient(circle at bottom, rgba(34, 197, 94, 0.12), transparent 60%),
+        rgba(15, 23, 42, 0.96);
       box-shadow:
-        0 18px 60px rgba(15, 23, 42, 0.9),
-        0 0 0 1px rgba(15, 23, 42, 0.9);
-      padding: 22px 22px 18px;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+        0 20px 60px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 1);
+      padding: 20px 20px 16px;
+      position: relative;
+      overflow: hidden;
     }
 
+    .shell::after {
+      content: "DEGEN MODE";
+      position: absolute;
+      right: -40px;
+      top: 8px;
+      font-family: "Fredoka", system-ui;
+      font-size: 12px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: rgba(252, 211, 77, 0.18);
+      transform: rotate(-10deg);
+    }
+
+    /* Header meme */
     .header {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
       gap: 14px;
-      align-items: flex-start;
-      margin-bottom: 18px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .header {
+        grid-template-columns: minmax(0, 1fr);
+      }
     }
 
     .title-block {
@@ -105,134 +118,153 @@
       gap: 8px;
     }
 
-    .badge-row {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .badge-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      background: rgba(15, 23, 42, 0.85);
-      color: #9ca3af;
-    }
-
-    .badge-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 999px;
-      background: #22c55e;
-      box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
-    }
-
-    .badge-dot.warn {
-      background: #eab308;
-      box-shadow: 0 0 10px rgba(234, 179, 8, 0.7);
-    }
-
-    .badge-dot.danger {
-      background: #f97373;
-      box-shadow: 0 0 10px rgba(248, 113, 113, 0.7);
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 23px;
-      letter-spacing: 0.03em;
+    .logo-row {
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    h1 span.logo-dot {
-      width: 24px;
-      height: 24px;
+    .logo-bubble {
+      width: 46px;
+      height: 46px;
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 30% 20%, #f9a8ff, #fb37ff, #7c2d99);
+      box-shadow:
+        0 0 0 3px rgba(248, 250, 252, 0.08),
+        0 0 30px rgba(251, 55, 255, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+
+    .title-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .title-main h1 {
+      margin: 0;
+      font-family: "Fredoka", system-ui;
+      font-size: 28px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #f9fafb;
+      text-shadow: 0 0 20px rgba(56, 189, 248, 0.8);
+    }
+
+    .subtitle-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 11px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
       border-radius: 999px;
-      background: radial-gradient(circle at 30% 20%, #bbf7d0, #22c55e, #14532d);
-      box-shadow: 0 0 24px rgba(34, 197, 94, 0.8);
-    }
-
-    .subtitle {
-      font-size: 13px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.95);
       color: #9ca3af;
-      max-width: 520px;
     }
 
-    .subtitle a {
-      color: var(--accent-2);
+    .chip span.dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.8);
+    }
+
+    .chip.pink span.dot {
+      background: var(--pink);
+      box-shadow: 0 0 12px rgba(251, 55, 255, 0.8);
+    }
+
+    .chip.yellow span.dot {
+      background: var(--yellow);
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.8);
+    }
+
+    .subtitle-text {
+      font-size: 13px;
+      color: #e5e7eb;
+      max-width: 560px;
+    }
+
+    .subtitle-text strong {
+      color: var(--yellow);
+    }
+
+    .subtitle-text a {
+      color: var(--blue);
       text-decoration: none;
     }
 
-    .subtitle a:hover {
+    .subtitle-text a:hover {
       text-decoration: underline;
     }
 
-    .header-actions {
+    .hero-right {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
       gap: 8px;
-      font-size: 11px;
-      color: #9ca3af;
+      text-align: right;
+      font-size: 12px;
+      color: #cbd5f5;
     }
 
-    .pill-row {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .pill {
-      padding: 3px 9px;
+    .hero-badge {
+      padding: 7px 12px;
       border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      font-size: 11px;
-      color: #9ca3af;
-      background: rgba(15, 23, 42, 0.9);
+      background: linear-gradient(135deg, #22c55e, #4ade80);
+      color: #022c22;
+      font-family: "Fredoka", system-ui;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow:
+        0 12px 30px rgba(22, 163, 74, 0.85),
+        0 0 0 1px rgba(15, 23, 42, 1);
     }
 
-    .pill.accent {
-      border-color: rgba(34, 197, 94, 0.7);
-      color: #bbf7d0;
-      background: rgba(21, 128, 61, 0.15);
+    .hero-badge span.emoji {
+      font-size: 16px;
     }
 
-    /* main layout */
-    .grid {
+    .hero-text-small {
+      opacity: 0.8;
+    }
+
+    /* Main grid */
+    .main-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.2fr);
-      gap: 16px;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.3fr);
+      gap: 14px;
+      margin-top: 4px;
     }
 
     @media (max-width: 900px) {
-      .grid {
+      .main-grid {
         grid-template-columns: minmax(0, 1fr);
-      }
-      .header {
-        align-items: flex-start;
-      }
-      .header-actions {
-        align-items: flex-start;
       }
     }
 
     .card {
       position: relative;
-      border-radius: var(--border-radius-lg);
-      background: var(--bg-elevated);
-      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 20px;
+      border: 2px solid rgba(148, 163, 184, 0.8);
+      background: var(--card);
       box-shadow:
-        0 18px 40px rgba(15, 23, 42, 0.9),
-        0 0 0 1px rgba(15, 23, 42, 0.9);
-      padding: 16px 16px 14px;
+        0 18px 45px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 1);
       overflow: hidden;
     }
 
@@ -240,138 +272,151 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 55%);
-      opacity: 0.35;
+      background:
+        radial-gradient(circle at top left, rgba(251, 55, 255, 0.18), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.18), transparent 55%);
+      opacity: 0.6;
       pointer-events: none;
     }
 
     .card-inner {
       position: relative;
       z-index: 1;
+      padding: 14px 14px 12px;
     }
 
-    .card-header {
+    .card-headerline {
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: baseline;
       gap: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .card-title {
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: #e5e7eb;
-    }
-
-    .card-subtitle {
-      font-size: 11px;
-      color: #9ca3af;
-    }
-
-    .section-label {
-      font-size: 11px;
-      margin-bottom: 4px;
-      color: #9ca3af;
+      font-family: "Fredoka", system-ui;
+      font-size: 16px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
+      color: #f9fafb;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
+    .card-title span.tag {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: rgba(148, 163, 184, 0.95);
+    }
+
+    .card-pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px dashed rgba(148, 163, 184, 0.8);
+      color: #e5e7eb;
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    /* Input side */
     .field-label {
       font-size: 11px;
-      color: #94a3b8;
-      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #9ca3af;
+      margin-bottom: 5px;
     }
 
-    .input-row {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .input-control {
+    .input-wrapper {
       position: relative;
+      margin-bottom: 8px;
     }
 
     input[type="text"] {
       width: 100%;
-      border-radius: 12px;
-      border: 1px solid var(--outline);
-      background: rgba(15, 23, 42, 0.9);
-      color: #e5e7eb;
-      padding: 10px 12px 10px 12px;
+      border-radius: 999px;
+      border: 2px solid rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 0.98);
+      color: #f9fafb;
+      padding: 10px 14px 10px 14px;
       font-family: "Space Grotesk", system-ui, sans-serif;
       font-size: 13px;
       outline: none;
-      transition: border-color var(--transition-fast), box-shadow var(--transition-fast),
-        background-color var(--transition-fast), transform var(--transition-fast);
+      transition:
+        border-color 130ms ease-out,
+        box-shadow 130ms ease-out,
+        transform 130ms ease-out,
+        background-color 130ms ease-out;
     }
 
     input[type="text"]::placeholder {
-      color: #64748b;
+      color: #6b7280;
     }
 
     input[type="text"]:focus {
-      border-color: rgba(56, 189, 248, 0.85);
+      border-color: rgba(250, 204, 21, 0.95);
       box-shadow:
-        0 0 0 1px rgba(56, 189, 248, 0.6),
-        0 0 24px rgba(56, 189, 248, 0.3);
-      background: rgba(15, 23, 42, 0.98);
+        0 0 0 1px rgba(250, 204, 21, 0.75),
+        0 0 25px rgba(250, 204, 21, 0.6);
       transform: translateY(-1px);
     }
 
     .hint {
       font-size: 11px;
-      color: #6b7280;
+      color: #9ca3af;
+      margin-bottom: 6px;
     }
 
     .controls-row {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 10px;
-      margin-top: 2px;
     }
 
     .btn-primary {
       border-radius: 999px;
-      padding: 9px 16px;
       border: none;
-      font-family: inherit;
-      font-size: 12px;
-      font-weight: 500;
-      background: linear-gradient(135deg, #22c55e, #22c55e, #16a34a);
-      color: #02130a;
-      cursor: pointer;
+      padding: 9px 18px;
+      font-family: "Fredoka", system-ui;
+      font-size: 13px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #22c55e, #4ade80);
+      color: #022c22;
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      cursor: pointer;
       box-shadow:
-        0 14px 30px rgba(21, 128, 61, 0.7),
-        0 0 0 1px rgba(15, 23, 42, 0.9);
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast),
-        opacity var(--transition-fast), filter var(--transition-fast);
+        0 14px 40px rgba(34, 197, 94, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 1);
+      transition:
+        transform 130ms ease-out,
+        box-shadow 130ms ease-out,
+        filter 130ms ease-out,
+        opacity 130ms ease-out;
     }
 
     .btn-primary span.icon {
-      font-size: 14px;
+      font-size: 16px;
     }
 
     .btn-primary:hover {
-      transform: translateY(-1px);
+      transform: translateY(-1px) scale(1.02);
       box-shadow:
-        0 18px 40px rgba(21, 128, 61, 0.9),
-        0 0 0 1px rgba(15, 23, 42, 0.9);
-      filter: brightness(1.02);
+        0 18px 55px rgba(34, 197, 94, 1),
+        0 0 0 1px rgba(15, 23, 42, 1);
+      filter: brightness(1.03);
     }
 
     .btn-primary:active {
-      transform: translateY(0);
+      transform: translateY(0) scale(0.99);
       box-shadow:
-        0 8px 20px rgba(21, 128, 61, 0.8),
-        0 0 0 1px rgba(15, 23, 42, 0.9);
+        0 10px 30px rgba(21, 128, 61, 0.9),
+        0 0 0 1px rgba(15, 23, 42, 1);
     }
 
     .btn-primary:disabled {
@@ -379,87 +424,108 @@
       cursor: default;
       transform: none;
       box-shadow:
-        0 4px 10px rgba(15, 23, 42, 0.9),
-        0 0 0 1px rgba(15, 23, 42, 0.9);
+        0 8px 25px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(15, 23, 42, 1);
     }
 
-    .status {
+    .status-line {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       font-size: 11px;
-      color: #9ca3af;
+      color: #e5e7eb;
     }
 
     .status-dot {
-      width: 9px;
-      height: 9px;
+      width: 10px;
+      height: 10px;
       border-radius: 999px;
-      border: 1px solid rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(15, 23, 42, 1);
       background: #6b7280;
-      box-shadow: 0 0 0 0 rgba(148, 163, 184, 0.6);
-      transition: all var(--transition-fast);
+      box-shadow: 0 0 0 0 rgba(148, 163, 184, 0.7);
+      transition: all 130ms ease-out;
     }
 
     .status-dot.ok {
       background: #22c55e;
-      box-shadow: 0 0 12px rgba(34, 197, 94, 0.7);
+      box-shadow: 0 0 14px rgba(34, 197, 94, 0.9);
     }
 
     .status-dot.error {
       background: #fb7185;
-      box-shadow: 0 0 12px rgba(248, 113, 113, 0.7);
+      box-shadow: 0 0 14px rgba(248, 113, 113, 0.9);
     }
 
-    .log {
+    .log-line {
+      margin-top: 4px;
       font-size: 11px;
-      margin-top: 8px;
-      color: #6b7280;
-      min-height: 16px;
+      color: #9ca3af;
       white-space: nowrap;
-      text-overflow: ellipsis;
       overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .log.error {
+    .log-line.error {
       color: #fb7185;
     }
 
-    /* results column */
+    /* Result side */
+    .meme-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 999px;
+      border: 1px dashed rgba(148, 163, 184, 0.8);
+      padding: 5px 10px;
+      margin-bottom: 8px;
+    }
+
+    .meme-banner span.left {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meme-banner span.emoji {
+      font-size: 16px;
+    }
 
     .risk-badges {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .risk-chip {
-      font-size: 10px;
+      font-size: 11px;
       padding: 4px 9px;
       border-radius: 999px;
-      border-width: 1px;
-      border-style: solid;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 0.95);
       display: inline-flex;
       align-items: center;
       gap: 6px;
     }
 
     .risk-chip.ok {
-      border-color: rgba(34, 197, 94, 0.7);
-      background: var(--accent-soft);
+      border-color: rgba(34, 197, 94, 0.9);
+      background: rgba(22, 163, 74, 0.18);
       color: #bbf7d0;
     }
 
     .risk-chip.warn {
-      border-color: rgba(234, 179, 8, 0.7);
-      background: var(--warn-soft);
+      border-color: rgba(234, 179, 8, 0.95);
+      background: rgba(234, 179, 8, 0.18);
       color: #facc15;
     }
 
     .risk-chip.danger {
-      border-color: rgba(248, 113, 113, 0.8);
-      background: var(--danger-soft);
+      border-color: rgba(248, 113, 113, 0.95);
+      background: rgba(248, 113, 113, 0.2);
       color: #fecaca;
     }
 
@@ -472,20 +538,26 @@
 
     .result-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 10px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
     }
 
-    .result-section {
-      border-radius: var(--border-radius-md);
-      border: 1px solid rgba(148, 163, 184, 0.45);
-      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.9), #020617);
-      padding: 9px 10px 8px;
+    @media (max-width: 800px) {
+      .result-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
     }
 
-    .result-section-title {
+    .result-card {
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.98), #020617);
+      padding: 8px 9px 7px;
+    }
+
+    .result-title {
       font-size: 11px;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
       color: #9ca3af;
       margin-bottom: 4px;
@@ -506,18 +578,19 @@
     }
 
     .footer {
-      margin-top: 10px;
+      margin-top: 8px;
       padding-top: 8px;
-      border-top: 1px dashed rgba(55, 65, 81, 0.8);
+      border-top: 1px dashed rgba(55, 65, 81, 0.9);
       font-size: 11px;
       display: flex;
       justify-content: space-between;
-      gap: 10px;
-      color: #6b7280;
+      gap: 8px;
+      color: #9ca3af;
+      align-items: center;
     }
 
     .footer a {
-      color: var(--accent-2);
+      color: var(--blue);
       text-decoration: none;
     }
 
@@ -525,15 +598,35 @@
       text-decoration: underline;
     }
 
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .tg-pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.9);
+      background: rgba(15, 23, 42, 0.95);
+      color: #bae6fd;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+    }
+
+    .tg-pill span.icon {
+      font-size: 14px;
+    }
+
     @media (max-width: 640px) {
       body {
-        padding: 12px;
+        padding: 10px;
       }
       .shell {
-        padding: 16px 14px 14px;
-      }
-      h1 {
-        font-size: 20px;
+        padding: 16px 14px 12px;
       }
       .footer {
         flex-direction: column;
@@ -543,121 +636,130 @@
   </style>
 </head>
 <body>
+  <div class="bg-memes"></div>
+
   <div class="page">
     <div class="shell">
       <header class="header">
         <div class="title-block">
-          <h1>
-            <span class="logo-dot"></span>
-            Solana Token Safety Viewer
-          </h1>
-          <p class="subtitle">
-            Fast, opinionated safety view on top of the
-            <strong>solana-tools</strong> repo by Kevin Smits (@smitskecbs).
-            Check mint authority, holder concentration and Raydium liquidity in one request.
-            Code: <a href="https://github.com/smitskecbs/solana-tools" target="_blank" rel="noreferrer">github.com/smitskecbs/solana-tools</a>
-          </p>
-          <div class="badge-row">
-            <div class="badge-chip">
-              <span class="badge-dot"></span>
-              Runs entirely on Vercel + Helius
-            </div>
-            <div class="badge-chip">
-              <span class="badge-dot warn"></span>
-              No wallet needed – read-only
+          <div class="logo-row">
+            <div class="logo-bubble">🧪</div>
+            <div class="title-main">
+              <h1>DEGEN TOKEN SCANNER</h1>
+              <div class="subtitle-chip-row">
+                <div class="chip">
+                  <span class="dot"></span> Solana mainnet only
+                </div>
+                <div class="chip pink">
+                  <span class="dot"></span> SPL tokens
+                </div>
+                <div class="chip yellow">
+                  <span class="dot"></span> Built on solana-tools
+                </div>
+              </div>
             </div>
           </div>
+          <p class="subtitle-text">
+            Is je bag <strong>safe</strong> of <strong>rekt</strong>?  
+            Deze viewer checkt mint authority, holder spread en Raydium liquidity – powered by
+            <a href="https://github.com/smitskecbs/solana-tools" target="_blank" rel="noreferrer">
+              solana-tools
+            </a>.
+          </p>
         </div>
 
-        <div class="header-actions">
-          <div class="pill-row">
-            <div class="pill accent">SPL tokens on Solana mainnet</div>
-            <div class="pill">Helius RPC + DexScreener</div>
+        <div class="hero-right">
+          <div class="hero-badge">
+            <span class="emoji">🚀</span>
+            <span>ON-CHAIN ONLY – NO WALLET CONNECT</span>
           </div>
-          <div>Ideal for token devs, security-minded degens and community mods.</div>
+          <div class="hero-text-small">
+            Perfect voor serieuze builders, degens en mods die niet eerst 10 tabs willen openen.
+          </div>
         </div>
       </header>
 
-      <main class="grid">
-        <!-- LEFT: input / controls -->
+      <main class="main-grid">
+        <!-- LEFT: input -->
         <section class="card">
           <div class="card-inner">
-            <div class="card-header">
-              <div>
-                <div class="card-title">Check a token</div>
-                <div class="card-subtitle">
-                  Paste any SPL mint address on Solana mainnet and run a quick safety pass.
-                </div>
+            <div class="card-headerline">
+              <div class="card-title">
+                TOKEN IN
+                <span class="tag">PLAYER 1</span>
               </div>
+              <div class="card-pill">Helius RPC + DexScreener</div>
             </div>
 
-            <div class="input-row">
-              <div>
-                <div class="field-label">Mint address</div>
-                <div class="input-control">
-                  <input
-                    id="mint-input"
-                    type="text"
-                    spellcheck="false"
-                    autocomplete="off"
-                    placeholder="B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk"
-                  />
-                </div>
-                <div class="hint">
-                  We only read public on-chain data.
-                </div>
-              </div>
+            <div class="field-label">Mint address</div>
+            <div class="input-wrapper">
+              <input
+                id="mint-input"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="Paste SPL mint…"
+              />
+            </div>
+            <div class="hint">
+              We lezen alleen publieke on-chain data. Geen keys, geen wallet connect, geen magie.
             </div>
 
-            <div class="controls-row">
+            <div class="controls-row" style="margin-top: 8px;">
               <button id="run-button" class="btn-primary">
-                <span class="icon">▶</span>
-                Run safety check
+                <span class="icon">⚡</span>
+                Scan this bag
               </button>
 
-              <div class="status">
+              <div class="status-line">
                 <span id="status-dot" class="status-dot"></span>
-                <span id="status-text">Idle</span>
+                <span id="status-text">Idle. Paste a mint & press scan.</span>
               </div>
             </div>
 
-            <div id="log" class="log"></div>
+            <div id="log" class="log-line"></div>
           </div>
         </section>
 
-        <!-- RIGHT: results -->
+        <!-- RIGHT: result -->
         <section class="card">
           <div class="card-inner">
-            <div class="card-header">
-              <div>
-                <div class="card-title">Risk & on-chain signals</div>
-                <div class="card-subtitle">
-                  We do not label projects as “good” or “bad” – we just surface the
-                  relevant parameters so you can make your own decision.
-                </div>
+            <div class="card-headerline">
+              <div class="card-title">
+                RESULT
+                <span class="tag">PLAYER 2</span>
               </div>
+              <div class="card-pill">Read-only vibes only 🧊</div>
+            </div>
+
+            <div class="meme-banner">
+              <span class="left">
+                <span class="emoji">🧠</span>
+                DYOR. Dit is geen financieel advies – alleen signalen.
+              </span>
+              <span class="emoji">📊</span>
             </div>
 
             <div id="risk-badges" class="risk-badges"></div>
 
             <div class="result-grid">
-              <div class="result-section">
-                <div class="result-section-title">Mint info</div>
+              <div class="result-card">
+                <div class="result-title">Mint info</div>
                 <div id="mint-info" class="result-body muted">No data yet.</div>
               </div>
 
-              <div class="result-section">
-                <div class="result-section-title">Holder concentration</div>
+              <div class="result-card">
+                <div class="result-title">Holder concentration</div>
                 <div id="holder-info" class="result-body muted">No data yet.</div>
               </div>
 
-              <div class="result-section">
-                <div class="result-section-title">Raydium / DexScreener</div>
+              <div class="result-card">
+                <div class="result-title">Raydium / Dex</div>
                 <div id="dex-info" class="result-body muted">No data yet.</div>
               </div>
 
-              <div class="result-section">
-                <div class="result-section-title">Risk summary</div>
+              <div class="result-card">
+                <div class="result-title">Risk summary</div>
                 <div id="risk-info" class="result-body muted">No data yet.</div>
               </div>
             </div>
@@ -667,33 +769,34 @@
 
       <footer class="footer">
         <div>
-          Built by Kevin Smits (@smitskecbs). No keys, no wallet connect – just
-          public RPC calls and Dex data.
+          Built by Kevin Smits (<code>@smitskecbs</code>) – open-source degen tools for Solana.
         </div>
-        <div>
-          Like this viewer? Feel free to re-use it and link back to
-          <a href="https://github.com/smitskecbs/solana-tools" target="_blank" rel="noreferrer">
-            solana-tools
-          </a>.
+        <div class="footer-right">
+          <span>Telegram:</span>
+          <span class="tg-pill">
+            <span class="icon">📨</span>
+            <span>@smitske</span>
+          </span>
         </div>
       </footer>
     </div>
   </div>
 
   <script>
-    // On Vercel, your API lives at /api/token-safety
+    // Frontend calls your Vercel backend at /api/token-safety
     const API_BASE = "/api";
 
     const mintInput = document.getElementById("mint-input");
     const runButton = document.getElementById("run-button");
     const logEl = document.getElementById("log");
+    const statusDot = document.getElementById("status-dot");
+    const statusText = document.getElementById("status-text");
+
     const mintInfoEl = document.getElementById("mint-info");
     const holderInfoEl = document.getElementById("holder-info");
     const dexInfoEl = document.getElementById("dex-info");
     const riskInfoEl = document.getElementById("risk-info");
     const riskBadgesEl = document.getElementById("risk-badges");
-    const statusDot = document.getElementById("status-dot");
-    const statusText = document.getElementById("status-text");
 
     function setStatus(text, mode = "idle") {
       statusText.textContent = text;
@@ -707,25 +810,12 @@
       logEl.classList.toggle("error", isError);
     }
 
-    function setResultLoading() {
-      const loadingText = "Loading…";
-      mintInfoEl.textContent = loadingText;
-      holderInfoEl.textContent = loadingText;
-      dexInfoEl.textContent = loadingText;
-      riskInfoEl.textContent = loadingText;
-      mintInfoEl.classList.remove("muted");
-      holderInfoEl.classList.remove("muted");
-      dexInfoEl.classList.remove("muted");
-      riskInfoEl.classList.remove("muted");
-      riskBadgesEl.innerHTML = "";
-    }
-
     function resetResult() {
-      const defaultText = "No data yet.";
-      mintInfoEl.textContent = defaultText;
-      holderInfoEl.textContent = defaultText;
-      dexInfoEl.textContent = defaultText;
-      riskInfoEl.textContent = defaultText;
+      const txt = "No data yet.";
+      mintInfoEl.textContent = txt;
+      holderInfoEl.textContent = txt;
+      dexInfoEl.textContent = txt;
+      riskInfoEl.textContent = txt;
       mintInfoEl.classList.add("muted");
       holderInfoEl.classList.add("muted");
       dexInfoEl.classList.add("muted");
@@ -733,15 +823,24 @@
       riskBadgesEl.innerHTML = "";
     }
 
+    function setLoading() {
+      const txt = "Loading…";
+      mintInfoEl.textContent = txt;
+      holderInfoEl.textContent = txt;
+      dexInfoEl.textContent = txt;
+      riskInfoEl.textContent = txt;
+      mintInfoEl.classList.remove("muted");
+      holderInfoEl.classList.remove("muted");
+      dexInfoEl.classList.remove("muted");
+      riskInfoEl.classList.remove("muted");
+      riskBadgesEl.innerHTML = "";
+    }
+
     function makeRiskChip(label, level) {
       const div = document.createElement("div");
       div.className =
         "risk-chip " +
-        (level === "ok"
-          ? "ok"
-          : level === "warn"
-          ? "warn"
-          : "danger");
+        (level === "ok" ? "ok" : level === "warn" ? "warn" : "danger");
       const dot = document.createElement("span");
       dot.className = "dot";
       const text = document.createElement("span");
@@ -752,7 +851,7 @@
     }
 
     function renderResult(json) {
-      // Mint info
+      // MINT INFO
       if (json.mintInfo) {
         const mi = json.mintInfo;
         const supply =
@@ -784,7 +883,7 @@
         mintInfoEl.classList.add("muted");
       }
 
-      // Holders
+      // HOLDERS
       if (json.holders && !json.holders.error) {
         const h = json.holders;
         let txt =
@@ -827,7 +926,7 @@
         holderInfoEl.classList.add("muted");
       }
 
-      // Dex
+      // DEX
       if (json.dex && json.dex.bestPool) {
         const d = json.dex.bestPool;
         const liq =
@@ -880,15 +979,14 @@
         dexInfoEl.classList.add("muted");
       }
 
-      // Risk
+      // RISK
       if (json.risk) {
         riskInfoEl.textContent =
           json.risk.text || "No risk summary available.";
         riskInfoEl.classList.remove("muted");
         riskBadgesEl.innerHTML = "";
-        const f = json.risk.flags || {};
 
-        // Map simple strings to levels
+        const f = json.risk.flags || {};
         const mintLevel = f.mintAuthorityRisk === "ok" ? "ok" : "warn";
         const freezeLevel = f.freezeAuthorityRisk === "ok" ? "ok" : "warn";
         const concLevel =
@@ -900,16 +998,28 @@
         const liqLevel = f.liquidityRisk === "ok" ? "ok" : "warn";
 
         riskBadgesEl.appendChild(
-          makeRiskChip("Mint: " + (f.mintAuthorityLabel || "unknown"), mintLevel)
+          makeRiskChip(
+            "Mint: " + (f.mintAuthorityLabel || "unknown"),
+            mintLevel
+          )
         );
         riskBadgesEl.appendChild(
-          makeRiskChip("Freeze: " + (f.freezeAuthorityLabel || "unknown"), freezeLevel)
+          makeRiskChip(
+            "Freeze: " + (f.freezeAuthorityLabel || "unknown"),
+            freezeLevel
+          )
         );
         riskBadgesEl.appendChild(
-          makeRiskChip("Holders: " + (f.concentrationLabel || "unknown"), concLevel)
+          makeRiskChip(
+            "Holders: " + (f.concentrationLabel || "unknown"),
+            concLevel
+          )
         );
         riskBadgesEl.appendChild(
-          makeRiskChip("Liquidity: " + (f.liquidityLabel || "unknown"), liqLevel)
+          makeRiskChip(
+            "Liquidity: " + (f.liquidityLabel || "unknown"),
+            liqLevel
+          )
         );
       } else {
         riskInfoEl.textContent = "No risk summary.";
@@ -921,14 +1031,14 @@
     async function runSafetyCheck() {
       const mint = mintInput.value.trim();
       if (!mint) {
-        setLog("Please enter a mint address first.", true);
+        setLog("Please paste a mint first.", true);
         return;
       }
 
       runButton.disabled = true;
-      setStatus("Scanning…", "idle");
-      setLog("Querying on-chain data + DexScreener…");
-      setResultLoading();
+      setStatus("Scanning on-chain + Raydium…", "idle");
+      setLog("Talking to Solana + Helius + DexScreener…");
+      setLoading();
 
       try {
         const res = await fetch(
@@ -941,12 +1051,13 @@
         }
 
         renderResult(data);
-        setStatus("Check complete", "ok");
-        setLog("Done. Validate these signals with your own research.");
+        setStatus("Scan complete. Now DYOR 🧠", "ok");
+        setLog("Signals loaded. Combine with your own brain.");
       } catch (err) {
         console.error(err);
-        setStatus("Error", "error");
+        setStatus("Error during scan.", "error");
         setLog("Error: " + (err.message || String(err)), true);
+
         mintInfoEl.textContent = "Error while fetching mint info.";
         holderInfoEl.textContent = "Error while fetching holders.";
         dexInfoEl.textContent = "Error while fetching Dex data.";
@@ -969,7 +1080,6 @@
       }
     });
 
-    // Initial state
     resetResult();
   </script>
 </body>
