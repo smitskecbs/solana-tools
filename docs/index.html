@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Solana Tools – Token Safety Viewer</title>
+  <title>Solana Token Safety Viewer — solana-tools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
@@ -234,7 +234,6 @@
     }
 
     function renderResult(json) {
-      // Mint info
       if (json.mintInfo) {
         const mi = json.mintInfo;
         mintInfoEl.textContent =
@@ -246,7 +245,6 @@
         mintInfoEl.textContent = "No mint info.";
       }
 
-      // Holders
       if (json.holders && !json.holders.error) {
         const h = json.holders;
         let txt =
@@ -280,7 +278,6 @@
         holderInfoEl.textContent = "No holder info.";
       }
 
-      // Dex
       if (json.dex && json.dex.bestPool) {
         const d = json.dex.bestPool;
         dexInfoEl.textContent =
@@ -294,12 +291,18 @@
           "\\n" +
           "Liquidity: " +
           (d.liquidityUsd != null
-            ? "$" + d.liquidityUsd.toLocaleString(undefined, { maximumFractionDigits: 2 })
+            ? "$" +
+              d.liquidityUsd.toLocaleString(undefined, {
+                maximumFractionDigits: 2
+              })
             : "unknown") +
           "\\n" +
           "Volume 24h: " +
           (d.volume24hUsd != null
-            ? "$" + d.volume24hUsd.toLocaleString(undefined, { maximumFractionDigits: 2 })
+            ? "$" +
+              d.volume24hUsd.toLocaleString(undefined, {
+                maximumFractionDigits: 2
+              })
             : "unknown") +
           "\\n" +
           "Price change 24h: " +
@@ -314,17 +317,22 @@
         dexInfoEl.textContent = "No Dex info.";
       }
 
-      // Risk
       if (json.risk) {
         riskInfoEl.textContent = json.risk.text || "No risk summary.";
         badgesEl.innerHTML = "";
         const f = json.risk.flags;
         if (f) {
           badgesEl.appendChild(
-            badge("Mint: " + f.mintAuthorityRisk, f.mintAuthorityRisk === "ok" ? "ok" : "warn")
+            badge(
+              "Mint: " + f.mintAuthorityRisk,
+              f.mintAuthorityRisk === "ok" ? "ok" : "warn"
+            )
           );
           badgesEl.appendChild(
-            badge("Freeze: " + f.freezeAuthorityRisk, f.freezeAuthorityRisk === "ok" ? "ok" : "warn")
+            badge(
+              "Freeze: " + f.freezeAuthorityRisk,
+              f.freezeAuthorityRisk === "ok" ? "ok" : "warn"
+            )
           );
           badgesEl.appendChild(
             badge(
@@ -364,7 +372,9 @@
       riskInfoEl.textContent = "Loading...";
 
       try {
-        const res = await fetch(API_BASE + "/api/token-safety?mint=" + encodeURIComponent(mint));
+        const res = await fetch(
+          API_BASE + "/api/token-safety?mint=" + encodeURIComponent(mint)
+        );
         const json = await res.json();
         if (!res.ok) {
           throw new Error(json.error || "Unknown error from API");
