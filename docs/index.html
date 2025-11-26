@@ -172,7 +172,7 @@
         <div class="card-title">Check a token</div>
         <div class="card-subtitle">
           Paste any SPL mint on Solana mainnet.  
-          The backend uses your configured Helius RPC (server-side), so it works even if public RPCs block the browser.
+          The backend uses Helius RPC on Vercel, nothing is stored.
         </div>
         <label for="mint-input">Mint address</label>
         <input
@@ -204,7 +204,7 @@
   </div>
 
   <script>
-    const API_BASE = ""; // zelfde domain (Vercel)
+    const API_BASE = ""; // same domain on Vercel
 
     const mintInput = document.getElementById("mint-input");
     const runButton = document.getElementById("run-button");
@@ -237,9 +237,9 @@
       if (json.mintInfo) {
         const mi = json.mintInfo;
         mintInfoEl.textContent =
-          "Decimals:           " + (mi.decimals ?? "unknown") + "\\n" +
-          "Supply (approx UI): " + (mi.supplyUi != null ? mi.supplyUi.toLocaleString() : "unknown") + "\\n" +
-          "Mint authority:     " + (mi.isMintAuthorityDisabled ? "DISABLED (renounced)" : (mi.mintAuthority || "unknown")) + "\\n" +
+          "Decimals:           " + (mi.decimals ?? "unknown") + "\n" +
+          "Supply (approx UI): " + (mi.supplyUi != null ? mi.supplyUi.toLocaleString() : "unknown") + "\n" +
+          "Mint authority:     " + (mi.isMintAuthorityDisabled ? "DISABLED (renounced)" : (mi.mintAuthority || "unknown")) + "\n" +
           "Freeze authority:   " + (mi.hasFreezeAuthority ? (mi.freezeAuthority || "present") : "none");
       } else {
         mintInfoEl.textContent = "No mint info.";
@@ -252,13 +252,13 @@
           (h.totalSupplyApprox != null
             ? h.totalSupplyApprox.toLocaleString()
             : "unknown") +
-          "\\n" +
+          "\n" +
           "Top 10 share:          " +
           (h.top10SharePercent != null
             ? h.top10SharePercent.toFixed(2) + "%"
             : "unknown") +
-          "\\n" +
-          "Top holders:\\n";
+          "\n" +
+          "Top holders:\n";
         if (h.topHolders && h.topHolders.length) {
           h.topHolders.forEach((th) => {
             txt +=
@@ -268,7 +268,7 @@
               th.uiAmount.toLocaleString() +
               " (" +
               th.sharePercent.toFixed(2) +
-              "%)\\n";
+              "%)\n";
           });
         }
         holderInfoEl.textContent = txt.trimEnd();
@@ -285,10 +285,10 @@
           (d.base || "?") +
           "/" +
           (d.quote || "?") +
-          "\\n" +
+          "\n" +
           "URL:       " +
           (d.url || "n/a") +
-          "\\n" +
+          "\n" +
           "Liquidity: " +
           (d.liquidityUsd != null
             ? "$" +
@@ -296,7 +296,7 @@
                 maximumFractionDigits: 2
               })
             : "unknown") +
-          "\\n" +
+          "\n" +
           "Volume 24h: " +
           (d.volume24hUsd != null
             ? "$" +
@@ -304,7 +304,7 @@
                 maximumFractionDigits: 2
               })
             : "unknown") +
-          "\\n" +
+          "\n" +
           "Price change 24h: " +
           (typeof d.priceChange24h === "number"
             ? d.priceChange24h.toFixed(2) + "%"
