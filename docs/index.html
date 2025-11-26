@@ -2,209 +2,366 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Solana Token Safety Viewer — solana-tools</title>
+  <title>Solana Token Safety – Retro Viewer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Retro pixel font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      padding: 24px;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #111827 0, #020617 45%, #000 100%);
-      color: #e5e7eb;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
+      align-items: stretch;
+      background: radial-gradient(circle at top, #1a1a3b 0, #050511 55%, #000 100%);
+      color: #f5f5f5;
+      font-family: "Press Start 2P", system-ui, sans-serif;
+      letter-spacing: 0.03em;
     }
-    .page {
+
+    /* Fake scanlines */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.05) 1px,
+        transparent 1px
+      );
+      background-size: 100% 3px;
+      mix-blend-mode: soft-light;
+      opacity: 0.6;
+    }
+
+    .crt-frame {
+      position: relative;
       width: 100%;
-      max-width: 960px;
+      max-width: 1100px;
+      margin: 20px;
+      padding: 14px;
+      border-radius: 18px;
+      background: radial-gradient(circle at top left, #3b82f6 0, #0b1027 45%, #020012 100%);
+      box-shadow:
+        0 0 0 4px #111320,
+        0 0 0 8px #3b82f6,
+        0 0 40px rgba(0, 0, 0, 0.8);
     }
+
+    .crt-border {
+      border-radius: 12px;
+      padding: 16px;
+      background: repeating-linear-gradient(
+        -45deg,
+        #020617,
+        #020617 5px,
+        #050b24 5px,
+        #050b24 10px
+      );
+      border: 3px solid #3b82f6;
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.9);
+    }
+
     .header {
-      margin-bottom: 24px;
-      padding: 18px 20px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(34, 197, 94, 0.14), rgba(56, 189, 248, 0.04));
-      border: 1px solid rgba(34, 197, 94, 0.4);
-      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+      border: 2px solid #facc15;
+      border-radius: 10px;
+      padding: 10px 10px 8px;
+      background: linear-gradient(90deg, #1d283a, #020617);
+      margin-bottom: 14px;
+      text-shadow: 2px 2px #000;
     }
-    .title {
-      font-size: 1.7rem;
-      font-weight: 700;
-      margin-bottom: 4px;
+
+    .header-title {
+      font-size: 16px;
+      color: #facc15;
+      margin-bottom: 6px;
     }
-    .subtitle {
-      font-size: 0.95rem;
+
+    .header-sub {
+      font-size: 8px;
       color: #9ca3af;
+      line-height: 1.5;
     }
-    .meta a {
-      color: #22c55e;
+
+    .header-sub a {
+      color: #4ade80;
       text-decoration: none;
     }
-    .layout {
+
+    .screen {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 16px;
+      gap: 12px;
     }
+
     @media (min-width: 900px) {
-      .layout {
-        grid-template-columns: 1.05fr 1.1fr;
+      .screen {
+        grid-template-columns: 0.95fr 1.05fr;
       }
     }
-    .card {
-      border-radius: 14px;
-      border: 1px solid #1f2933;
-      background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.08), #020617 55%);
-      padding: 16px;
-      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+
+    .panel {
+      border-radius: 10px;
+      background: #020617;
+      border: 2px solid #3b82f6;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.9);
+      padding: 10px;
+      position: relative;
     }
-    .card-title {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 8px;
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: inherit;
+      background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.24), transparent 60%);
+      opacity: 0.7;
     }
-    .card-subtitle {
-      font-size: 0.88rem;
+
+    .panel-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel-title {
+      font-size: 11px;
+      margin-bottom: 6px;
+      color: #22c55e;
+      text-shadow: 2px 2px #000;
+    }
+
+    .panel-sub {
+      font-size: 8px;
       color: #9ca3af;
       margin-bottom: 10px;
+      line-height: 1.6;
     }
+
     label {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #9ca3af;
       display: block;
-      margin-bottom: 4px;
+      font-size: 7px;
+      margin-bottom: 3px;
+      color: #93c5fd;
     }
+
     input {
       width: 100%;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid #111827;
+      font-family: "Press Start 2P", system-ui, sans-serif;
+      font-size: 9px;
+      padding: 7px 8px;
+      border-radius: 6px;
+      border: 2px solid #3b82f6;
       background: #020617;
       color: #e5e7eb;
-      font-size: 0.9rem;
-      margin-bottom: 10px;
+      outline: none;
+      margin-bottom: 8px;
     }
-    button {
-      display: inline-flex;
+
+    input:focus {
+      border-color: #facc15;
+      box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.5);
+    }
+
+    .btn-row {
+      display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 7px 14px;
-      border-radius: 999px;
-      border: none;
-      background: #22c55e;
-      color: #020617;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
+      gap: 10px;
+      margin-top: 6px;
     }
+
+    button {
+      font-family: "Press Start 2P", system-ui, sans-serif;
+      font-size: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 2px solid #16a34a;
+      background: linear-gradient(180deg, #22c55e, #15803d);
+      color: #02100a;
+      cursor: pointer;
+      box-shadow:
+        0 3px 0 #064e3b,
+        0 0 10px rgba(34, 197, 94, 0.6);
+      text-transform: uppercase;
+    }
+
+    button:active {
+      transform: translateY(1px);
+      box-shadow:
+        0 1px 0 #064e3b,
+        0 0 4px rgba(34, 197, 94, 0.6);
+    }
+
     button:disabled {
       opacity: 0.6;
       cursor: default;
+      box-shadow: none;
+      transform: none;
     }
-    .result-title {
-      font-size: 0.82rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+
+    .status-led {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid #111827;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+      background: radial-gradient(circle at 30% 30%, #f87171, #b91c1c);
+    }
+
+    .status-led.ok {
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
+      background: radial-gradient(circle at 30% 30%, #bbf7d0, #15803d);
+    }
+
+    .status-text {
+      font-size: 8px;
       color: #9ca3af;
-      margin-top: 6px;
-      margin-bottom: 3px;
     }
-    .result-body {
-      font-size: 0.88rem;
+
+    .log {
+      margin-top: 6px;
+      font-size: 7px;
+      color: #9ca3af;
+      min-height: 11px;
+    }
+
+    .log.error {
+      color: #fb7185;
+    }
+
+    .result-block {
+      font-size: 8px;
+      margin-bottom: 6px;
       white-space: pre-wrap;
       word-break: break-word;
     }
+
+    .result-title {
+      font-size: 8px;
+      color: #38bdf8;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+    }
+
     .badge-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 4px;
-      margin-bottom: 4px;
+      gap: 4px;
+      margin: 4px 0 6px;
     }
+
     .badge {
-      font-size: 0.7rem;
-      padding: 2px 8px;
+      font-size: 7px;
+      padding: 2px 6px;
       border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      color: #9ca3af;
+      border-width: 2px;
+      border-style: solid;
+      text-shadow: 1px 1px #000;
     }
+
     .badge-ok {
-      border-color: rgba(34, 197, 94, 0.7);
-      color: #22c55e;
-      background: rgba(34, 197, 94, 0.12);
+      border-color: #22c55e;
+      background: radial-gradient(circle at top, #4ade80, #166534);
+      color: #022c22;
     }
+
     .badge-warn {
-      border-color: rgba(234, 179, 8, 0.7);
-      color: #facc15;
-      background: rgba(250, 204, 21, 0.08);
+      border-color: #facc15;
+      background: radial-gradient(circle at top, #fde047, #92400e);
+      color: #1f1301;
     }
+
     .badge-danger {
-      border-color: rgba(248, 113, 113, 0.8);
-      color: #f97373;
-      background: rgba(248, 113, 113, 0.08);
+      border-color: #fb7185;
+      background: radial-gradient(circle at top, #fecaca, #7f1d1d);
+      color: #2f0606;
     }
-    .log {
-      margin-top: 6px;
-      font-size: 0.8rem;
-      color: #9ca3af;
-      white-space: pre-wrap;
-    }
-    .error {
-      color: #f97373;
+
+    .footer {
+      margin-top: 12px;
+      font-size: 7px;
+      text-align: center;
+      color: #6b7280;
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <header class="header">
-      <div class="title">Solana Token Safety Viewer</div>
-      <div class="subtitle">
-        Web UI on top of the <strong>solana-tools</strong> CLI by Kevin Smits (@smitskecbs).  
-        Enter a mint to see authorities, holder concentration and Raydium liquidity – like a lightweight Solscan for devs & degen researchers.
-      </div>
-      <div class="meta">
-        Repo: <a href="https://github.com/smitskecbs/solana-tools" target="_blank">github.com/smitskecbs/solana-tools</a>
-      </div>
-    </header>
-
-    <main class="layout">
-      <section class="card">
-        <div class="card-title">Check a token</div>
-        <div class="card-subtitle">
-          Paste any SPL mint on Solana mainnet.  
-          The backend uses Helius RPC on Vercel, nothing is stored.
+  <div class="crt-frame">
+    <div class="crt-border">
+      <header class="header">
+        <div class="header-title">SOLANA TOKEN SAFETY VIEWER</div>
+        <div class="header-sub">
+          Retro HUD built on top of the <span style="color:#4ade80;">solana-tools</span> repo by Kevin Smits (@smitskecbs).<br />
+          Paste a mint &amp; press START to scan authorities, holder spread and Raydium liquidity.<br />
+          Repo: <a href="https://github.com/smitskecbs/solana-tools" target="_blank">github.com/smitskecbs/solana-tools</a>
         </div>
-        <label for="mint-input">Mint address</label>
-        <input
-          id="mint-input"
-          type="text"
-          placeholder="e.g. B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk"
-        />
-        <button id="run-button">Run safety check</button>
-        <div id="log" class="log"></div>
-      </section>
+      </header>
 
-      <section class="card">
-        <div class="card-title">Result</div>
-        <div id="badges" class="badge-row"></div>
+      <main class="screen">
+        <!-- LEFT PANEL -->
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="panel-title">PLAYER 1 – INPUT</div>
+            <div class="panel-sub">
+              GAME MODE: token-safety.<br />
+              NETWORK: Solana mainnet. Backend: Helius RPC @ Vercel.
+            </div>
 
-        <div class="result-title">Mint info</div>
-        <div id="mint-info" class="result-body">No data yet.</div>
+            <label for="mint-input">Mint address</label>
+            <input
+              id="mint-input"
+              type="text"
+              placeholder="B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk"
+            />
 
-        <div class="result-title">Holders</div>
-        <div id="holder-info" class="result-body">No data yet.</div>
+            <div class="btn-row">
+              <button id="run-button">▶ START CHECK</button>
+              <div class="status-led" id="status-led"></div>
+              <div class="status-text" id="status-text">IDLE</div>
+            </div>
 
-        <div class="result-title">Raydium / DexScreener</div>
-        <div id="dex-info" class="result-body">No data yet.</div>
+            <div id="log" class="log"></div>
+          </div>
+        </section>
 
-        <div class="result-title">Risk summary</div>
-        <div id="risk-info" class="result-body">No data yet.</div>
-      </section>
-    </main>
+        <!-- RIGHT PANEL -->
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="panel-title">PLAYER 2 – RESULT</div>
+
+            <div id="badges" class="badge-row"></div>
+
+            <div class="result-title">Mint info</div>
+            <div id="mint-info" class="result-block">No data yet.</div>
+
+            <div class="result-title">Holders</div>
+            <div id="holder-info" class="result-block">No data yet.</div>
+
+            <div class="result-title">Raydium / DexScreener</div>
+            <div id="dex-info" class="result-block">No data yet.</div>
+
+            <div class="result-title">Risk summary</div>
+            <div id="risk-info" class="result-block">No data yet.</div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        © Kevin Smits – solana-tools. No wallet connect. No tracking. Just raw data.
+      </footer>
+    </div>
   </div>
 
   <script>
-    const API_BASE = ""; // same domain on Vercel
+    // Belangrijk: op Vercel staat je API op /api/token-safety
+    const API_BASE = "/api";
 
     const mintInput = document.getElementById("mint-input");
     const runButton = document.getElementById("run-button");
@@ -214,13 +371,20 @@
     const dexInfoEl = document.getElementById("dex-info");
     const riskInfoEl = document.getElementById("risk-info");
     const badgesEl = document.getElementById("badges");
+    const statusLed = document.getElementById("status-led");
+    const statusText = document.getElementById("status-text");
+
+    function setStatus(text, ok) {
+      statusText.textContent = text;
+      statusLed.classList.toggle("ok", !!ok);
+    }
 
     function setLog(msg, isError = false) {
       logEl.textContent = msg;
       logEl.classList.toggle("error", isError);
     }
 
-    function badge(text, level) {
+    function makeBadge(text, level) {
       const span = document.createElement("span");
       span.className =
         "badge " +
@@ -234,35 +398,41 @@
     }
 
     function renderResult(json) {
+      // Mint info
       if (json.mintInfo) {
         const mi = json.mintInfo;
         mintInfoEl.textContent =
-          "Decimals:           " + (mi.decimals ?? "unknown") + "\n" +
-          "Supply (approx UI): " + (mi.supplyUi != null ? mi.supplyUi.toLocaleString() : "unknown") + "\n" +
-          "Mint authority:     " + (mi.isMintAuthorityDisabled ? "DISABLED (renounced)" : (mi.mintAuthority || "unknown")) + "\n" +
-          "Freeze authority:   " + (mi.hasFreezeAuthority ? (mi.freezeAuthority || "present") : "none");
+          "Decimals .......... " + (mi.decimals ?? "unknown") + "\n" +
+          "Supply (UI) ....... " + (mi.supplyUi != null ? mi.supplyUi.toLocaleString() : "unknown") + "\n" +
+          "Mint authority .... " + (mi.isMintAuthorityDisabled ? "DISABLED (renounced)" : (mi.mintAuthority || "active")) + "\n" +
+          "Freeze authority .. " + (mi.hasFreezeAuthority ? (mi.freezeAuthority || "present") : "none");
       } else {
         mintInfoEl.textContent = "No mint info.";
       }
 
+      // Holders
       if (json.holders && !json.holders.error) {
         const h = json.holders;
         let txt =
-          "Total supply (approx): " +
+          "Total supply (approx) ... " +
           (h.totalSupplyApprox != null
             ? h.totalSupplyApprox.toLocaleString()
             : "unknown") +
           "\n" +
-          "Top 10 share:          " +
+          "Top 10 share ............ " +
           (h.top10SharePercent != null
             ? h.top10SharePercent.toFixed(2) + "%"
             : "unknown") +
-          "\n" +
-          "Top holders:\n";
-        if (h.topHolders && h.topHolders.length) {
-          h.topHolders.forEach((th) => {
+          "\n\n" +
+          "TOP HOLDERS:\n";
+
+        if (Array.isArray(h.topHolders) && h.topHolders.length) {
+          h.topHolders.forEach((th, i) => {
+            const idx = (i + 1).toString().padStart(2, "0");
             txt +=
-              "  - " +
+              " " +
+              idx +
+              " ► " +
               th.address +
               "  ~" +
               th.uiAmount.toLocaleString() +
@@ -270,7 +440,10 @@
               th.sharePercent.toFixed(2) +
               "%)\n";
           });
+        } else {
+          txt += "  No holder data.";
         }
+
         holderInfoEl.textContent = txt.trimEnd();
       } else if (json.holders && json.holders.error) {
         holderInfoEl.textContent = json.holders.error;
@@ -278,18 +451,19 @@
         holderInfoEl.textContent = "No holder info.";
       }
 
+      // Dex
       if (json.dex && json.dex.bestPool) {
         const d = json.dex.bestPool;
         dexInfoEl.textContent =
-          "Best pool: " +
+          "Best pool ......... " +
           (d.base || "?") +
           "/" +
           (d.quote || "?") +
           "\n" +
-          "URL:       " +
+          "URL ............... " +
           (d.url || "n/a") +
           "\n" +
-          "Liquidity: " +
+          "Liquidity ......... " +
           (d.liquidityUsd != null
             ? "$" +
               d.liquidityUsd.toLocaleString(undefined, {
@@ -297,7 +471,7 @@
               })
             : "unknown") +
           "\n" +
-          "Volume 24h: " +
+          "Volume 24h ........ " +
           (d.volume24hUsd != null
             ? "$" +
               d.volume24hUsd.toLocaleString(undefined, {
@@ -305,7 +479,7 @@
               })
             : "unknown") +
           "\n" +
-          "Price change 24h: " +
+          "Price change 24h .. " +
           (typeof d.priceChange24h === "number"
             ? d.priceChange24h.toFixed(2) + "%"
             : "unknown");
@@ -317,54 +491,56 @@
         dexInfoEl.textContent = "No Dex info.";
       }
 
+      // Risk
       if (json.risk) {
         riskInfoEl.textContent = json.risk.text || "No risk summary.";
         badgesEl.innerHTML = "";
-        const f = json.risk.flags;
-        if (f) {
-          badgesEl.appendChild(
-            badge(
-              "Mint: " + f.mintAuthorityRisk,
-              f.mintAuthorityRisk === "ok" ? "ok" : "warn"
-            )
-          );
-          badgesEl.appendChild(
-            badge(
-              "Freeze: " + f.freezeAuthorityRisk,
-              f.freezeAuthorityRisk === "ok" ? "ok" : "warn"
-            )
-          );
-          badgesEl.appendChild(
-            badge(
-              "Concentration: " + f.concentrationRisk,
-              f.concentrationRisk === "ok"
-                ? "ok"
-                : f.concentrationRisk === "warning"
-                ? "warn"
-                : "danger"
-            )
-          );
-          badgesEl.appendChild(
-            badge(
-              "Liquidity: " + f.liquidityRisk,
-              f.liquidityRisk === "ok" ? "ok" : "warn"
-            )
-          );
-        }
+        const f = json.risk.flags || {};
+
+        badgesEl.appendChild(
+          makeBadge(
+            "MINT: " + (f.mintAuthorityRisk || "unknown"),
+            f.mintAuthorityRisk === "ok" ? "ok" : "warn"
+          )
+        );
+        badgesEl.appendChild(
+          makeBadge(
+            "FREEZE: " + (f.freezeAuthorityRisk || "unknown"),
+            f.freezeAuthorityRisk === "ok" ? "ok" : "warn"
+          )
+        );
+        badgesEl.appendChild(
+          makeBadge(
+            "HOLDERS: " + (f.concentrationRisk || "unknown"),
+            f.concentrationRisk === "ok"
+              ? "ok"
+              : f.concentrationRisk === "warning"
+              ? "warn"
+              : "danger"
+          )
+        );
+        badgesEl.appendChild(
+          makeBadge(
+            "LIQUIDITY: " + (f.liquidityRisk || "unknown"),
+            f.liquidityRisk === "ok" ? "ok" : "warn"
+          )
+        );
       } else {
         riskInfoEl.textContent = "No risk summary.";
+        badgesEl.innerHTML = "";
       }
     }
 
-    async function run() {
+    async function runCheck() {
       const mint = mintInput.value.trim();
       if (!mint) {
-        setLog("Please enter a mint address.", true);
+        setLog("Insert mint address first.", true);
         return;
       }
 
-      setLog("Loading...");
       runButton.disabled = true;
+      setStatus("SCANNING…", false);
+      setLog("Talking to backend...");
       badgesEl.innerHTML = "";
       mintInfoEl.textContent = "Loading...";
       holderInfoEl.textContent = "Loading...";
@@ -373,17 +549,19 @@
 
       try {
         const res = await fetch(
-          API_BASE + "/api/token-safety?mint=" + encodeURIComponent(mint)
+          API_BASE + "/token-safety?mint=" + encodeURIComponent(mint)
         );
         const json = await res.json();
         if (!res.ok) {
-          throw new Error(json.error || "Unknown error from API");
+          throw new Error(json.error || "API error");
         }
         renderResult(json);
-        setLog("Done.");
+        setStatus("OK", true);
+        setLog("Scan complete.");
       } catch (e) {
         console.error(e);
         setLog("Error: " + (e.message || String(e)), true);
+        setStatus("ERROR", false);
         mintInfoEl.textContent = "Error while fetching mint info.";
         holderInfoEl.textContent = "Error while fetching holders.";
         dexInfoEl.textContent = "Error while fetching Dex data.";
@@ -394,7 +572,7 @@
       }
     }
 
-    runButton.addEventListener("click", run);
+    runButton.addEventListener("click", runCheck);
   </script>
 </body>
 </html>
