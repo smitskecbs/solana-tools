@@ -9,33 +9,37 @@
     content="Ultra degen Solana token safety meme scanner. Built on solana-tools by Kevin Smits (@smitskecbs)."
   />
 
-  <!-- Retro / arcade font -->
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Baloo+2:wght@500;600;700&display=swap"
     rel="stylesheet"
   />
 
   <style>
     :root {
       color-scheme: dark;
-      --bg: #240046;
-      --grid-line: rgba(250, 250, 250, 0.14);
-      --window-bg: #fdf2ff;
-      --window-border: #f9a8ff;
-      --window-shadow: #1a032f;
-      --titlebar-top: #f973c9;
-      --titlebar-bottom: #ec4899;
-      --accent: #f973c9;
-      --accent-soft: #ffe4ff;
-      --chip-bg: #4c1d95;
-      --chip-border: #a855f7;
-      --chip-text: #e0e7ff;
-      --text-main: #0f172a;
+      --bg: #050016;
+      --bg-soft: #090021;
+      --grid-line: rgba(148, 163, 184, 0.18);
+
+      --purple: #8b5cf6;
+      --purple-soft: rgba(139, 92, 246, 0.24);
+      --pink: #ec4899;
+      --pink-soft: rgba(236, 72, 153, 0.26);
+      --cyan: #22d3ee;
+      --cyan-soft: rgba(34, 211, 238, 0.26);
+      --solana1: #14f195;
+      --solana2: #9945ff;
+
+      --card-bg: rgba(15, 23, 42, 0.96);
+      --card-border: rgba(148, 163, 184, 0.75);
+
+      --text-main: #e5e7eb;
       --text-muted: #9ca3af;
       --ok: #22c55e;
-      --warn: #fbbf24;
+      --warn: #facc15;
       --danger: #fb7185;
     }
 
@@ -48,18 +52,18 @@
       min-height: 100vh;
       font-family: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont,
         "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, #4c1d95 0, #050016 45%, #000 100%);
       color: var(--text-main);
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: stretch;
       padding: 18px;
-      background:
-        radial-gradient(circle at top left, #4c1d95 0, #240046 45%, #020014 100%);
+      overflow-x: hidden;
       position: relative;
-      overflow: hidden;
     }
 
-    /* Paars grid achtergrond zoals het voorbeeld */
+    /* Neon grid zoals je afbeelding, maar moderner */
     body::before {
       content: "";
       position: fixed;
@@ -68,87 +72,74 @@
       background-image:
         linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
         linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-      background-size: 40px 40px;
+      background-size: 42px 42px;
       opacity: 0.6;
-      z-index: 0;
+      z-index: -2;
+    }
+
+    /* grote diffuse glows */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: -20%;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 12% 20%, rgba(236, 72, 153, 0.28), transparent 65%),
+        radial-gradient(circle at 82% 75%, rgba(34, 211, 238, 0.25), transparent 60%),
+        radial-gradient(circle at 50% 120%, rgba(20, 241, 149, 0.22), transparent 65%);
+      mix-blend-mode: screen;
+      z-index: -1;
     }
 
     .page {
       width: 100%;
-      max-width: 1100px;
-      position: relative;
-      z-index: 1;
+      max-width: 1180px;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* “Window” in paars/roze stijl */
+    /* hoofd “window” */
 
-    .window {
-      border-radius: 12px;
-      border: 3px solid var(--window-border);
-      background: var(--window-bg);
+    .shell {
+      border-radius: 28px;
+      padding: 20px 18px 14px;
+      background:
+        radial-gradient(circle at top left, rgba(236, 72, 153, 0.22), transparent 60%),
+        radial-gradient(circle at bottom right, rgba(34, 211, 238, 0.16), transparent 60%),
+        rgba(10, 16, 32, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.45);
       box-shadow:
-        0 20px 40px var(--window-shadow),
-        0 0 0 3px rgba(15, 23, 42, 0.8);
+        0 32px 90px rgba(0, 0, 0, 0.95),
+        0 0 0 1px rgba(15, 23, 42, 0.9),
+        0 0 38px rgba(139, 92, 246, 0.7);
+      position: relative;
       overflow: hidden;
     }
 
-    .window-titlebar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 7px 10px;
-      background: linear-gradient(to bottom, var(--titlebar-top), var(--titlebar-bottom));
-      color: #fdf2ff;
-      font-family: "Press Start 2P", system-ui;
-      font-size: 10px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .title-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .title-icon {
-      width: 16px;
-      height: 16px;
-      border-radius: 4px;
-      background: #facc15;
-      box-shadow: 0 0 0 2px rgba(24, 24, 27, 0.9);
-    }
-
-    .title-right {
-      display: flex;
-      gap: 6px;
-    }
-
-    .title-btn {
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
-      border: 2px solid #f9a8ff;
-      background: #fdf2ff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      color: #db2777;
-      box-shadow: 0 0 0 2px rgba(24, 24, 27, 0.85);
-    }
-
-    .window-body {
-      padding: 12px 12px 10px;
+    .shell::after {
+      /* subtiele solana-gradient bar rechtsboven */
+      content: "";
+      position: absolute;
+      top: 14px;
+      right: 26px;
+      width: 138px;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--solana1), var(--solana2), var(--cyan));
+      box-shadow:
+        0 0 18px rgba(20, 241, 149, 0.8),
+        0 0 22px rgba(153, 69, 255, 0.9);
+      opacity: 0.85;
     }
 
     /* HEADER */
 
     .header {
       display: grid;
-      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-      gap: 12px;
-      margin-bottom: 10px;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 12px;
     }
 
     @media (max-width: 900px) {
@@ -163,42 +154,56 @@
       gap: 8px;
     }
 
-    .title-row {
+    .logo-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 11px;
     }
 
-    .title-logo {
-      width: 54px;
-      height: 54px;
-      border-radius: 14px;
-      background: linear-gradient(145deg, #ec4899, #a855f7);
+    .logo-bubble {
+      width: 60px;
+      height: 60px;
+      border-radius: 22px;
+      background:
+        conic-gradient(from 210deg,
+          #ec4899,
+          #8b5cf6,
+          #22d3ee,
+          #14f195,
+          #facc15,
+          #ec4899);
+      box-shadow:
+        0 0 0 3px rgba(15, 23, 42, 0.9),
+        0 0 50px rgba(236, 72, 153, 1);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: "Press Start 2P", system-ui;
-      font-size: 18px;
-      color: #fffbeb;
-      box-shadow:
-        0 0 0 3px #fdf2ff,
-        0 0 18px rgba(251, 113, 133, 1);
+      font-size: 30px;
+    }
+
+    .title-main {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
     }
 
     .title-main h1 {
       margin: 0;
-      font-family: "Press Start 2P", system-ui;
-      font-size: 14px;
-      letter-spacing: 0.12em;
+      font-family: "Baloo 2", system-ui;
+      font-size: 30px;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: #0f172a;
+      color: #f9fafb;
+      text-shadow:
+        0 0 18px rgba(56, 189, 248, 0.9),
+        0 0 30px rgba(236, 72, 153, 0.9);
     }
 
-    .subtitle-row {
+    .subtitle-chip-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 4px;
+      gap: 7px;
+      font-size: 11px;
     }
 
     .chip {
@@ -207,40 +212,48 @@
       gap: 6px;
       padding: 4px 10px;
       border-radius: 999px;
-      background: var(--chip-bg);
-      border: 1px solid var(--chip-border);
-      font-family: "Press Start 2P", system-ui;
-      font-size: 8px;
-      text-transform: uppercase;
-      color: var(--chip-text);
+      border: 1px solid rgba(148, 163, 184, 0.9);
+      background: radial-gradient(circle at top left, #1f2937, #020617);
+      color: #e5e7eb;
+      font-family: "Baloo 2", system-ui;
+      box-shadow: 0 0 18px rgba(15, 23, 42, 0.9);
     }
 
     .chip span.dot {
       width: 7px;
       height: 7px;
-      border-radius: 2px;
-      background: #fbbf24;
+      border-radius: 999px;
+      background: var(--solana1);
+      box-shadow: 0 0 10px rgba(20, 241, 149, 1);
+    }
+
+    .chip.pink span.dot {
+      background: var(--pink);
+      box-shadow: 0 0 10px rgba(236, 72, 153, 1);
+    }
+
+    .chip.purple span.dot {
+      background: var(--purple);
+      box-shadow: 0 0 10px rgba(139, 92, 246, 1);
     }
 
     .subtitle-text {
-      font-size: 12px;
+      font-size: 13px;
       color: var(--text-muted);
-      max-width: 560px;
-      line-height: 1.45;
+      max-width: 600px;
     }
 
     .subtitle-text strong {
-      color: #ec4899;
+      color: var(--pink);
     }
 
     .subtitle-text a {
-      color: #6366f1;
+      color: var(--cyan);
       text-decoration: none;
-      border-bottom: 1px dashed #6366f1;
     }
 
     .subtitle-text a:hover {
-      background: rgba(129, 140, 248, 0.18);
+      text-decoration: underline;
     }
 
     .hero-right {
@@ -249,41 +262,41 @@
       align-items: flex-end;
       gap: 8px;
       text-align: right;
-      font-size: 11px;
-      color: var(--text-muted);
+      font-size: 12px;
+      color: #cbd5f5;
     }
 
     .hero-badge {
-      padding: 7px 11px;
+      padding: 8px 14px;
       border-radius: 999px;
-      background: #22c55e;
+      background: radial-gradient(circle at top left, #22c55e, #14f195);
       color: #022c22;
-      font-family: "Press Start 2P", system-ui;
-      font-size: 9px;
-      text-transform: uppercase;
+      font-family: "Baloo 2", system-ui;
+      font-size: 11px;
       display: inline-flex;
-      gap: 8px;
       align-items: center;
+      gap: 8px;
       box-shadow:
-        0 0 0 2px #bbf7d0,
-        0 12px 26px rgba(22, 163, 74, 0.7);
+        0 16px 42px rgba(20, 241, 149, 0.92),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
     }
 
     .hero-badge span.emoji {
-      font-size: 14px;
+      font-size: 18px;
     }
 
     .hero-text-small {
+      opacity: 0.9;
+      font-size: 11px;
       max-width: 260px;
-      line-height: 1.4;
     }
 
     /* MAIN GRID */
 
     .main-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-      gap: 12px;
+      grid-template-columns: minmax(0, 1.02fr) minmax(0, 1.35fr);
+      gap: 14px;
       margin-top: 6px;
     }
 
@@ -294,89 +307,131 @@
     }
 
     .card {
-      border-radius: 10px;
-      border: 2px solid rgba(148, 163, 184, 0.8);
-      background: #fdf2ff;
+      position: relative;
+      border-radius: 22px;
+      border: 1px solid var(--card-border);
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), #020617);
       box-shadow:
-        0 10px 26px rgba(15, 23, 42, 0.25),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.85);
+        0 20px 55px rgba(0, 0, 0, 1),
+        0 0 0 1px rgba(15, 23, 42, 1);
       overflow: hidden;
-      font-size: 11px;
     }
 
-    .card-headerline {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 7px 10px;
-      background: linear-gradient(to right, #a855f7, #ec4899);
-      color: #fdf2ff;
-      font-family: "Press Start 2P", system-ui;
-      font-size: 9px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-
-    .card-pill {
-      font-family: "Press Start 2P", system-ui;
-      font-size: 8px;
-      text-transform: uppercase;
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(248, 250, 252, 0.9);
-      background: rgba(15, 23, 42, 0.25);
-      white-space: nowrap;
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      background:
+        radial-gradient(circle at top left, var(--pink-soft), transparent 60%),
+        radial-gradient(circle at bottom right, var(--cyan-soft), transparent 55%);
+      opacity: 0.85;
+      mix-blend-mode: screen;
+      pointer-events: none;
     }
 
     .card-inner {
-      padding: 9px 11px 8px;
+      position: relative;
+      z-index: 1;
+      padding: 13px 14px 11px;
+    }
+
+    .card-headerline {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px 6px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.9);
+    }
+
+    .card-headerline::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        rgba(15, 23, 42, 0.9),
+        rgba(139, 92, 246, 0.4),
+        rgba(15, 23, 42, 0.9)
+      );
+      opacity: 0.7;
+      z-index: -1;
+    }
+
+    .card-title {
+      font-family: "Baloo 2", system-ui;
+      font-size: 15px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #f9fafb;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-pill {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.85);
+      color: #e5e7eb;
+      background: radial-gradient(circle at top left, #0f172a, #020617);
+      font-family: "Space Grotesk", system-ui;
+      white-space: nowrap;
     }
 
     /* INPUT SIDE */
 
     .field-label {
-      font-family: "Press Start 2P", system-ui;
-      font-size: 8px;
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: #4b5563;
-      margin-bottom: 4px;
+      letter-spacing: 0.18em;
+      color: #9ca3af;
+      margin-bottom: 6px;
+      font-family: "Baloo 2", system-ui;
     }
 
     .input-wrapper {
+      position: relative;
       margin-bottom: 6px;
     }
 
     input[type="text"] {
       width: 100%;
       border-radius: 999px;
-      border: 2px solid #a855f7;
-      background: #fdf2ff;
-      color: #111827;
-      padding: 9px 12px;
+      border: 1px solid rgba(148, 163, 184, 0.9);
+      background: radial-gradient(circle at top left, #020617, #020617);
+      color: #f9fafb;
+      padding: 11px 15px;
       font-family: "Space Grotesk", system-ui, sans-serif;
       font-size: 13px;
       outline: none;
+      transition:
+        border-color 130ms ease-out,
+        box-shadow 130ms ease-out,
+        transform 130ms ease-out,
+        background-color 130ms ease-out;
       box-shadow:
-        0 0 0 2px rgba(255, 255, 255, 0.8),
-        inset 0 0 0 1px rgba(148, 163, 184, 0.7);
+        0 0 0 1px rgba(15, 23, 42, 0.95),
+        0 12px 26px rgba(15, 23, 42, 0.95);
     }
 
     input[type="text"]::placeholder {
-      color: #9ca3af;
-      font-size: 12px;
+      color: #6b7280;
     }
 
     input[type="text"]:focus {
-      border-color: #f973c9;
+      border-color: var(--pink);
       box-shadow:
-        0 0 0 2px rgba(244, 114, 182, 0.7),
-        0 0 20px rgba(244, 114, 182, 0.7);
+        0 0 0 1px rgba(236, 72, 153, 0.9),
+        0 0 30px rgba(236, 72, 153, 0.9);
+      transform: translateY(-1px);
     }
 
     .hint {
-      font-size: 10px;
+      font-size: 11px;
       color: var(--text-muted);
       margin-bottom: 6px;
     }
@@ -389,26 +444,46 @@
       margin-top: 4px;
     }
 
+    @keyframes pulse-glow {
+      0% {
+        box-shadow:
+          0 16px 45px rgba(20, 241, 149, 0.8),
+          0 0 0 1px rgba(15, 23, 42, 1);
+      }
+      50% {
+        box-shadow:
+          0 18px 55px rgba(56, 189, 248, 0.9),
+          0 0 0 1px rgba(15, 23, 42, 1);
+      }
+      100% {
+        box-shadow:
+          0 16px 45px rgba(20, 241, 149, 0.8),
+          0 0 0 1px rgba(15, 23, 42, 1);
+      }
+    }
+
     .btn-primary {
       border-radius: 999px;
       border: none;
-      padding: 9px 18px;
-      font-family: "Press Start 2P", system-ui;
-      font-size: 9px;
+      padding: 10px 20px;
+      font-family: "Baloo 2", system-ui;
+      font-size: 13px;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      background: linear-gradient(135deg, #22c55e, #a3e635);
-      color: #022c22;
+      background: linear-gradient(135deg, #14f195, #22d3ee, #8b5cf6);
+      color: #020617;
       display: inline-flex;
       align-items: center;
-      gap: 7px;
+      gap: 9px;
       cursor: pointer;
-      box-shadow:
-        0 12px 30px rgba(22, 163, 74, 0.75),
-        0 0 0 2px rgba(15, 23, 42, 0.9);
+      animation: pulse-glow 2.1s infinite ease-in-out;
+      transition:
+        transform 120ms ease-out,
+        filter 120ms ease-out;
     }
 
     .btn-primary span.icon {
-      font-size: 14px;
+      font-size: 18px;
     }
 
     .btn-primary:hover {
@@ -417,59 +492,55 @@
     }
 
     .btn-primary:active {
-      transform: translateY(0);
-      box-shadow:
-        0 6px 18px rgba(22, 163, 74, 0.8),
-        0 0 0 2px rgba(15, 23, 42, 0.9);
+      transform: translateY(0) scale(0.98);
+      animation: none;
     }
 
     .btn-primary:disabled {
-      opacity: 0.5;
+      opacity: 0.45;
       cursor: default;
-      transform: none;
-      box-shadow:
-        0 6px 16px rgba(15, 23, 42, 0.6),
-        0 0 0 2px rgba(15, 23, 42, 0.9);
+      animation: none;
     }
 
     .status-line {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 10px;
-      color: #0f172a;
+      font-size: 11px;
+      color: #e5e7eb;
     }
 
     .status-dot {
       width: 10px;
       height: 10px;
       border-radius: 999px;
-      border: 2px solid rgba(15, 23, 42, 0.9);
-      background: #9ca3af;
-      box-shadow: 0 0 0 2px #f9fafb;
+      border: 1px solid rgba(15, 23, 42, 1);
+      background: #6b7280;
+      box-shadow: 0 0 0 0 rgba(148, 163, 184, 0.7);
+      transition: all 130ms ease-out;
     }
 
     .status-dot.ok {
       background: #22c55e;
-      box-shadow: 0 0 0 2px #bbf7d0;
+      box-shadow: 0 0 14px rgba(34, 197, 94, 0.9);
     }
 
     .status-dot.error {
       background: #fb7185;
-      box-shadow: 0 0 0 2px #fee2e2;
+      box-shadow: 0 0 14px rgba(248, 113, 113, 0.9);
     }
 
     .log-line {
       margin-top: 4px;
-      font-size: 10px;
-      color: var(--text-muted);
+      font-size: 11px;
+      color: #9ca3af;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     .log-line.error {
-      color: #b91c1c;
+      color: #fb7185;
     }
 
     /* RESULT SIDE */
@@ -478,15 +549,16 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 8px;
-      font-size: 10px;
-      background: var(--accent-soft);
+      gap: 10px;
+      font-size: 11px;
+      background: linear-gradient(90deg, var(--purple-soft), var(--pink-soft));
       border-radius: 999px;
-      border: 1px dashed #f472b6;
-      padding: 6px 10px;
+      border: 1px solid rgba(248, 113, 113, 0.8);
+      padding: 6px 12px;
       margin-bottom: 8px;
-      font-family: "Space Grotesk", system-ui;
-      color: #9f1239;
+      font-family: "Baloo 2", system-ui;
+      color: #fdf2f8;
+      box-shadow: 0 10px 30px rgba(236, 72, 153, 0.7);
     }
 
     .meme-banner span.left {
@@ -496,7 +568,7 @@
     }
 
     .meme-banner span.emoji {
-      font-size: 14px;
+      font-size: 18px;
     }
 
     .risk-badges {
@@ -507,39 +579,40 @@
     }
 
     .risk-chip {
-      font-size: 9px;
+      font-size: 10px;
       padding: 4px 9px;
       border-radius: 999px;
-      border: 1px solid rgba(15, 23, 42, 0.9);
-      background: #fdf2ff;
+      border: 1px solid rgba(148, 163, 184, 0.9);
+      background: radial-gradient(circle at top left, #020617, #020617);
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-family: "Press Start 2P", system-ui;
+      font-family: "Baloo 2", system-ui;
+      color: #e5e7eb;
     }
 
     .risk-chip.ok {
-      background: #dcfce7;
       border-color: #22c55e;
-      color: #166534;
+      background: rgba(21, 128, 61, 0.4);
+      color: #bbf7d0;
     }
 
     .risk-chip.warn {
-      background: #fef9c3;
       border-color: #facc15;
-      color: #854d0e;
+      background: rgba(202, 138, 4, 0.4);
+      color: #fef3c7;
     }
 
     .risk-chip.danger {
-      background: #fee2e2;
       border-color: #fb7185;
-      color: #7f1d1d;
+      background: rgba(220, 38, 38, 0.5);
+      color: #fee2e2;
     }
 
     .risk-chip span.dot {
       width: 7px;
       height: 7px;
-      border-radius: 2px;
+      border-radius: 999px;
       background: currentColor;
     }
 
@@ -556,33 +629,34 @@
     }
 
     .result-card {
-      border-radius: 8px;
-      border: 1px solid rgba(148, 163, 184, 0.9);
-      background: #f9fafb;
-      padding: 7px 8px 6px;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.85);
+      background: radial-gradient(circle at top left, #020617, #020617);
+      padding: 7px 9px 6px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.9);
     }
 
     .result-title {
-      font-family: "Press Start 2P", system-ui;
-      font-size: 8px;
-      letter-spacing: 0.16em;
+      font-size: 11px;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: #6b21a8;
+      color: #a5b4fc;
       margin-bottom: 4px;
+      font-family: "Baloo 2", system-ui;
     }
 
     .result-body {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
         "Liberation Mono", "Courier New", monospace;
-      font-size: 11px;
-      color: #0f172a;
+      font-size: 12px;
+      color: #e5e7eb;
       white-space: pre-wrap;
       word-break: break-word;
       line-height: 1.45;
     }
 
     .result-body.muted {
-      color: #9ca3af;
+      color: #6b7280;
     }
 
     /* FOOTER */
@@ -590,17 +664,17 @@
     .footer {
       margin-top: 10px;
       padding-top: 8px;
-      border-top: 1px dashed rgba(148, 163, 184, 0.8);
-      font-size: 10px;
+      border-top: 1px dashed rgba(55, 65, 81, 0.9);
+      font-size: 11px;
       display: flex;
       justify-content: space-between;
       gap: 8px;
-      color: #e5e7eb;
+      color: #9ca3af;
       align-items: center;
     }
 
     .footer a {
-      color: #bfdbfe;
+      color: var(--cyan);
       text-decoration: none;
     }
 
@@ -616,180 +690,172 @@
     }
 
     .tg-pill {
-      padding: 4px 9px;
+      padding: 4px 10px;
       border-radius: 999px;
-      border: 1px solid #38bdf8;
-      background: #0f172a;
-      color: #e0f2fe;
+      border: 1px solid rgba(56, 189, 248, 0.95);
+      background: radial-gradient(circle at top left, #020617, #020617);
+      color: #bae6fd;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      font-size: 9px;
-      font-family: "Press Start 2P", system-ui;
+      gap: 6px;
+      font-size: 11px;
+      font-family: "Baloo 2", system-ui;
     }
 
     .tg-pill span.icon {
-      font-size: 13px;
+      font-size: 14px;
     }
 
     @media (max-width: 640px) {
       body {
         padding: 12px;
       }
+      .shell {
+        padding: 16px 12px 11px;
+      }
+      .footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
-
   </style>
 </head>
 <body>
   <div class="page">
-    <div class="window">
-      <div class="window-titlebar">
-        <div class="title-left">
-          <div class="title-icon"></div>
-          <span>Degen Token Scanner</span>
+    <div class="shell">
+      <header class="header">
+        <div class="title-block">
+          <div class="logo-row">
+            <div class="logo-bubble">🧪</div>
+            <div class="title-main">
+              <h1>DEGEN TOKEN SCANNER</h1>
+              <div class="subtitle-chip-row">
+                <div class="chip">
+                  <span class="dot"></span> Solana mainnet only
+                </div>
+                <div class="chip pink">
+                  <span class="dot"></span> SPL token enjoyers
+                </div>
+                <div class="chip purple">
+                  <span class="dot"></span> Powered by solana-tools
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="subtitle-text">
+            Paste a mint, smash <strong>SCAN</strong> and get instant vibes:
+            mint authority, holder spread and Raydium liquidity – all built on
+            <a href="https://github.com/smitskecbs/solana-tools" target="_blank" rel="noreferrer">
+              solana-tools
+            </a>.
+          </p>
         </div>
-        <div class="title-right">
-          <div class="title-btn">-</div>
-          <div class="title-btn">□</div>
-          <div class="title-btn">x</div>
+
+        <div class="hero-right">
+          <div class="hero-badge">
+            <span class="emoji">🔒</span>
+            <span>Read-only – no wallet connect</span>
+          </div>
+          <div class="hero-text-small">
+            Built for serious builders and terminally online degens who want Solana intel in one neon window.
+          </div>
         </div>
-      </div>
+      </header>
 
-      <div class="window-body">
-        <header class="header">
-          <div class="title-block">
-            <div class="title-row">
-              <div class="title-logo">◆</div>
-              <div class="title-main">
-                <h1>DEGEN TOKEN SCANNER</h1>
-                <div class="subtitle-row">
-                  <div class="chip">
-                    <span class="dot"></span> Solana mainnet only
-                  </div>
-                  <div class="chip">
-                    <span class="dot"></span> SPL token enjoyers
-                  </div>
-                  <div class="chip">
-                    <span class="dot"></span> Powered by solana-tools
-                  </div>
-                </div>
-              </div>
-            </div>
-            <p class="subtitle-text">
-              Paste a mint, hit <strong>SCAN</strong> and get instant vibes:
-              mint authority, holder spread and Raydium liquidity – all built on
-              <a href="https://github.com/smitskecbs/solana-tools" target="_blank" rel="noreferrer">
-                solana-tools
-              </a>.
-            </p>
+      <main class="main-grid">
+        <!-- LEFT: input -->
+        <section class="card">
+          <div class="card-headerline">
+            <div class="card-title">INPUT</div>
+            <div class="card-pill">Helius RPC + DexScreener</div>
           </div>
 
-          <div class="hero-right">
-            <div class="hero-badge">
-              <span class="emoji">🧪</span>
-              <span>Read-only – no wallet connect</span>
+          <div class="card-inner">
+            <div class="field-label">Mint address</div>
+            <div class="input-wrapper">
+              <input
+                id="mint-input"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="Paste SPL mint here and pray…"
+              />
             </div>
-            <div class="hero-text-small">
-              For serious builders, mods and terminally online degens who prefer one neon window over twelve boring tabs.
+            <div class="hint">
+              We only touch public on-chain data. No keys, no wallet connect, no spooky stuff.
+            </div>
+
+            <div class="controls-row">
+              <button id="run-button" class="btn-primary">
+                <span class="icon">⚡</span>
+                Scan this bag
+              </button>
+
+              <div class="status-line">
+                <span id="status-dot" class="status-dot"></span>
+                <span id="status-text">Idle. Paste a mint & smash scan.</span>
+              </div>
+            </div>
+
+            <div id="log" class="log-line"></div>
+          </div>
+        </section>
+
+        <!-- RIGHT: result -->
+        <section class="card">
+          <div class="card-headerline">
+            <div class="card-title">RESULT</div>
+            <div class="card-pill">Signals, not financial advice 🧠</div>
+          </div>
+
+          <div class="card-inner">
+            <div class="meme-banner">
+              <span class="left">
+                <span class="emoji">⚠️</span>
+                DYOR. This shows red flags & green lights – you still press the buy button yourself.
+              </span>
+              <span class="emoji">📊</span>
+            </div>
+
+            <div id="risk-badges" class="risk-badges"></div>
+
+            <div class="result-grid">
+              <div class="result-card">
+                <div class="result-title">Mint info</div>
+                <div id="mint-info" class="result-body muted">No data yet.</div>
+              </div>
+
+              <div class="result-card">
+                <div class="result-title">Holder concentration</div>
+                <div id="holder-info" class="result-body muted">No data yet.</div>
+              </div>
+
+              <div class="result-card">
+                <div class="result-title">Raydium / Dex</div>
+                <div id="dex-info" class="result-body muted">No data yet.</div>
+              </div>
+
+              <div class="result-card">
+                <div class="result-title">Risk summary</div>
+                <div id="risk-info" class="result-body muted">No data yet.</div>
+              </div>
             </div>
           </div>
-        </header>
+        </section>
+      </main>
 
-        <main class="main-grid">
-          <!-- LEFT: input -->
-          <section class="card">
-            <div class="card-headerline">
-              <div>INPUT</div>
-              <div class="card-pill">Helius RPC + DexScreener</div>
-            </div>
-
-            <div class="card-inner">
-              <div class="field-label">Mint address</div>
-              <div class="input-wrapper">
-                <input
-                  id="mint-input"
-                  type="text"
-                  autocomplete="off"
-                  spellcheck="false"
-                  placeholder="Paste SPL mint here and pray…"
-                />
-              </div>
-              <div class="hint">
-                We only touch public on-chain data. No keys, no wallet connect, no spooky stuff.
-              </div>
-
-              <div class="controls-row">
-                <button id="run-button" class="btn-primary">
-                  <span class="icon">⚡</span>
-                  Scan this bag
-                </button>
-
-                <div class="status-line">
-                  <span id="status-dot" class="status-dot"></span>
-                  <span id="status-text">Idle. Paste a mint & smash scan.</span>
-                </div>
-              </div>
-
-              <div id="log" class="log-line"></div>
-            </div>
-          </section>
-
-          <!-- RIGHT: result -->
-          <section class="card">
-            <div class="card-headerline">
-              <div>RESULT</div>
-              <div class="card-pill">Signals, not financial advice 🧠</div>
-            </div>
-
-            <div class="card-inner">
-              <div class="meme-banner">
-                <span class="left">
-                  <span class="emoji">⚠️</span>
-                  DYOR. This shows red flags & green lights – you still press the buy button yourself.
-                </span>
-                <span class="emoji">📊</span>
-              </div>
-
-              <div id="risk-badges" class="risk-badges"></div>
-
-              <div class="result-grid">
-                <div class="result-card">
-                  <div class="result-title">Mint info</div>
-                  <div id="mint-info" class="result-body muted">No data yet.</div>
-                </div>
-
-                <div class="result-card">
-                  <div class="result-title">Holder concentration</div>
-                  <div id="holder-info" class="result-body muted">No data yet.</div>
-                </div>
-
-                <div class="result-card">
-                  <div class="result-title">Raydium / Dex</div>
-                  <div id="dex-info" class="result-body muted">No data yet.</div>
-                </div>
-
-                <div class="result-card">
-                  <div class="result-title">Risk summary</div>
-                  <div id="risk-info" class="result-body muted">No data yet.</div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </main>
-
-        <footer class="footer">
-          <div>
-            Built by Kevin Smits (<code>@smitskecbs</code>) – open-source degen tools for Solana.
-          </div>
-          <div class="footer-right">
-            <span>Telegram:</span>
-            <span class="tg-pill">
-              <span class="icon">📨</span>
-              <span>@smitske</span>
-            </span>
-          </div>
-        </footer>
-      </div>
+      <footer class="footer">
+        <div>
+          Built by Kevin Smits (<code>@smitskecbs</code>) – open-source degen tools for Solana.
+        </div>
+        <div class="footer-right">
+          <span>Telegram:</span>
+          <span class="tg-pill">
+            <span class="icon">📨</span>
+            <span>@smitske</span>
+          </span>
+        </div>
+      </footer>
     </div>
   </div>
 
