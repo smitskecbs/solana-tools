@@ -83,3 +83,4 @@ packages/*/dist/
 solana-tools/
 
 packages/snapshot-airdrop/snapshots/
+packages/whale-tracker/snapshots/
