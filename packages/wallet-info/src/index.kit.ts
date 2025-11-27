@@ -21,9 +21,27 @@ async function safeFetch(url: string, opts: any = {}) {
 }
 
 async function main() {
-  const addrStr = process.argv[2];
+  // CLI args:
+  // 1) npm run dev:kit -w ./packages/wallet-info -- <WALLET>
+  // 2) npm run dev:kit -w ./packages/wallet-info -- --mint <WALLET>
+  const argv = process.argv.slice(2);
+
+  let addrStr: string | undefined;
+
+  const mintFlagIndex = argv.indexOf("--mint");
+  if (mintFlagIndex !== -1 && argv[mintFlagIndex + 1]) {
+    addrStr = argv[mintFlagIndex + 1];
+  } else if (argv[0] && !argv[0].startsWith("-")) {
+    addrStr = argv[0];
+  }
+
   if (!addrStr) {
-    console.log("Usage: npm run dev:kit -w ./packages/wallet-info -- <WALLET_ADDRESS>");
+    console.log(
+      "Usage:\n" +
+        "  npm run dev:kit -w ./packages/wallet-info -- <WALLET_ADDRESS>\n" +
+        "  or\n" +
+        "  npm run dev:kit -w ./packages/wallet-info -- --mint <WALLET_ADDRESS>"
+    );
     process.exit(1);
   }
 
@@ -31,10 +49,11 @@ async function main() {
   const walletPk = new PublicKey(addrStr);
 
   const rpc = createSolanaRpc(RPC_URL);
-  const connection = new Connection(RPC_URL, "confirmed"); // fallback + parsed helpers
+  const connection = new Connection(RPC_URL, "confirmed"); // voor SOL + SPL
 
   console.log("\n🔍 Wallet analysis for:", walletPk.toBase58(), "\n");
 
+<<<<<<< HEAD
   // --- SOL balance (kit, veilig geparsed)
   let lamportsRaw: any;
   try {
@@ -61,9 +80,20 @@ async function main() {
   const sol = lamports / 1e9;
   const solUi = sol.toFixed(4);
 
+=======
+  // --- SOL balance via web3.js (zelfde als jouw test)
+  let lamports = 0;
+  try {
+    lamports = await connection.getBalance(walletPk, "confirmed");
+  } catch {
+    lamports = 0;
+  }
+  const sol = lamports / 1e9;
+  const solUi = sol.toFixed(4);
+>>>>>>> ceed726 (Fix wallet-info SOL balance via web3.js)
   console.log(`💰 SOL Balance: ${solUi} SOL`);
 
-  // --- SPL balances (web3 parsed, easiest + stable)
+  // --- SPL balances (web3 parsed)
   let spl: SplRow[] = [];
   try {
     const accounts = await connection.getParsedTokenAccountsByOwner(walletPk, {
@@ -94,7 +124,6 @@ async function main() {
       .getSignaturesForAddress(walletAddr, { limit: 10 })
       .send();
 
-    // kit types differ per version: normalize to array
     const sigs: any[] = Array.isArray(sigResp)
       ? sigResp
       : (sigResp.value ?? sigResp.values ?? []);
@@ -146,7 +175,6 @@ async function main() {
     txs = [];
   }
 
-  // fallback if kit gives nothing on this RPC
   if (txs.length === 0) {
     console.log(
       "\n⚠️  Kit getTransaction returned no data on this RPC. Using web3.js fallback for txs...\n"
