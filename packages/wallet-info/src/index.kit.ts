@@ -35,10 +35,33 @@ async function main() {
 
   console.log("\n🔍 Wallet analysis for:", walletPk.toBase58(), "\n");
 
-  // --- SOL balance (kit)
-  const lamports = await rpc.getBalance(walletAddr, { commitment: "confirmed" }).send();
-  const sol = Number(lamports) / 1e9;
-  console.log(`💰 SOL Balance: ${sol} SOL`);
+  // --- SOL balance (kit, veilig geparsed)
+  let lamportsRaw: any;
+  try {
+    lamportsRaw = await rpc
+      .getBalance(walletAddr, { commitment: "confirmed" })
+      .send();
+  } catch {
+    lamportsRaw = null;
+  }
+
+  let lamports: number;
+
+  if (typeof lamportsRaw === "number") {
+    lamports = lamportsRaw;
+  } else if (
+    lamportsRaw &&
+    typeof (lamportsRaw as any).value === "number"
+  ) {
+    lamports = (lamportsRaw as any).value;
+  } else {
+    lamports = 0;
+  }
+
+  const sol = lamports / 1e9;
+  const solUi = sol.toFixed(4);
+
+  console.log(`💰 SOL Balance: ${solUi} SOL`);
 
   // --- SPL balances (web3 parsed, easiest + stable)
   let spl: SplRow[] = [];
@@ -103,7 +126,13 @@ async function main() {
       if (meta?.innerInstructions?.length) {
         const ix = meta.innerInstructions.flatMap((i: any) => i.instructions);
         if (ix.some((i: any) => i.program === "spl-token")) type = "token";
-        if (ix.some((i: any) => i.programId === "ComputeBudget111111111111111111111111111111")) type = "swap";
+        if (
+          ix.some(
+            (i: any) =>
+              i.programId === "ComputeBudget111111111111111111111111111111"
+          )
+        )
+          type = "swap";
       }
 
       txs.push({
@@ -119,9 +148,13 @@ async function main() {
 
   // fallback if kit gives nothing on this RPC
   if (txs.length === 0) {
-    console.log("\n⚠️  Kit getTransaction returned no data on this RPC. Using web3.js fallback for txs...\n");
+    console.log(
+      "\n⚠️  Kit getTransaction returned no data on this RPC. Using web3.js fallback for txs...\n"
+    );
     try {
-      const sigs = await connection.getSignaturesForAddress(walletPk, { limit: 10 });
+      const sigs = await connection.getSignaturesForAddress(walletPk, {
+        limit: 10
+      });
 
       for (const sig of sigs) {
         const tx = await connection.getTransaction(sig.signature, {
@@ -142,9 +175,18 @@ async function main() {
 
         let type = "transfer";
         if (meta?.innerInstructions?.length) {
-          const ix = meta.innerInstructions.flatMap((i) => i.instructions as any[]);
+          const ix = meta.innerInstructions.flatMap(
+            (i) => i.instructions as any[]
+          );
           if (ix.some((i: any) => i.program === "spl-token")) type = "token";
-          if (ix.some((i: any) => i.programId?.toBase58?.() === "ComputeBudget111111111111111111111111111111")) type = "swap";
+          if (
+            ix.some(
+              (i: any) =>
+                i.programId?.toBase58?.() ===
+                "ComputeBudget111111111111111111111111111111"
+            )
+          )
+            type = "swap";
         }
 
         txs.push({
@@ -163,7 +205,9 @@ async function main() {
   if (txs.length === 0) console.log("  (none)");
   else
     txs.forEach((t) =>
-      console.log(`  • ${t.time} | ${t.type} | ${t.solChange} SOL | ${t.signature}`)
+      console.log(
+        `  • ${t.time} | ${t.type} | ${t.solChange} SOL | ${t.signature}`
+      )
     );
 
   // --- Helius enhanced (optional)
@@ -172,13 +216,18 @@ async function main() {
     const json = await safeFetch(url);
     if (json) {
       console.log("\n🔎 Helius Enhanced:");
-      console.log("  Labels:      ", (json.labels || []).join(", ") || "(none)");
+      console.log(
+        "  Labels:      ",
+        (json.labels || []).join(", ") || "(none)"
+      );
       console.log("  Received:    ", json.totalReceived ?? null, "lamports");
       console.log("  Sent:        ", json.totalSent ?? null, "lamports");
       console.log("  Owner type:  ", json.accountType || "unknown");
       console.log(
         "  Created:     ",
-        json.createdAt ? new Date(json.createdAt * 1000).toLocaleString() : "unknown"
+        json.createdAt
+          ? new Date(json.createdAt * 1000).toLocaleString()
+          : "unknown"
       );
     } else {
       console.log("\n🔎 Helius Enhanced: (fetch failed)");
