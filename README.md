@@ -1,106 +1,51 @@
-# solana-tools 🛠️
+# Solana Whale Token Tracker
 
-Modern TypeScript monorepo by Kevin Smits — free, open-source :contentReference[oaicite:0]{index=0} CLI utilities built with :contentReference[oaicite:1]{index=1} for read-only holder and mint intelligence on :contentReference[oaicite:2]{index=2}.
+A read-only CLI utility for scanning top wallet holders of any SPL token mint on Solana mainnet and comparing whale movements between snapshots.
 
----
+## What this tool does
 
-## 🐋 Whale Token Tracker
+- Reads total UI-supply from chain
+- Lists the largest wallet holders ranked by size
+- Calculates approximate ownership percentage per wallet
+- Compares snapshots (previous → current) safely, even when data is missing
+- Saves output as JSON for frontend or API integration
+- Stays fully read-only — no wallet connections, no private keys, no approvals
 
-A dedicated SPL mint whale scanner package for deep holder distribution & movement diffs.
+## Install (workspace)
 
-### Capabilities
-- Fetch total supply (UI)
-- List top N largest wallets
-- Rank holders by size + ownership %
-- Compare snapshots (prev → current) with null-safe diffs
-- Export results to JSON for frontend or API use
-
-### Install (workspace)
 From the monorepo root:
 
 ```bash
 npm install -w ./packages/whale-tracker
 ```
 
-### Run
+## Run a fresh whale scan
 
 ```bash
-npm run dev -w ./packages/whale-tracker -- \
-  --mint <MINT_ADDRESS> \
-  --limit 20 \
-  --out snapshots/<mint>-whales.json
+npm run dev -w ./packages/whale-tracker -- --mint <MINT_ADDRESS> --limit 20
 ```
 
-### Run with previous snapshot (diff included)
+## Generate a diff using an earlier snapshot
 
 ```bash
-npm run dev -w ./packages/whale-tracker -- \
-  --mint <MINT_ADDRESS> \
-  --limit 20 \
-  --prev snapshots/prev.json \
-  --out snapshots/new.json
+npm run dev -w ./packages/whale-tracker -- --mint <MINT_ADDRESS> --limit 20 --prev snapshots/prev.json --out snapshots/new.json
 ```
 
-### Output format
+## Output format
 
 ```ts
-{ "snapshot": {...}, "diff": {...} }
+{
+  "snapshot": { /* ranked holders + supply */ },
+  "diff": { /* biggest movers + status labels */ }
+}
 ```
 
-Fully **read-only** — no wallet connect, no private keys, no approvals.
+The JSON file is saved under `snapshots/` when the `--out` flag is used.
 
----
+## Who is this for?
 
-## 👥 Target audience
+Token founders, developers, and community moderators that want clear, consolidated on-chain holder intelligence in a single command or clean dashboard integration.
 
-Token founders, contributors, mods and on-chain builders that want a single flow for:
-- Supply + authority state
-- Top holder spread
-- Whale movement diffs
-- JSON export for dashboards
+## License
 
-All signals are **intel, not financial advice**.
-
----
-
-## 🧱 Tech stack
-
-- 100% **TypeScript**
-- **Node.js CLI** focused package pattern
-- Uses Helius-style RPC endpoints + DEX aggregation vibes  
-  *(DexScreener, Raydium, authority state, holder spread, etc.)*
-
----
-
-## 📁 Structure
-
-```
-/
-├─ api/
-├─ packages/
-│   └─ whale-tracker/
-│       ├─ src/index.ts
-│       ├─ tsconfig.json
-│       └─ README.md (this file)
-├─ snapshots/
-└─ README.md (root)
-```
-
----
-
-## 🤝 Contributing
-
-Transparency-first tooling contributions are welcome.
-
-Rules:
-- Tool = read-only CLI utilities
-- Folder = `packages/<tool-name>`
-- README must include install & run examples
-- No spam, shilling, or speculative reach claims
-
----
-
-## 🆓 License
-
-:contentReference[oaicite:3]{index=3} — free for anyone.  
-Created by Kevin Smits.
+Free to use. Attribution appreciated if shared.
