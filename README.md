@@ -1,51 +1,52 @@
-# Solana Whale Token Tracker
+# Solana Tools
 
-A read-only CLI utility for scanning top wallet holders of any SPL token mint on Solana mainnet and comparing whale movements between snapshots.
+A modern TypeScript monorepo by Kevin Smits for read-only SPL token intelligence on Solana mainnet.
 
-## What this tool does
+## Philosophy
 
-- Reads total UI-supply from chain
-- Lists the largest wallet holders ranked by size
-- Calculates approximate ownership percentage per wallet
-- Compares snapshots (previous → current) safely, even when data is missing
-- Saves output as JSON for frontend or API integration
-- Stays fully read-only — no wallet connections, no private keys, no approvals
+- On-chain transparency
+- Holder distribution insights
+- CLI-first developer utilities
+- Read-only intelligence, no wallet connections or private keys
 
-## Install (workspace)
+## Whale Tracker
 
-From the monorepo root:
+Scan the largest wallet holders for any SPL token mint and compare distribution changes between snapshots.
 
-```bash
-npm install -w ./packages/whale-tracker
+### Highlights
+- Mainnet holder ranking by size
+- Percentage ownership per wallet
+- Safe snapshot diffing (previous to current)
+- JSON export ready for dashboards or API use
+- Fully read-only (no keys, no approvals)
+
+## Ecosystem
+
+Other tooling categories in this monorepo include SPL mint reading, account inspection, pool analysis, and snapshot exports, built to simplify Solana Web3 flows for developers and community moderators.
+
+## Usage goal
+
+Deliver consolidated, lightweight on-chain intelligence for token founders, developers, and mods, in a single command or clean integration.
+
+## Structure
+
+```
+/
+├─ api/
+├─ packages/whale-tracker/
+└─ snapshots/
 ```
 
-## Run a fresh whale scan
+## Contributing
 
-```bash
-npm run dev -w ./packages/whale-tracker -- --mint <MINT_ADDRESS> --limit 20
-```
+Contributions are welcome if focused on:
+- Holder insights
+- Reliability
+- Transparency
 
-## Generate a diff using an earlier snapshot
-
-```bash
-npm run dev -w ./packages/whale-tracker -- --mint <MINT_ADDRESS> --limit 20 --prev snapshots/prev.json --out snapshots/new.json
-```
-
-## Output format
-
-```ts
-{
-  "snapshot": { /* ranked holders + supply */ },
-  "diff": { /* biggest movers + status labels */ }
-}
-```
-
-The JSON file is saved under `snapshots/` when the `--out` flag is used.
-
-## Who is this for?
-
-Token founders, developers, and community moderators that want clear, consolidated on-chain holder intelligence in a single command or clean dashboard integration.
+No spam, no paid shilling, no speculative reach claims.
 
 ## License
 
-Free to use. Attribution appreciated if shared.
+Free to use. Attribution appreciated.
+
