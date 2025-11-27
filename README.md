@@ -1,78 +1,106 @@
 # solana-tools 🛠️
 
-Modern TypeScript monorepo by **Kevin Smits (@smitskecbs)** — free, open-source Solana CLI utilities.
-
-All tools are:
-
-- Written in **TypeScript**
-- Designed for **Node.js CLI use**
-- Using **web3.js** and/or **Solana Kit (v2)**
-
-Each tool lives in `packages/<tool-name>` with its own README and usage examples.
+Modern TypeScript monorepo by Kevin Smits — free, open-source :contentReference[oaicite:0]{index=0} CLI utilities built with :contentReference[oaicite:1]{index=1} for read-only holder and mint intelligence on :contentReference[oaicite:2]{index=2}.
 
 ---
 
-## 📦 Install
+## 🐋 Whale Token Tracker
 
-    git clone https://github.com/smitskecbs/solana-tools.git
-    cd solana-tools
-    npm install
+A dedicated SPL mint whale scanner package for deep holder distribution & movement diffs.
 
-Optional `.env` (for custom RPC / Helius):
+### Capabilities
+- Fetch total supply (UI)
+- List top N largest wallets
+- Rank holders by size + ownership %
+- Compare snapshots (prev → current) with null-safe diffs
+- Export results to JSON for frontend or API use
 
-    RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
-    HELIUS_API_KEY=YOUR_HELIUS_KEY
+### Install (workspace)
+From the monorepo root:
+
+```bash
+npm install -w ./packages/whale-tracker
+```
+
+### Run
+
+```bash
+npm run dev -w ./packages/whale-tracker -- \
+  --mint <MINT_ADDRESS> \
+  --limit 20 \
+  --out snapshots/<mint>-whales.json
+```
+
+### Run with previous snapshot (diff included)
+
+```bash
+npm run dev -w ./packages/whale-tracker -- \
+  --mint <MINT_ADDRESS> \
+  --limit 20 \
+  --prev snapshots/prev.json \
+  --out snapshots/new.json
+```
+
+### Output format
+
+```ts
+{ "snapshot": {...}, "diff": {...} }
+```
+
+Fully **read-only** — no wallet connect, no private keys, no approvals.
 
 ---
 
-## 🚀 Available tools
+## 👥 Target audience
 
-Current tools in this monorepo:
+Token founders, contributors, mods and on-chain builders that want a single flow for:
+- Supply + authority state
+- Top holder spread
+- Whale movement diffs
+- JSON export for dashboards
 
-- `holder-info` – inspect SPL token holders (top holders, balances, token accounts)
-- `token-info` – read SPL mint info + on-chain metadata (name, symbol, URI, authorities, supply)
-- `wallet-info` – wallet overview (SOL balance, SPL tokens, recent activity)
-- `nft-info` – inspect NFTs / digital assets (via Helius DAS / Solana Kit)
-- `snapshot-airdrop` – snapshot SPL holders to CSV + JSON for fair airdrops
-- `raydium-analyzer` – inspect Raydium pools for any SPL mint (via DexScreener)
-
-For **usage per tool**, see the README inside each package, for example:
-
-- `packages/holder-info/README.md`
-- `packages/snapshot-airdrop/README.md`
-- `packages/raydium-analyzer/README.md`
+All signals are **intel, not financial advice**.
 
 ---
 
-## 🧱 Scripts (monorepo)
+## 🧱 Tech stack
 
-Generic pattern from the repo root:
+- 100% **TypeScript**
+- **Node.js CLI** focused package pattern
+- Uses Helius-style RPC endpoints + DEX aggregation vibes  
+  *(DexScreener, Raydium, authority state, holder spread, etc.)*
 
-- Dev / run a tool:
+---
 
-      npm run dev -w ./packages/<tool> -- <args>
+## 📁 Structure
 
-- Kit / v2 variant (if available):
-
-      npm run dev:kit -w ./packages/<tool> -- <args>
-
-Check each package README for exact examples and flags.
+```
+/
+├─ api/
+├─ packages/
+│   └─ whale-tracker/
+│       ├─ src/index.ts
+│       ├─ tsconfig.json
+│       └─ README.md (this file)
+├─ snapshots/
+└─ README.md (root)
+```
 
 ---
 
 ## 🤝 Contributing
 
-Pull requests are welcome.
+Transparency-first tooling contributions are welcome.
 
-Guidelines:
-
-- Tools live in `packages/<tool-name>`
-- Each tool has its own `README.md`
-- No `node_modules` or `dist` folders in Git
+Rules:
+- Tool = read-only CLI utilities
+- Folder = `packages/<tool-name>`
+- README must include install & run examples
+- No spam, shilling, or speculative reach claims
 
 ---
 
 ## 🆓 License
 
-MIT — free for anyone.  
-Created by **Kevin Smits (@smitskecbs)**.
+:contentReference[oaicite:3]{index=3} — free for anyone.  
+Created by Kevin Smits.
