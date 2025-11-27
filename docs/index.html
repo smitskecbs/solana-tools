@@ -9,7 +9,7 @@
     content="Ultra degen Solana token safety meme scanner. Built on solana-tools by Kevin Smits (@smitskecbs)."
   />
 
-  <!-- Retro fonts -->
+  <!-- Retro / arcade font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -19,20 +19,24 @@
 
   <style>
     :root {
-      color-scheme: light;
-      --bg: #f5f5f5;
-      --frame: #d4cec4;
-      --frame-dark: #9f9486;
-      --frame-light: #f8f3ea;
-      --screen: #ffffff;
-      --screen-border: #000000;
-      --accent: #0066cc;
-      --accent-soft: #e0ecff;
-      --text-main: #111827;
-      --text-muted: #6b7280;
-      --ok: #15803d;
-      --warn: #b45309;
-      --danger: #b91c1c;
+      color-scheme: dark;
+      --bg: #240046;
+      --grid-line: rgba(250, 250, 250, 0.14);
+      --window-bg: #fdf2ff;
+      --window-border: #f9a8ff;
+      --window-shadow: #1a032f;
+      --titlebar-top: #f973c9;
+      --titlebar-bottom: #ec4899;
+      --accent: #f973c9;
+      --accent-soft: #ffe4ff;
+      --chip-bg: #4c1d95;
+      --chip-border: #a855f7;
+      --chip-text: #e0e7ff;
+      --text-main: #0f172a;
+      --text-muted: #9ca3af;
+      --ok: #22c55e;
+      --warn: #fbbf24;
+      --danger: #fb7185;
     }
 
     * {
@@ -42,28 +46,31 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: var(--bg);
       font-family: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont,
         "Segoe UI", sans-serif;
       color: var(--text-main);
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 16px;
+      padding: 18px;
+      background:
+        radial-gradient(circle at top left, #4c1d95 0, #240046 45%, #020014 100%);
+      position: relative;
+      overflow: hidden;
     }
 
-    /* Subtle 80s-style wallpaper pattern */
+    /* Paars grid achtergrond zoals het voorbeeld */
     body::before {
       content: "";
       position: fixed;
       inset: 0;
       pointer-events: none;
-      opacity: 0.16;
       background-image:
-        linear-gradient(90deg, rgba(0,0,0,0.08) 1px, transparent 1px),
-        linear-gradient(180deg, rgba(0,0,0,0.06) 1px, transparent 1px);
-      background-size: 14px 14px;
-      mix-blend-mode: multiply;
+        linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.6;
+      z-index: 0;
     }
 
     .page {
@@ -73,106 +80,74 @@
       z-index: 1;
     }
 
-    /* Monitor frame */
-    .monitor {
-      border-radius: 10px;
-      background: var(--frame);
+    /* “Window” in paars/roze stijl */
+
+    .window {
+      border-radius: 12px;
+      border: 3px solid var(--window-border);
+      background: var(--window-bg);
       box-shadow:
-        0 14px 0 #b3aa9c,
-        0 20px 40px rgba(0, 0, 0, 0.35);
-      padding: 10px;
-      border: 2px solid var(--frame-dark);
-      position: relative;
+        0 20px 40px var(--window-shadow),
+        0 0 0 3px rgba(15, 23, 42, 0.8);
+      overflow: hidden;
     }
 
-    .monitor::after {
-      content: "SOLANA-TOOLS TERMINAL  v1.0";
-      position: absolute;
-      bottom: 6px;
-      right: 18px;
-      font-family: "Press Start 2P", system-ui;
-      font-size: 7px;
-      letter-spacing: 0.08em;
-      color: #4b5563;
-      opacity: 0.9;
-    }
-
-    /* Taskbar style bar */
-    .monitor-top-bar {
+    .window-titlebar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: linear-gradient(to bottom, #004a9f, #00336e);
-      color: #f9fafb;
-      padding: 5px 8px;
-      border-radius: 4px 4px 0 0;
-      border: 2px solid #001b3f;
-      border-bottom: none;
+      padding: 7px 10px;
+      background: linear-gradient(to bottom, var(--titlebar-top), var(--titlebar-bottom));
+      color: #fdf2ff;
       font-family: "Press Start 2P", system-ui;
-      font-size: 9px;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
-    .monitor-top-left {
+    .title-left {
       display: flex;
       align-items: center;
+      gap: 8px;
+    }
+
+    .title-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      background: #facc15;
+      box-shadow: 0 0 0 2px rgba(24, 24, 27, 0.9);
+    }
+
+    .title-right {
+      display: flex;
       gap: 6px;
     }
 
-    .monitor-icon {
-      width: 12px;
-      height: 12px;
-      background: #facc15;
-      border-radius: 2px;
-      border: 1px solid #1f2937;
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-    }
-
-    .window-controls {
-      display: flex;
-      gap: 4px;
-    }
-
-    .window-btn {
-      width: 14px;
-      height: 14px;
-      border-radius: 2px;
-      background: #e5e7eb;
-      border: 1px solid #111827;
+    .title-btn {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 2px solid #f9a8ff;
+      background: #fdf2ff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 9px;
-      line-height: 1;
-      box-shadow: inset 1px 1px 0 #ffffff;
+      font-size: 11px;
+      color: #db2777;
+      box-shadow: 0 0 0 2px rgba(24, 24, 27, 0.85);
     }
 
-    .window-btn span {
-      transform: translateY(-0.5px);
+    .window-body {
+      padding: 12px 12px 10px;
     }
 
-    /* Screen area */
-    .screen {
-      margin-top: 0;
-      background: var(--screen);
-      border-radius: 0 0 6px 6px;
-      border: 2px solid var(--screen-border);
-      border-top: none;
-      padding: 10px;
-    }
-
-    .shell {
-      border-radius: 4px;
-      border: 2px inset #c4c4c4;
-      background: var(--frame-light);
-      padding: 10px;
-    }
-
-    /* HEADER SECTION */
+    /* HEADER */
 
     .header {
       display: grid;
       grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-      gap: 10px;
+      gap: 12px;
       margin-bottom: 10px;
     }
 
@@ -185,7 +160,7 @@
     .title-block {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
     }
 
     .title-row {
@@ -195,109 +170,110 @@
     }
 
     .title-logo {
-      width: 50px;
-      height: 50px;
-      border-radius: 4px;
-      background: #000000;
-      color: #00ff00;
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #ec4899, #a855f7);
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: "Press Start 2P", system-ui;
-      font-size: 16px;
-      border: 2px inset #666666;
-    }
-
-    .title-main {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      font-size: 18px;
+      color: #fffbeb;
+      box-shadow:
+        0 0 0 3px #fdf2ff,
+        0 0 18px rgba(251, 113, 133, 1);
     }
 
     .title-main h1 {
       margin: 0;
       font-family: "Press Start 2P", system-ui;
-      font-size: 13px;
-      letter-spacing: 0.08em;
+      font-size: 14px;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
+      color: #0f172a;
     }
 
     .subtitle-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 4px;
-      font-family: "Press Start 2P", system-ui;
-      font-size: 7px;
-      text-transform: uppercase;
+      gap: 6px;
+      margin-top: 4px;
     }
 
     .chip {
-      padding: 3px 6px;
-      border-radius: 2px;
-      border: 1px solid #111827;
-      background: #ffffff;
-      box-shadow: inset 1px 1px 0 #f3f4f6;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-border);
+      font-family: "Press Start 2P", system-ui;
+      font-size: 8px;
+      text-transform: uppercase;
+      color: var(--chip-text);
     }
 
     .chip span.dot {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      border-radius: 0;
-      margin-right: 4px;
-      background: #111827;
+      width: 7px;
+      height: 7px;
+      border-radius: 2px;
+      background: #fbbf24;
     }
 
     .subtitle-text {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--text-muted);
-      max-width: 520px;
-      line-height: 1.4;
+      max-width: 560px;
+      line-height: 1.45;
     }
 
     .subtitle-text strong {
-      color: #111827;
+      color: #ec4899;
     }
 
     .subtitle-text a {
-      color: var(--accent);
+      color: #6366f1;
       text-decoration: none;
-      border-bottom: 1px dotted var(--accent);
+      border-bottom: 1px dashed #6366f1;
     }
 
     .subtitle-text a:hover {
-      background: var(--accent-soft);
+      background: rgba(129, 140, 248, 0.18);
     }
 
     .hero-right {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 6px;
+      gap: 8px;
       text-align: right;
-      font-size: 10px;
+      font-size: 11px;
       color: var(--text-muted);
     }
 
     .hero-badge {
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: #22c55e;
+      color: #022c22;
       font-family: "Press Start 2P", system-ui;
-      font-size: 8px;
+      font-size: 9px;
       text-transform: uppercase;
-      padding: 5px 8px;
-      border-radius: 3px;
-      border: 2px inset #c4c4c4;
-      background: #ffffff;
       display: inline-flex;
-      gap: 6px;
+      gap: 8px;
       align-items: center;
+      box-shadow:
+        0 0 0 2px #bbf7d0,
+        0 12px 26px rgba(22, 163, 74, 0.7);
     }
 
     .hero-badge span.emoji {
-      font-size: 12px;
+      font-size: 14px;
     }
 
     .hero-text-small {
-      font-size: 10px;
       max-width: 260px;
       line-height: 1.4;
     }
@@ -307,8 +283,8 @@
     .main-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-      gap: 10px;
-      margin-top: 4px;
+      gap: 12px;
+      margin-top: 6px;
     }
 
     @media (max-width: 900px) {
@@ -318,9 +294,12 @@
     }
 
     .card {
-      border-radius: 3px;
-      border: 2px groove #c4c4c4;
-      background: #ffffff;
+      border-radius: 10px;
+      border: 2px solid rgba(148, 163, 184, 0.8);
+      background: #fdf2ff;
+      box-shadow:
+        0 10px 26px rgba(15, 23, 42, 0.25),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.85);
       overflow: hidden;
       font-size: 11px;
     }
@@ -330,42 +309,28 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      padding: 6px 8px;
-      background: linear-gradient(to bottom, #e5e7eb, #d1d5db);
-      border-bottom: 1px solid #9ca3af;
-    }
-
-    .card-title {
+      padding: 7px 10px;
+      background: linear-gradient(to right, #a855f7, #ec4899);
+      color: #fdf2ff;
       font-family: "Press Start 2P", system-ui;
       font-size: 9px;
-      letter-spacing: 0.13em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .card-title span.tag {
-      font-size: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.13em;
-      color: #6b7280;
     }
 
     .card-pill {
       font-family: "Press Start 2P", system-ui;
-      font-size: 7px;
+      font-size: 8px;
       text-transform: uppercase;
-      padding: 3px 6px;
-      border-radius: 2px;
-      border: 1px solid #111827;
-      background: #fefce8;
-      color: #713f12;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(248, 250, 252, 0.9);
+      background: rgba(15, 23, 42, 0.25);
       white-space: nowrap;
     }
 
     .card-inner {
-      padding: 8px 9px 7px;
+      padding: 9px 11px 8px;
     }
 
     /* INPUT SIDE */
@@ -380,29 +345,34 @@
     }
 
     .input-wrapper {
-      margin-bottom: 5px;
+      margin-bottom: 6px;
     }
 
     input[type="text"] {
       width: 100%;
-      border-radius: 2px;
-      border: 2px inset #9ca3af;
-      background: #ffffff;
+      border-radius: 999px;
+      border: 2px solid #a855f7;
+      background: #fdf2ff;
       color: #111827;
-      padding: 7px 8px;
+      padding: 9px 12px;
       font-family: "Space Grotesk", system-ui, sans-serif;
-      font-size: 12px;
+      font-size: 13px;
       outline: none;
+      box-shadow:
+        0 0 0 2px rgba(255, 255, 255, 0.8),
+        inset 0 0 0 1px rgba(148, 163, 184, 0.7);
     }
 
     input[type="text"]::placeholder {
       color: #9ca3af;
-      font-size: 11px;
+      font-size: 12px;
     }
 
     input[type="text"]:focus {
-      border-color: #111827;
-      box-shadow: 0 0 0 1px #111827;
+      border-color: #f973c9;
+      box-shadow:
+        0 0 0 2px rgba(244, 114, 182, 0.7),
+        0 0 20px rgba(244, 114, 182, 0.7);
     }
 
     .hint {
@@ -415,42 +385,51 @@
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       margin-top: 4px;
     }
 
     .btn-primary {
-      border-radius: 2px;
-      border: 2px outset #9ca3af;
-      padding: 7px 14px;
+      border-radius: 999px;
+      border: none;
+      padding: 9px 18px;
       font-family: "Press Start 2P", system-ui;
       font-size: 9px;
       text-transform: uppercase;
-      background: #e5f2ff;
-      color: #111827;
+      background: linear-gradient(135deg, #22c55e, #a3e635);
+      color: #022c22;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
       cursor: pointer;
+      box-shadow:
+        0 12px 30px rgba(22, 163, 74, 0.75),
+        0 0 0 2px rgba(15, 23, 42, 0.9);
     }
 
     .btn-primary span.icon {
-      font-size: 12px;
+      font-size: 14px;
     }
 
     .btn-primary:hover {
-      background: #cbdffd;
+      filter: brightness(1.06);
+      transform: translateY(-1px);
     }
 
     .btn-primary:active {
-      border-style: inset;
-      background: #bcd2f8;
+      transform: translateY(0);
+      box-shadow:
+        0 6px 18px rgba(22, 163, 74, 0.8),
+        0 0 0 2px rgba(15, 23, 42, 0.9);
     }
 
     .btn-primary:disabled {
       opacity: 0.5;
       cursor: default;
-      border-style: inset;
+      transform: none;
+      box-shadow:
+        0 6px 16px rgba(15, 23, 42, 0.6),
+        0 0 0 2px rgba(15, 23, 42, 0.9);
     }
 
     .status-line {
@@ -458,23 +437,26 @@
       align-items: center;
       gap: 6px;
       font-size: 10px;
-      color: #111827;
+      color: #0f172a;
     }
 
     .status-dot {
       width: 10px;
       height: 10px;
-      border-radius: 0;
-      border: 1px solid #111827;
+      border-radius: 999px;
+      border: 2px solid rgba(15, 23, 42, 0.9);
       background: #9ca3af;
+      box-shadow: 0 0 0 2px #f9fafb;
     }
 
     .status-dot.ok {
-      background: #16a34a;
+      background: #22c55e;
+      box-shadow: 0 0 0 2px #bbf7d0;
     }
 
     .status-dot.error {
-      background: #dc2626;
+      background: #fb7185;
+      box-shadow: 0 0 0 2px #fee2e2;
     }
 
     .log-line {
@@ -498,12 +480,13 @@
       align-items: center;
       gap: 8px;
       font-size: 10px;
-      background: #f9fafb;
-      border-radius: 2px;
-      border: 1px dashed #9ca3af;
-      padding: 5px 7px;
-      margin-bottom: 6px;
+      background: var(--accent-soft);
+      border-radius: 999px;
+      border: 1px dashed #f472b6;
+      padding: 6px 10px;
+      margin-bottom: 8px;
       font-family: "Space Grotesk", system-ui;
+      color: #9f1239;
     }
 
     .meme-banner span.left {
@@ -519,51 +502,51 @@
     .risk-badges {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
+      gap: 6px;
       margin-bottom: 8px;
     }
 
     .risk-chip {
       font-size: 9px;
-      padding: 3px 7px;
-      border-radius: 2px;
-      border: 1px solid #111827;
-      background: #f9fafb;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 23, 42, 0.9);
+      background: #fdf2ff;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       font-family: "Press Start 2P", system-ui;
     }
 
     .risk-chip.ok {
       background: #dcfce7;
-      border-color: #15803d;
-      color: #14532d;
+      border-color: #22c55e;
+      color: #166534;
     }
 
     .risk-chip.warn {
       background: #fef9c3;
-      border-color: #b45309;
-      color: #78350f;
+      border-color: #facc15;
+      color: #854d0e;
     }
 
     .risk-chip.danger {
       background: #fee2e2;
-      border-color: #b91c1c;
+      border-color: #fb7185;
       color: #7f1d1d;
     }
 
     .risk-chip span.dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 0;
+      width: 7px;
+      height: 7px;
+      border-radius: 2px;
       background: currentColor;
     }
 
     .result-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 6px;
+      gap: 8px;
     }
 
     @media (max-width: 800px) {
@@ -573,18 +556,18 @@
     }
 
     .result-card {
-      border-radius: 2px;
-      border: 1px solid #9ca3af;
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.9);
       background: #f9fafb;
-      padding: 6px 7px 5px;
+      padding: 7px 8px 6px;
     }
 
     .result-title {
       font-family: "Press Start 2P", system-ui;
       font-size: 8px;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: #4b5563;
+      color: #6b21a8;
       margin-bottom: 4px;
     }
 
@@ -592,10 +575,10 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
         "Liberation Mono", "Courier New", monospace;
       font-size: 11px;
-      color: #111827;
+      color: #0f172a;
       white-space: pre-wrap;
       word-break: break-word;
-      line-height: 1.4;
+      line-height: 1.45;
     }
 
     .result-body.muted {
@@ -605,19 +588,19 @@
     /* FOOTER */
 
     .footer {
-      margin-top: 8px;
-      padding-top: 6px;
-      border-top: 1px dashed #9ca3af;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(148, 163, 184, 0.8);
       font-size: 10px;
       display: flex;
       justify-content: space-between;
       gap: 8px;
-      color: #4b5563;
+      color: #e5e7eb;
       align-items: center;
     }
 
     .footer a {
-      color: var(--accent);
+      color: #bfdbfe;
       text-decoration: none;
     }
 
@@ -628,16 +611,16 @@
     .footer-right {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       white-space: nowrap;
     }
 
     .tg-pill {
-      padding: 3px 8px;
-      border-radius: 2px;
-      border: 1px solid #111827;
-      background: #e5f2ff;
-      color: #111827;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid #38bdf8;
+      background: #0f172a;
+      color: #e0f2fe;
       display: inline-flex;
       align-items: center;
       gap: 5px;
@@ -646,174 +629,166 @@
     }
 
     .tg-pill span.icon {
-      font-size: 12px;
+      font-size: 13px;
     }
 
     @media (max-width: 640px) {
       body {
-        padding: 10px;
+        padding: 12px;
       }
     }
+
   </style>
 </head>
 <body>
   <div class="page">
-    <div class="monitor">
-      <div class="monitor-top-bar">
-        <div class="monitor-top-left">
-          <div class="monitor-icon"></div>
-          <span>DEGEN TOKEN SCANNER</span>
+    <div class="window">
+      <div class="window-titlebar">
+        <div class="title-left">
+          <div class="title-icon"></div>
+          <span>Degen Token Scanner</span>
         </div>
-        <div class="window-controls">
-          <div class="window-btn"><span>_</span></div>
-          <div class="window-btn"><span>□</span></div>
-          <div class="window-btn"><span>X</span></div>
+        <div class="title-right">
+          <div class="title-btn">-</div>
+          <div class="title-btn">□</div>
+          <div class="title-btn">x</div>
         </div>
       </div>
 
-      <div class="screen">
-        <div class="shell">
-          <header class="header">
-            <div class="title-block">
-              <div class="title-row">
-                <div class="title-logo">▶</div>
-                <div class="title-main">
-                  <h1>DEGEN TOKEN SCANNER</h1>
-                  <div class="subtitle-row">
-                    <div class="chip">
-                      <span class="dot"></span> SOLANA MAINNET ONLY
-                    </div>
-                    <div class="chip">
-                      <span class="dot"></span> SPL TOKEN ENJOYERS
-                    </div>
-                    <div class="chip">
-                      <span class="dot"></span> POWERED BY SOLANA-TOOLS
-                    </div>
+      <div class="window-body">
+        <header class="header">
+          <div class="title-block">
+            <div class="title-row">
+              <div class="title-logo">◆</div>
+              <div class="title-main">
+                <h1>DEGEN TOKEN SCANNER</h1>
+                <div class="subtitle-row">
+                  <div class="chip">
+                    <span class="dot"></span> Solana mainnet only
+                  </div>
+                  <div class="chip">
+                    <span class="dot"></span> SPL token enjoyers
+                  </div>
+                  <div class="chip">
+                    <span class="dot"></span> Powered by solana-tools
                   </div>
                 </div>
-              </div>
-              <p class="subtitle-text">
-                Paste a mint, hit <strong>SCAN</strong> and get instant old-school terminal readouts:
-                mint authority, holder spread and Raydium liquidity – all built on
-                <a href="https://github.com/smitskecbs/solana-tools" target="_blank" rel="noreferrer">
-                  solana-tools
-                </a>.
-              </p>
-            </div>
-
-            <div class="hero-right">
-              <div class="hero-badge">
-                <span class="emoji">🧪</span>
-                <span>Read-only – no wallet connect</span>
-              </div>
-              <div class="hero-text-small">
-                For serious builders, mods and terminally online degens
-                who prefer one retro screen over twelve modern tabs.
               </div>
             </div>
-          </header>
+            <p class="subtitle-text">
+              Paste a mint, hit <strong>SCAN</strong> and get instant vibes:
+              mint authority, holder spread and Raydium liquidity – all built on
+              <a href="https://github.com/smitskecbs/solana-tools" target="_blank" rel="noreferrer">
+                solana-tools
+              </a>.
+            </p>
+          </div>
 
-          <main class="main-grid">
-            <!-- LEFT: input -->
-            <section class="card">
-              <div class="card-headerline">
-                <div class="card-title">
-                  INPUT
-                  <span class="tag">PLAYER 1</span>
-                </div>
-                <div class="card-pill">Helius RPC + DexScreener</div>
-              </div>
-
-              <div class="card-inner">
-                <div class="field-label">Mint address</div>
-                <div class="input-wrapper">
-                  <input
-                    id="mint-input"
-                    type="text"
-                    autocomplete="off"
-                    spellcheck="false"
-                    placeholder="Paste SPL mint here and pray…"
-                  />
-                </div>
-                <div class="hint">
-                  We only touch public on-chain data. No keys, no wallet connect, no spooky stuff.
-                </div>
-
-                <div class="controls-row">
-                  <button id="run-button" class="btn-primary">
-                    <span class="icon">⚡</span>
-                    Scan this bag
-                  </button>
-
-                  <div class="status-line">
-                    <span id="status-dot" class="status-dot"></span>
-                    <span id="status-text">Idle. Paste a mint & smash scan.</span>
-                  </div>
-                </div>
-
-                <div id="log" class="log-line"></div>
-              </div>
-            </section>
-
-            <!-- RIGHT: result -->
-            <section class="card">
-              <div class="card-headerline">
-                <div class="card-title">
-                  RESULT
-                  <span class="tag">PLAYER 2</span>
-                </div>
-                <div class="card-pill">Signals, not financial advice 🧠</div>
-              </div>
-
-              <div class="card-inner">
-                <div class="meme-banner">
-                  <span class="left">
-                    <span class="emoji">⚠️</span>
-                    DYOR. This shows red flags & green lights – you still press the buy button yourself.
-                  </span>
-                  <span class="emoji">📊</span>
-                </div>
-
-                <div id="risk-badges" class="risk-badges"></div>
-
-                <div class="result-grid">
-                  <div class="result-card">
-                    <div class="result-title">Mint info</div>
-                    <div id="mint-info" class="result-body muted">No data yet.</div>
-                  </div>
-
-                  <div class="result-card">
-                    <div class="result-title">Holder concentration</div>
-                    <div id="holder-info" class="result-body muted">No data yet.</div>
-                  </div>
-
-                  <div class="result-card">
-                    <div class="result-title">Raydium / Dex</div>
-                    <div id="dex-info" class="result-body muted">No data yet.</div>
-                  </div>
-
-                  <div class="result-card">
-                    <div class="result-title">Risk summary</div>
-                    <div id="risk-info" class="result-body muted">No data yet.</div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </main>
-
-          <footer class="footer">
-            <div>
-              Built by Kevin Smits (<code>@smitskecbs</code>) – open-source degen tools for Solana.
+          <div class="hero-right">
+            <div class="hero-badge">
+              <span class="emoji">🧪</span>
+              <span>Read-only – no wallet connect</span>
             </div>
-            <div class="footer-right">
-              <span>Telegram:</span>
-              <span class="tg-pill">
-                <span class="icon">📨</span>
-                <span>@smitske</span>
-              </span>
+            <div class="hero-text-small">
+              For serious builders, mods and terminally online degens who prefer one neon window over twelve boring tabs.
             </div>
-          </footer>
-        </div>
+          </div>
+        </header>
+
+        <main class="main-grid">
+          <!-- LEFT: input -->
+          <section class="card">
+            <div class="card-headerline">
+              <div>INPUT</div>
+              <div class="card-pill">Helius RPC + DexScreener</div>
+            </div>
+
+            <div class="card-inner">
+              <div class="field-label">Mint address</div>
+              <div class="input-wrapper">
+                <input
+                  id="mint-input"
+                  type="text"
+                  autocomplete="off"
+                  spellcheck="false"
+                  placeholder="Paste SPL mint here and pray…"
+                />
+              </div>
+              <div class="hint">
+                We only touch public on-chain data. No keys, no wallet connect, no spooky stuff.
+              </div>
+
+              <div class="controls-row">
+                <button id="run-button" class="btn-primary">
+                  <span class="icon">⚡</span>
+                  Scan this bag
+                </button>
+
+                <div class="status-line">
+                  <span id="status-dot" class="status-dot"></span>
+                  <span id="status-text">Idle. Paste a mint & smash scan.</span>
+                </div>
+              </div>
+
+              <div id="log" class="log-line"></div>
+            </div>
+          </section>
+
+          <!-- RIGHT: result -->
+          <section class="card">
+            <div class="card-headerline">
+              <div>RESULT</div>
+              <div class="card-pill">Signals, not financial advice 🧠</div>
+            </div>
+
+            <div class="card-inner">
+              <div class="meme-banner">
+                <span class="left">
+                  <span class="emoji">⚠️</span>
+                  DYOR. This shows red flags & green lights – you still press the buy button yourself.
+                </span>
+                <span class="emoji">📊</span>
+              </div>
+
+              <div id="risk-badges" class="risk-badges"></div>
+
+              <div class="result-grid">
+                <div class="result-card">
+                  <div class="result-title">Mint info</div>
+                  <div id="mint-info" class="result-body muted">No data yet.</div>
+                </div>
+
+                <div class="result-card">
+                  <div class="result-title">Holder concentration</div>
+                  <div id="holder-info" class="result-body muted">No data yet.</div>
+                </div>
+
+                <div class="result-card">
+                  <div class="result-title">Raydium / Dex</div>
+                  <div id="dex-info" class="result-body muted">No data yet.</div>
+                </div>
+
+                <div class="result-card">
+                  <div class="result-title">Risk summary</div>
+                  <div id="risk-info" class="result-body muted">No data yet.</div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <footer class="footer">
+          <div>
+            Built by Kevin Smits (<code>@smitskecbs</code>) – open-source degen tools for Solana.
+          </div>
+          <div class="footer-right">
+            <span>Telegram:</span>
+            <span class="tg-pill">
+              <span class="icon">📨</span>
+              <span>@smitske</span>
+            </span>
+          </div>
+        </footer>
       </div>
     </div>
   </div>
@@ -1120,4 +1095,3 @@
   </script>
 </body>
 </html>
-
