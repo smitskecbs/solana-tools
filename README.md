@@ -1,52 +1,42 @@
-# Solana Tools
+# solana-tools
 
-A modern TypeScript monorepo by Kevin Smits for read-only SPL token intelligence on Solana mainnet.
+Modern TypeScript monorepo by Kevin Smits — free, open-source 
 
-## Philosophy
+## Features
 
-- On-chain transparency
-- Holder distribution insights
-- CLI-first developer utilities
-- Read-only intelligence, no wallet connections or private keys
+- Written in TypeScript
+- Designed for Node.js CLI use
+- Read-only on-chain data (no wallet connections, no private keys)
 
-## Whale Tracker
+## Packages
 
-Scan the largest wallet holders for any SPL token mint and compare distribution changes between snapshots.
+### Whale Token Tracker
 
-### Highlights
-- Mainnet holder ranking by size
-- Percentage ownership per wallet
-- Safe snapshot diffing (previous to current)
-- JSON export ready for dashboards or API use
-- Fully read-only (no keys, no approvals)
+- Fetch ranked largest wallets by mint
+- Calculate approximate percentage ownership
+- Compare previous snapshot to current safely
+- Export table + structured JSON for UI or API integration
+- Fully read-only (no approvals, no keys)
 
-## Ecosystem
+### Other utilities
 
-Other tooling categories in this monorepo include SPL mint reading, account inspection, pool analysis, and snapshot exports, built to simplify Solana Web3 flows for developers and community moderators.
+More SPL holder and pool intelligence tooling lives under `packages/<tool-name>` in the monorepo.
 
-## Usage goal
-
-Deliver consolidated, lightweight on-chain intelligence for token founders, developers, and mods, in a single command or clean integration.
-
-## Structure
+## Folder structure
 
 ```
 /
 ├─ api/
-├─ packages/whale-tracker/
+├─ packages/
 └─ snapshots/
 ```
 
 ## Contributing
 
-Contributions are welcome if focused on:
-- Holder insights
-- Reliability
-- Transparency
-
-No spam, no paid shilling, no speculative reach claims.
+Pull requests are welcome if focused on reliability and transparency.  
+Do not commit node_modules, dist or lockfile noise unless required for reproducible CLI tooling.
 
 ## License
 
-Free to use. Attribution appreciated.
-
+MIT — free for anyone.  
+Created by Kevin Smits.
