@@ -33,7 +33,7 @@
       max-width: 100%;
       border: 4px solid #22d3ee;
       box-shadow: 0 0 0 4px #0f172a, 0 0 40px rgba(34, 211, 238, 0.4);
-      background: linear-gradient(145deg, #020617 0, #020617 40%, #020617 100%);
+      background: #020617;
       padding: 20px 24px 28px;
       position: relative;
       overflow: hidden;
@@ -437,7 +437,6 @@
 
     // Default backend = jouw Render API
     let API_BASE = "https://solana-tools-api.onrender.com";
-    let lastEndpoint = "";
 
     backendInput.value = API_BASE;
     backendLabel.textContent = "Backend base URL: " + API_BASE;
@@ -448,91 +447,181 @@
       statusDot.style.boxShadow = ok ? "0 0 6px #22c55e" : "0 0 6px #f97373";
     }
 
-    function renderOutput(endpoint, data) {
-      if (endpoint === "/api/wallet-info" && data && typeof data === "object") {
-        const lines = [];
+    function renderWalletInfo(data) {
+      const lines = [];
+      lines.push("=== WALLET INFO ===");
+      lines.push("Address : " + (data.address || "?"));
 
-        lines.push("=== WALLET INFO ===");
-        lines.push("Address : " + (data.address || "?"));
-        if (typeof data.sol === "number") {
-          lines.push("SOL     : " + data.sol.toFixed(6) + " SOL");
-        }
+      if (typeof data.sol === "number") {
+        lines.push("SOL     : " + data.sol.toFixed(6) + " SOL");
+      }
 
-        const tokens = Array.isArray(data.tokens) ? data.tokens : [];
-        if (tokens.length) {
-          lines.push("");
-          lines.push("SPL tokens (non-zero balances):");
-          tokens.forEach((t, i) => {
-            const amt =
-              typeof t.uiAmount === "number"
-                ? t.uiAmount.toString()
-                : String(t.amountRaw || "?");
-            lines.push(
-              " " +
-                (i + 1) +
-                ". " +
-                amt +
-                "  (mint: " +
-                t.mint +
-                ", decimals: " +
-                t.decimals +
-                ")"
-            );
-          });
-        } else {
-          lines.push("");
-          lines.push("SPL tokens : none with non-zero balance returned.");
-        }
-
+      const tokens = Array.isArray(data.tokens) ? data.tokens : [];
+      if (tokens.length) {
         lines.push("");
-        lines.push("--- RAW JSON ---");
-        lines.push(JSON.stringify(data, null, 2));
-
-        outputEl.textContent = lines.join("\n");
-        return;
+        lines.push("SPL tokens (non-zero balances):");
+        tokens.forEach((t, i) => {
+          const amt =
+            typeof t.uiAmount === "number"
+              ? t.uiAmount.toString()
+              : String(t.amountRaw || "?");
+          lines.push(
+            " " +
+              (i + 1) +
+              ". " +
+              amt +
+              "  (mint: " +
+              t.mint +
+              ", decimals: " +
+              t.decimals +
+              ")"
+          );
+        });
+      } else {
+        lines.push("");
+        lines.push("SPL tokens : none with non-zero balance returned.");
       }
 
-      if (
-        (endpoint === "/api/token-info" ||
-          endpoint === "/api/token-safety-check" ||
-          endpoint === "/api/cbs-metrics") &&
-        data &&
-        typeof data === "object"
-      ) {
-        outputEl.textContent = JSON.stringify(data, null, 2);
-        return;
-      }
-
-      // Fallback
-      outputEl.textContent =
-        typeof data === "string" ? data : JSON.stringify(data, null, 2);
+      outputEl.textContent = lines.join("\n");
     }
 
-    async function callApi(path) {
+    function renderTokenInfo(data) {
+      const lines = [];
+      lines.push("=== TOKEN INFO ===");
+      lines.push("Mint      : " + (data.mint || "?"));
+      lines.push("Decimals  : " + (data.decimals ?? "?"));
+      lines.push("Supply    : " + (data.supply ?? "?"));
+      lines.push(
+        "Mint auth : " +
+          (data.mintAuthority === null
+            ? "revoked (immutable)"
+            : data.mintAuthority || "unknown")
+      );
+      lines.push(
+        "Freeze    : " +
+          (data.freezeAuthority === null
+            ? "revoked"
+            : data.freezeAuthority || "unknown")
+      );
+      outputEl.textContent = lines.join("\n");
+    }
+
+    function renderDexMetrics(data) {
+      const lines = [];
+      lines.push("=== DEX METRICS ===");
+      lines.push("Mint          : " + (data.mint || "?"));
+      lines.push("Total pools   : " + (data.totalPools ?? 0));
+      lines.push("Raydium pools : " + (data.raydiumCount ?? 0));
+      lines.push(
+        "Other DEXes   : " + (data.otherDexCount ?? 0)
+      );
+      if (typeof data.totalLiquidityUsd === "number") {
+        lines.push(
+          "Total Raydium liquidity: $" +
+            data.totalLiquidityUsd.toFixed(2)
+        );
+      }
+
+      const ray = Array.isArray(data.raydium) ? data.raydium : [];
+      if (ray.length) {
+        lines.push("");
+        lines.push("Raydium pairs:");
+        ray.forEach((p, i) => {
+          lines.push(
+            " " +
+              (i + 1) +
+              ". " +
+              (p.baseToken?.symbol || "?") +
+              "/" +
+              (p.quoteToken?.symbol || "?") +
+              " – $" +
+              (p.priceUsd || "?") +
+              " (liq: $" +
+              (p.liquidityUsd ?? "?") +
+              ")"
+          );
+        });
+      }
+
+      outputEl.textContent = lines.join("\n");
+    }
+
+    function renderTokenSafety(data) {
+      const lines = [];
+      lines.push("=== TOKEN SAFETY CHECK ===");
+      lines.push("Mint      : " + (data.mint || "?"));
+      const s = data.safety || {};
+      lines.push("Risk      : " + (s.riskLevel || "unknown"));
+      lines.push(
+        "Immutable : " + (s.immutableMint ? "yes" : "no")
+      );
+      lines.push(
+        "Can freeze: " + (s.canFreeze ? "yes" : "no")
+      );
+      if (typeof s.lowLiquidity === "boolean") {
+        lines.push("Low liquidity : " + (s.lowLiquidity ? "yes" : "no"));
+      }
+      if (typeof (data.dex?.totalLiquidityUsd) === "number") {
+        lines.push(
+          "Total liquidity: $" +
+            data.dex.totalLiquidityUsd.toFixed(2)
+        );
+      }
+
+      const reasons = Array.isArray(s.reasons) ? s.reasons : [];
+      if (reasons.length) {
+        lines.push("");
+        lines.push("Reasons:");
+        reasons.forEach((r, i) => {
+          lines.push(" " + (i + 1) + ". " + r);
+        });
+      }
+
+      if (data.disclaimer) {
+        lines.push("");
+        lines.push("Note: " + data.disclaimer);
+      }
+
+      outputEl.textContent = lines.join("\n");
+    }
+
+    function renderPlainText(text) {
+      outputEl.textContent = text;
+    }
+
+    async function callApi(kind, path) {
       try {
         const base = API_BASE.replace(/\/+$/, "");
         const url = base + path;
-        lastEndpoint = path.split("?")[0];
 
-        setStatus(true, "Calling " + lastEndpoint + " ...");
+        setStatus(true, "Calling " + kind + " ...");
         const res = await fetch(url);
         const data = await res.json();
 
         if (!res.ok) {
-          setStatus(false, "Error " + res.status + " – see JSON");
-          renderOutput(lastEndpoint, data);
+          setStatus(false, "Error " + res.status + " – see raw JSON in console");
+          console.error("API error", kind, data);
+          renderPlainText("Error " + res.status + ": " + (data.error || "see console"));
           return;
         }
 
-        setStatus(true, "OK - " + lastEndpoint + " responded");
-        renderOutput(lastEndpoint, data);
+        setStatus(true, "OK - " + kind + " responded");
+
+        if (kind === "wallet-info") return renderWalletInfo(data);
+        if (kind === "token-info") return renderTokenInfo(data);
+        if (kind === "cbs-metrics") return renderDexMetrics(data);
+        if (kind === "token-safety") return renderTokenSafety(data);
+
+        // fallback
+        renderPlainText(JSON.stringify(data, null, 2));
       } catch (e) {
         console.error(e);
-        setStatus(false, "Network error calling " + path);
-        renderOutput(lastEndpoint, { error: String(e) });
+        setStatus(false, "Network error calling " + kind);
+        renderPlainText("Network error: " + String(e));
       }
     }
 
+    // Buttons
     document
       .getElementById("btn-wallet-info")
       .addEventListener("click", () => {
@@ -541,7 +630,7 @@
           setStatus(false, "Fill wallet address first");
           return;
         }
-        callApi("/api/wallet-info?address=" + encodeURIComponent(addr));
+        callApi("wallet-info", "/api/wallet-info?address=" + encodeURIComponent(addr));
       });
 
     document
@@ -550,7 +639,7 @@
         const mint =
           mintInput.value.trim() ||
           "B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk";
-        callApi("/api/token-info?mint=" + encodeURIComponent(mint));
+        callApi("token-info", "/api/token-info?mint=" + encodeURIComponent(mint));
       });
 
     document
@@ -559,7 +648,7 @@
         const mint =
           mintInput.value.trim() ||
           "B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk";
-        callApi("/api/cbs-metrics?mint=" + encodeURIComponent(mint));
+        callApi("cbs-metrics", "/api/cbs-metrics?mint=" + encodeURIComponent(mint));
       });
 
     document
@@ -569,18 +658,18 @@
           mintInput.value.trim() ||
           "B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk";
         callApi(
+          "token-safety",
           "/api/token-safety-check?mint=" + encodeURIComponent(mint)
         );
       });
 
-    // Nog niet geïmplementeerde endpoints
+    // Nog niet geïmplementeerde endpoints in backend
     document
       .getElementById("btn-holder-info")
       .addEventListener("click", () => {
         setStatus(false, "Holder info API not wired yet");
-        renderOutput(
-          "/api/holder-info",
-          "Endpoint /api/holder-info not implemented on this backend yet."
+        renderPlainText(
+          "Endpoint /api/holder-info is nog niet geïmplementeerd op deze backend."
         );
       });
 
@@ -588,9 +677,8 @@
       .getElementById("btn-whale-tracker")
       .addEventListener("click", () => {
         setStatus(false, "Whale tracker API not wired yet");
-        renderOutput(
-          "/api/whale-tracker",
-          "Endpoint /api/whale-tracker not implemented on this backend yet."
+        renderPlainText(
+          "Endpoint /api/whale-tracker is nog niet geïmplementeerd op deze backend."
         );
       });
 
@@ -611,3 +699,4 @@
   </script>
 </body>
 </html>
+
