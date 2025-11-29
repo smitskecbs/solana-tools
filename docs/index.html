@@ -4,653 +4,554 @@
   <meta charset="UTF-8" />
   <title>Solana Tools – SPL Toolkit by Kevin Smits</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Old-school Nintendo style fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+
   <style>
-    :root {
-      --bg: #050716;
-      --bg-soft: #0c1024;
-      --card: #11152b;
-      --card-soft: #171c35;
-      --accent: #7c5cff;
-      --accent-soft: rgba(124, 92, 255, 0.15);
-      --accent2: #22e1ff;
-      --text: #f4f5ff;
-      --text-soft: #9da4d1;
-      --danger: #ff4b81;
-      --border: #242a4a;
-      --radius-xl: 18px;
-      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.45);
-      --transition-fast: 0.16s ease-out;
-    }
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
+
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Inter", sans-serif;
-      background: radial-gradient(circle at top, #1a1f3f 0, #050716 45%, #020308 100%);
-      color: var(--text);
       min-height: 100vh;
+      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
+      color: #e5e7eb;
+      font-family: "Space Mono", monospace;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+      padding: 24px;
     }
-    a {
-      color: var(--accent2);
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    .page {
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 24px 16px 40px;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-    .brand {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .brand-title {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .brand-badge {
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: linear-gradient(120deg, var(--accent-soft), transparent);
-      border: 1px solid rgba(124, 92, 255, 0.4);
-      color: var(--accent2);
-    }
-    .brand-sub {
-      font-size: 13px;
-      color: var(--text-soft);
-    }
-    .header-right {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 4px;
-      font-size: 12px;
-      color: var(--text-soft);
-    }
-    .tag-pill {
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(0, 0, 0, 0.2);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .tag-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: #40ffb7;
-    }
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.4fr);
-      gap: 20px;
-    }
-    @media (max-width: 900px) {
-      .layout {
-        grid-template-columns: minmax(0, 1fr);
-      }
-      .header-right {
-        align-items: flex-start;
-      }
-    }
-    .card {
-      background: radial-gradient(circle at top, #171c35 0, #11152b 35%, #060819 100%);
-      border-radius: var(--radius-xl);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-soft);
-      padding: 18px 18px 16px;
+
+    .app {
+      width: 1200px;
+      max-width: 100%;
+      border: 4px solid #22d3ee;
+      box-shadow: 0 0 0 4px #0f172a, 0 0 40px rgba(34, 211, 238, 0.4);
+      background: linear-gradient(145deg, #020617 0, #020617 40%, #020617 100%);
+      padding: 20px 24px 28px;
       position: relative;
       overflow: hidden;
     }
-    .card::before {
+
+    /* subtle scanlines */
+    .app::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at top right, rgba(124, 92, 255, 0.12), transparent 55%);
-      opacity: 0.7;
+      background-image: linear-gradient(
+        rgba(255, 255, 255, 0.03) 1px,
+        transparent 1px
+      );
+      background-size: 100% 3px;
       pointer-events: none;
+      mix-blend-mode: soft-light;
     }
-    .card-inner {
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
       position: relative;
       z-index: 1;
     }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    .card-title {
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-    }
-    .card-sub {
-      font-size: 12px;
-      color: var(--text-soft);
-    }
-    .pill {
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(0, 0, 0, 0.28);
-    }
-    .inputs-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 8px;
-      margin-bottom: 8px;
-    }
-    .input-group {
-      flex: 1;
+
+    .title-block {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-    }
-    label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: var(--text-soft);
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      background: rgba(3, 5, 18, 0.95);
-      color: var(--text);
-      font-size: 13px;
-      outline: none;
-      transition: border-color var(--transition-fast), box-shadow var(--transition-fast),
-        background var(--transition-fast);
-    }
-    input[type="text"]::placeholder {
-      color: #5d6387;
-    }
-    input[type="text"]:focus {
-      border-color: var(--accent2);
-      box-shadow: 0 0 0 1px rgba(34, 225, 255, 0.5);
-      background: rgba(7, 10, 30, 0.98);
-    }
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 6px;
-    }
-    button {
-      border-radius: 999px;
-      border: none;
-      padding: 7px 14px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
       gap: 6px;
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast),
-        background var(--transition-fast), opacity 0.1s linear;
-      white-space: nowrap;
     }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #02030a;
-      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.6);
+
+    h1 {
+      font-family: "Press Start 2P", system-ui;
+      font-size: 18px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #facc15;
+      text-shadow: 2px 2px 0 #000, 0 0 8px #facc15;
     }
-    .btn-secondary {
-      background: rgba(10, 14, 32, 0.9);
-      color: var(--text-soft);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+
+    .subtitle {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #9ca3af;
     }
-    .btn-ghost {
-      background: transparent;
-      border: 1px dashed rgba(255, 255, 255, 0.15);
-      color: var(--text-soft);
+
+    .badge-ks {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 6px 10px;
+      border: 2px solid #22d3ee;
+      background: #020617;
+      color: #e5e7eb;
+      box-shadow: 2px 2px 0 #000;
     }
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.55);
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.4fr);
+      gap: 18px;
+      position: relative;
+      z-index: 1;
     }
-    button:active {
-      transform: translateY(0);
-      box-shadow: none;
-      opacity: 0.9;
+
+    .panel {
+      border: 3px solid #22d3ee;
+      background: rgba(15, 23, 42, 0.96);
+      padding: 14px 14px 16px;
+      box-shadow: 3px 3px 0 #000;
+      position: relative;
+      overflow: hidden;
     }
-    .status-bar {
-      margin-top: 8px;
+
+    .panel + .panel {
+      margin-top: 10px;
+    }
+
+    .panel-title {
+      font-family: "Press Start 2P", system-ui;
       font-size: 11px;
-      color: var(--text-soft);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #a5b4fc;
+      margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
-      gap: 8px;
       align-items: center;
     }
+
+    .panel-title span.label {
+      font-size: 8px;
+      padding: 2px 6px;
+      border: 1px solid #4ade80;
+      border-radius: 0;
+      color: #bbf7d0;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1.65fr);
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .field-label {
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      color: #9ca3af;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 8px 9px;
+      border: 2px solid #22d3ee;
+      background: #020617;
+      color: #e5e7eb;
+      font-family: "Space Mono", monospace;
+      font-size: 11px;
+      outline: none;
+      box-shadow: inset 0 0 0 1px #0f172a;
+    }
+
+    input[type="text"]::placeholder {
+      color: #6b7280;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 10px 0 8px;
+    }
+
+    button.pixel-btn {
+      font-family: "Press Start 2P", system-ui;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: 2px solid #22d3ee;
+      background: #020617;
+      color: #e5e7eb;
+      padding: 6px 8px;
+      cursor: pointer;
+      box-shadow: 2px 2px 0 #000;
+      transition: transform 0.05s ease, box-shadow 0.05s ease,
+        background 0.1s ease, color 0.1s ease;
+      white-space: nowrap;
+    }
+
+    button.pixel-btn:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 3px 3px 0 #000;
+      background: #0f172a;
+    }
+
+    button.pixel-btn:active {
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0 #000;
+      background: #22d3ee;
+      color: #020617;
+    }
+
+    button.pixel-btn.secondary {
+      border-color: #f97316;
+      color: #fed7aa;
+    }
+
+    button.pixel-btn.secondary:hover {
+      background: #7c2d12;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      margin-bottom: 6px;
+    }
+
     .status-dot {
       width: 8px;
       height: 8px;
-      border-radius: 999px;
-      margin-right: 4px;
-      display: inline-block;
+      border: 2px solid #111827;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
     }
-    .status-dot.ok {
-      background: #40ffb7;
-    }
-    .status-dot.err {
-      background: var(--danger);
-    }
-    .status-dot.idle {
-      background: #5d6387;
-    }
+
     .status-text {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+      color: #a5b4fc;
     }
-    .result-box {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 12px;
-      background: rgba(4, 7, 22, 0.95);
-      border: 1px solid rgba(124, 92, 255, 0.3);
-      max-height: 280px;
+
+    .output-box {
+      background: #020617;
+      border: 2px solid #4b5563;
+      padding: 8px;
+      min-height: 190px;
+      max-height: 260px;
       overflow: auto;
-      font-family: "SF Mono", ui-monospace, Menlo, Monaco, "Courier New", monospace;
+      font-family: "Space Mono", monospace;
       font-size: 11px;
+      color: #e5e7eb;
       line-height: 1.4;
-      color: #e6e7ff;
-      white-space: pre-wrap;
-      word-break: break-word;
     }
-    .result-box.empty {
-      border-style: dashed;
-      border-color: rgba(255, 255, 255, 0.12);
-      color: var(--text-soft);
+
+    .tiny {
+      font-size: 9px;
+      color: #6b7280;
+      margin-top: 4px;
     }
-    .side-card {
-      margin-bottom: 14px;
+
+    /* Right-hand panels */
+
+    .list {
+      list-style: none;
+      font-size: 10px;
+      line-height: 1.6;
+      color: #e5e7eb;
     }
-    .side-card .card-title {
-      font-size: 14px;
+
+    .list li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .side-list {
+
+    .list li::before {
+      content: "▸";
+      color: #22d3ee;
+      font-size: 9px;
+    }
+
+    .mono-line {
+      font-size: 9px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+      white-space: nowrap;
+    }
+
+    .mono-line code {
+      color: #e5e7eb;
+    }
+
+    .backend-input-row {
+      display: flex;
+      gap: 6px;
       margin-top: 6px;
-      font-size: 12px;
-      color: var(--text-soft);
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
     }
-    .side-list code {
-      font-size: 11px;
-      background: rgba(0, 0, 0, 0.35);
-      border-radius: 999px;
-      padding: 2px 7px;
+
+    .backend-input-row input {
+      flex: 1;
+      font-size: 10px;
     }
-    footer {
-      margin-top: 26px;
-      font-size: 11px;
-      color: var(--text-soft);
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      opacity: 0.8;
-    }
-    @media (max-width: 700px) {
-      footer {
-        flex-direction: column;
+
+    @media (max-width: 960px) {
+      main {
+        grid-template-columns: minmax(0, 1fr);
       }
     }
   </style>
 </head>
+
 <body>
-  <div class="page">
+  <div class="app">
     <header>
-      <div class="brand">
-        <div class="brand-title">
-          Solana Tools
-          <span class="brand-badge">By Kevin Smits</span>
-        </div>
-        <div class="brand-sub">
-          SPL on-chain insights in one Web2 dashboard. No trading, only data.
-        </div>
+      <div class="title-block">
+        <h1>SOLANA TOOLS</h1>
+        <div class="subtitle">SPL on-chain insights · Web2 style · no trading, only data</div>
       </div>
-      <div class="header-right">
-        <div class="tag-pill">
-          <span class="tag-dot"></span>
-          <span>Read-only · Uses your backend API</span>
-        </div>
-        <div>Connect this UI to your Node/TS tools in <code>solana-tools</code>.</div>
-      </div>
+      <div class="badge-ks">BY KEVIN SMITS</div>
     </header>
 
-    <main class="layout">
-      <!-- LEFT COLUMN: main tools -->
-      <section class="card">
-        <div class="card-inner">
-          <div class="card-header">
-            <div>
-              <div class="card-title">Wallet & Token Input</div>
-              <div class="card-sub">
-                Fill once, then call all tools below with one or two clicks.
-              </div>
-            </div>
-            <span class="pill">Inputs</span>
-          </div>
+    <main>
+      <!-- LEFT: Inputs + output -->
+      <section class="panel">
+        <div class="panel-title">
+          <span>Wallet &amp; Token Console</span>
+          <span class="label">INPUTS</span>
+        </div>
 
-          <div class="inputs-row">
-            <div class="input-group">
-              <label for="wallet">Wallet address</label>
-              <input
-                id="wallet"
-                type="text"
-                placeholder="Enter Solana wallet (public key)"
-                autocomplete="off"
-              />
-            </div>
-            <div class="input-group">
-              <label for="mint">Token mint</label>
-              <input
-                id="mint"
-                type="text"
-                placeholder="Enter SPL token mint (default: CBS)"
-                autocomplete="off"
-              />
-            </div>
+        <div class="grid-2">
+          <div>
+            <div class="field-label">Wallet address</div>
+            <input
+              id="wallet-input"
+              type="text"
+              placeholder="Enter Solana wallet (public key)"
+            />
           </div>
+          <div>
+            <div class="field-label">Token mint</div>
+            <input
+              id="mint-input"
+              type="text"
+              placeholder="Enter SPL token mint (default: CBS)"
+              value="B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk"
+            />
+          </div>
+        </div>
 
-          <div class="btn-row">
-            <button class="btn-primary" onclick="runWalletInfo()">
-              Wallet info
-            </button>
-            <button class="btn-secondary" onclick="runTokenInfo()">
-              Token info
-            </button>
-            <button class="btn-secondary" onclick="runHolderInfo()">
-              Holder info (snapshot)
-            </button>
-            <button class="btn-secondary" onclick="runMetrics()">
-              DEX metrics (DexScreener)
-            </button>
-            <button class="btn-secondary" onclick="runWhaleTracker()">
-              Whale tracker
-            </button>
-            <button class="btn-ghost" onclick="clearResult()">
-              Clear output
-            </button>
-          </div>
+        <div class="button-row">
+          <button id="btn-wallet-info" class="pixel-btn">Wallet info</button>
+          <button id="btn-token-info" class="pixel-btn">Token info</button>
+          <button id="btn-holder-info" class="pixel-btn">Holder info</button>
+          <button id="btn-cbs-metrics" class="pixel-btn">DEX metrics</button>
+          <button id="btn-whale-tracker" class="pixel-btn">Whale tracker</button>
+          <button id="btn-token-safety" class="pixel-btn secondary">
+            Token safety
+          </button>
+          <button id="btn-clear" class="pixel-btn" style="margin-left:auto;">
+            Clear
+          </button>
+        </div>
 
-          <div class="status-bar">
-            <div class="status-text" id="statusText">
-              <span class="status-dot idle" id="statusDot"></span>
-              <span>Idle · Waiting for request</span>
-            </div>
-            <div id="statusHint">
-              Backend base URL: <code id="baseUrlLabel"></code>
-            </div>
-          </div>
+        <div class="status-bar">
+          <div id="status-dot" class="status-dot"></div>
+          <div id="status" class="status-text">Ready</div>
+        </div>
 
-          <div id="result" class="result-box empty">
-            Results from tools will appear here (wallet-info, token-info, metrics, etc.)
-          </div>
+        <div id="output" class="output-box"></div>
+        <div class="tiny">
+          Tip: fill wallet or mint once, then try each tool with one click. This page is
+          read-only: it never sends private keys or does transactions.
         </div>
       </section>
 
-      <!-- RIGHT COLUMN: overview & docs -->
-      <section>
-        <div class="card side-card">
-          <div class="card-inner">
-            <div class="card-header">
-              <div>
-                <div class="card-title">Available tools</div>
-                <div class="card-sub">Mapped to your existing packages.</div>
-              </div>
-              <span class="pill">solana-tools</span>
-            </div>
-            <div class="side-list">
-              <div>• <strong>wallet-info</strong> → basic wallet balance / token list</div>
-              <div>• <strong>token-info</strong> → token metadata, decimals, supply</div>
-              <div>• <strong>cbs-metrics</strong> → DexScreener prices & liquidity</div>
-              <div>• <strong>holder-info</strong> → snapshot of SPL holders</div>
-              <div>• <strong>whale-tracker</strong> → large holder / movement alerts</div>
-              <div>• <strong>token-safety-check</strong> → risk checks for SPL tokens</div>
-            </div>
+      <!-- RIGHT: tools, endpoints, backend config -->
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <section class="panel">
+          <div class="panel-title">
+            <span>Available tools</span>
+            <span class="label">solana-tools</span>
           </div>
-        </div>
+          <ul class="list">
+            <li><code>wallet-info</code> – basic wallet balance / token list</li>
+            <li><code>token-info</code> – token metadata, decimals, supply</li>
+            <li><code>cbs-metrics</code> – DexScreener prices &amp; liquidity</li>
+            <li><code>holder-info</code> – snapshot of SPL holders</li>
+            <li><code>whale-tracker</code> – large holder / movement alerts</li>
+            <li><code>token-safety-check</code> – risk heuristics for SPL tokens</li>
+          </ul>
+        </section>
 
-        <div class="card side-card">
-          <div class="card-inner">
-            <div class="card-header">
-              <div>
-                <div class="card-title">Expected backend endpoints</div>
-                <div class="card-sub">Connect these routes to your TS tools.</div>
-              </div>
-              <span class="pill">API contract</span>
-            </div>
-            <div class="side-list">
-              <div><code>GET /api/wallet-info?address=...</code></div>
-              <div><code>GET /api/token-info?mint=...</code></div>
-              <div><code>GET /api/cbs-metrics?mint=...</code></div>
-              <div><code>GET /api/holder-info?mint=...</code></div>
-              <div><code>GET /api/whale-tracker?mint=...&address=...</code></div>
-              <div><code>GET /api/token-safety-check?mint=...</code></div>
-            </div>
+        <section class="panel">
+          <div class="panel-title">
+            <span>Expected backend endpoints</span>
+            <span class="label">API contract</span>
           </div>
-        </div>
+          <div class="mono-line">
+            GET <code>/api/wallet-info?address=...</code>
+          </div>
+          <div class="mono-line">
+            GET <code>/api/token-info?mint=...</code>
+          </div>
+          <div class="mono-line">
+            GET <code>/api/cbs-metrics?mint=...</code>
+          </div>
+          <div class="mono-line">
+            GET <code>/api/holder-info?mint=...</code>
+          </div>
+          <div class="mono-line">
+            GET <code>/api/whale-tracker?mint=...&amp;address=...</code>
+          </div>
+          <div class="mono-line">
+            GET <code>/api/token-safety-check?mint=...</code>
+          </div>
+        </section>
 
-        <div class="card side-card">
-          <div class="card-inner">
-            <div class="card-header">
-              <div>
-                <div class="card-title">Backend base URL</div>
-                <div class="card-sub">
-                  Change this once, UI uses it for all requests.
-                </div>
-              </div>
-              <span class="pill">Config</span>
-            </div>
-            <div class="inputs-row">
-              <div class="input-group">
-                <label for="apiBase">API base URL</label>
-                <input
-                  id="apiBase"
-                  type="text"
-                  placeholder="https://your-backend-domain.com"
-                  autocomplete="off"
-                  oninput="updateBaseUrl()"
-                />
-              </div>
-            </div>
-            <div class="card-sub" style="margin-top: 4px;">
-              Host your Node/TypeScript tools (solana-tools) behind a small API and point
-              this UI to it.
-            </div>
+        <section class="panel">
+          <div class="panel-title">
+            <span>Backend base URL</span>
+            <span class="label">Config</span>
           </div>
-        </div>
-      </section>
+          <div id="backend-label" class="mono-line"></div>
+          <div class="backend-input-row">
+            <input
+              id="backend-input"
+              type="text"
+              placeholder="https://your-backend-domain.com"
+            />
+          </div>
+          <div class="tiny">
+            Host your Node/TypeScript tools behind a small API and point this UI to it.
+            Default is the public <code>solana-tools-api</code> instance.
+          </div>
+        </section>
+      </div>
     </main>
-
-    <footer>
-      <div>
-        Built as a Web2 dashboard on top of your existing Solana CLI tools. No private keys,
-        no signing, only read-only analytics.
-      </div>
-      <div>
-        Repo: <code>smitskecbs/solana-tools</code> · Frontend file: <code>index.html</code>
-      </div>
-    </footer>
   </div>
 
   <script>
-    const DEFAULT_BASE_URL = "https://your-backend-domain.com"; // TODO: change this
-    const baseUrlInput = document.getElementById("apiBase");
-    const baseUrlLabel = document.getElementById("baseUrlLabel");
-    const statusDot = document.getElementById("statusDot");
-    const statusText = document.getElementById("statusText");
-    const resultBox = document.getElementById("result");
+    const walletInput = document.getElementById("wallet-input");
+    const mintInput = document.getElementById("mint-input");
+    const outputEl = document.getElementById("output");
+    const statusEl = document.getElementById("status");
+    const statusDot = document.getElementById("status-dot");
+    const backendLabel = document.getElementById("backend-label");
+    const backendInput = document.getElementById("backend-input");
 
-    function getBaseUrl() {
-      return (baseUrlInput.value || DEFAULT_BASE_URL).trim().replace(/\/+$/, "");
+    // Default backend = Render API
+    let API_BASE = "https://solana-tools-api.onrender.com";
+
+    backendInput.value = API_BASE;
+    backendLabel.textContent = "Backend base URL: " + API_BASE;
+
+    function setStatus(ok, text) {
+      statusEl.textContent = text;
+      statusDot.style.background = ok ? "#22c55e" : "#f97373";
+      statusDot.style.boxShadow = ok
+        ? "0 0 6px #22c55e"
+        : "0 0 6px #f97373";
     }
 
-    function updateBaseUrl() {
-      baseUrlLabel.textContent = getBaseUrl();
+    function setOutput(obj) {
+      outputEl.textContent =
+        typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
     }
 
-    // init label
-    baseUrlInput.value = "";
-    baseUrlLabel.textContent = getBaseUrl();
-
-    function setStatus(state, msg) {
-      statusDot.className = "status-dot " + (state || "idle");
-      statusText.innerHTML =
-        '<span class="status-dot ' +
-        (state || "idle") +
-        '"></span><span>' +
-        (msg || "Idle · Waiting for request") +
-        "</span>";
-    }
-
-    function setResult(content, isError) {
-      if (!content) {
-        resultBox.textContent =
-          "Results from tools will appear here (wallet-info, token-info, metrics, etc.)";
-        resultBox.classList.add("empty");
-        return;
-      }
-      resultBox.classList.remove("empty");
-      if (typeof content === "string") {
-        resultBox.textContent = content;
-      } else {
-        resultBox.textContent = JSON.stringify(content, null, 2);
-      }
-      if (isError) {
-        resultBox.style.borderColor = "rgba(255,75,129,0.9)";
-      } else {
-        resultBox.style.borderColor = "rgba(124,92,255,0.6)";
-      }
-    }
-
-    function getWallet() {
-      return (document.getElementById("wallet").value || "").trim();
-    }
-
-    function getMint() {
-      return (document.getElementById("mint").value || "").trim();
-    }
-
-    async function callEndpoint(path, params) {
-      const base = getBaseUrl();
-      const search = new URLSearchParams(params || {}).toString();
-      const url = base + path + (search ? "?" + search : "");
-
-      setStatus("idle", "Calling " + path + " …");
-      setResult("Loading " + url + " …");
-
+    async function callApi(path) {
       try {
+        const url = API_BASE.replace(/\/+$/, "") + path;
+        setStatus(true, "Calling " + path + " ...");
         const res = await fetch(url);
-        const text = await res.text();
-        let json;
-        try {
-          json = JSON.parse(text);
-        } catch {
-          json = text;
-        }
+        const data = await res.json();
         if (!res.ok) {
-          setStatus("err", "Error " + res.status + " from " + path);
-          setResult(json, true);
-        } else {
-          setStatus("ok", "OK · " + path + " responded");
-          setResult(json, false);
+          setStatus(false, "Error " + res.status + " – see JSON");
+          setOutput(data);
+          return;
         }
+        setStatus(true, "OK - " + path.split("?")[0] + " responded");
+        setOutput(data);
       } catch (e) {
-        setStatus("err", "Network error calling " + path);
-        setResult(String(e), true);
+        console.error(e);
+        setStatus(false, "Network error calling " + path);
+        setOutput({ error: String(e) });
       }
     }
 
-    function requireWallet() {
-      const w = getWallet();
-      if (!w) {
-        alert("Please enter a wallet address first.");
-        return null;
-      }
-      return w;
-    }
+    document
+      .getElementById("btn-wallet-info")
+      .addEventListener("click", () => {
+        const addr = walletInput.value.trim();
+        if (!addr) {
+          setStatus(false, "Fill wallet address first");
+          return;
+        }
+        callApi("/api/wallet-info?address=" + encodeURIComponent(addr));
+      });
 
-    function requireMint(defaultToCBS = false) {
-      let m = getMint();
-      if (!m && defaultToCBS) {
-        m = "B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk"; // CBS default
-      }
-      if (!m) {
-        alert("Please enter a token mint first.");
-        return null;
-      }
-      return m;
-    }
+    document
+      .getElementById("btn-token-info")
+      .addEventListener("click", () => {
+        const mint =
+          mintInput.value.trim() ||
+          "B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk";
+        callApi("/api/token-info?mint=" + encodeURIComponent(mint));
+      });
 
-    function runWalletInfo() {
-      const w = requireWallet();
-      if (!w) return;
-      callEndpoint("/api/wallet-info", { address: w });
-    }
+    document
+      .getElementById("btn-cbs-metrics")
+      .addEventListener("click", () => {
+        const mint =
+          mintInput.value.trim() ||
+          "B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk";
+        callApi("/api/cbs-metrics?mint=" + encodeURIComponent(mint));
+      });
 
-    function runTokenInfo() {
-      const m = requireMint(true);
-      if (!m) return;
-      callEndpoint("/api/token-info", { mint: m });
-    }
+    document
+      .getElementById("btn-token-safety")
+      .addEventListener("click", () => {
+        const mint =
+          mintInput.value.trim() ||
+          "B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk";
+        callApi(
+          "/api/token-safety-check?mint=" + encodeURIComponent(mint)
+        );
+      });
 
-    function runHolderInfo() {
-      const m = requireMint(true);
-      if (!m) return;
-      callEndpoint("/api/holder-info", { mint: m });
-    }
+    // Placeholders voor toekomstige tools
+    document
+      .getElementById("btn-holder-info")
+      .addEventListener("click", () => {
+        setStatus(false, "Holder info API not wired yet");
+        setOutput(
+          "Endpoint /api/holder-info not implemented on this backend yet."
+        );
+      });
 
-    function runMetrics() {
-      const m = requireMint(true);
-      if (!m) return;
-      callEndpoint("/api/cbs-metrics", { mint: m });
-    }
+    document
+      .getElementById("btn-whale-tracker")
+      .addEventListener("click", () => {
+        setStatus(false, "Whale tracker API not wired yet");
+        setOutput(
+          "Endpoint /api/whale-tracker not implemented on this backend yet."
+        );
+      });
 
-    function runWhaleTracker() {
-      const w = requireWallet();
-      const m = requireMint(true);
-      if (!w || !m) return;
-      callEndpoint("/api/whale-tracker", { address: w, mint: m });
-    }
+    document.getElementById("btn-clear").addEventListener("click", () => {
+      setOutput("");
+      setStatus(true, "Cleared");
+    });
 
-    function clearResult() {
-      setResult("");
-      setStatus("idle", "Idle · Waiting for request");
-    }
+    backendInput.addEventListener("change", () => {
+      const v = backendInput.value.trim();
+      if (!v) return;
+      API_BASE = v.replace(/\/+$/, "");
+      backendLabel.textContent = "Backend base URL: " + API_BASE;
+      setStatus(true, "Backend URL updated");
+    });
+
+    // initial status
+    setStatus(true, "Ready");
   </script>
 </body>
 </html>
