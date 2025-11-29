@@ -39,7 +39,6 @@
       overflow: hidden;
     }
 
-    /* subtle scanlines */
     .app::before {
       content: "";
       position: absolute;
@@ -132,7 +131,6 @@
       font-size: 8px;
       padding: 2px 6px;
       border: 1px solid #4ade80;
-      border-radius: 0;
       color: #bbf7d0;
     }
 
@@ -243,6 +241,7 @@
       font-size: 11px;
       color: #e5e7eb;
       line-height: 1.4;
+      white-space: pre;
     }
 
     .tiny {
@@ -250,8 +249,6 @@
       color: #6b7280;
       margin-top: 4px;
     }
-
-    /* Right-hand panels */
 
     .list {
       list-style: none;
@@ -307,7 +304,7 @@
     <header>
       <div class="title-block">
         <h1>SOLANA TOOLS</h1>
-        <div class="subtitle">SPL on-chain insights · Web2 style · no trading, only data</div>
+        <div class="subtitle">SPL on-chain insights · Web2 style · read-only</div>
       </div>
       <div class="badge-ks">BY KEVIN SMITS</div>
     </header>
@@ -361,12 +358,11 @@
 
         <div id="output" class="output-box"></div>
         <div class="tiny">
-          Tip: fill wallet or mint once, then try each tool with one click. This page is
-          read-only: it never sends private keys or does transactions.
+          Read-only tools: this UI never asks for private keys and does no transactions.
         </div>
       </section>
 
-      <!-- RIGHT: tools, endpoints, backend config -->
+      <!-- RIGHT SIDE -->
       <div style="display:flex; flex-direction:column; gap:10px;">
         <section class="panel">
           <div class="panel-title">
@@ -374,12 +370,12 @@
             <span class="label">solana-tools</span>
           </div>
           <ul class="list">
-            <li><code>wallet-info</code> – basic wallet balance / token list</li>
-            <li><code>token-info</code> – token metadata, decimals, supply</li>
+            <li><code>wallet-info</code> – SOL balance &amp; SPL token balances</li>
+            <li><code>token-info</code> – token decimals, supply, authorities</li>
             <li><code>cbs-metrics</code> – DexScreener prices &amp; liquidity</li>
-            <li><code>holder-info</code> – snapshot of SPL holders</li>
-            <li><code>whale-tracker</code> – large holder / movement alerts</li>
-            <li><code>token-safety-check</code> – risk heuristics for SPL tokens</li>
+            <li><code>holder-info</code> – SPL holder snapshot (coming soon)</li>
+            <li><code>whale-tracker</code> – large holder / movement alerts (coming)</li>
+            <li><code>token-safety-check</code> – risk heuristics (immutable, LP, freeze)</li>
           </ul>
         </section>
 
@@ -422,8 +418,8 @@
             />
           </div>
           <div class="tiny">
-            Host your Node/TypeScript tools behind a small API and point this UI to it.
-            Default is the public <code>solana-tools-api</code> instance.
+            Default points to the public <code>solana-tools-api</code> instance on Render.
+            You can host your own and override the URL here.
           </div>
         </section>
       </div>
@@ -439,8 +435,9 @@
     const backendLabel = document.getElementById("backend-label");
     const backendInput = document.getElementById("backend-input");
 
-    // Default backend = Render API
+    // Default backend = jouw Render API
     let API_BASE = "https://solana-tools-api.onrender.com";
+    let lastEndpoint = "";
 
     backendInput.value = API_BASE;
     backendLabel.textContent = "Backend base URL: " + API_BASE;
@@ -448,33 +445,91 @@
     function setStatus(ok, text) {
       statusEl.textContent = text;
       statusDot.style.background = ok ? "#22c55e" : "#f97373";
-      statusDot.style.boxShadow = ok
-        ? "0 0 6px #22c55e"
-        : "0 0 6px #f97373";
+      statusDot.style.boxShadow = ok ? "0 0 6px #22c55e" : "0 0 6px #f97373";
     }
 
-    function setOutput(obj) {
+    function renderOutput(endpoint, data) {
+      if (endpoint === "/api/wallet-info" && data && typeof data === "object") {
+        const lines = [];
+
+        lines.push("=== WALLET INFO ===");
+        lines.push("Address : " + (data.address || "?"));
+        if (typeof data.sol === "number") {
+          lines.push("SOL     : " + data.sol.toFixed(6) + " SOL");
+        }
+
+        const tokens = Array.isArray(data.tokens) ? data.tokens : [];
+        if (tokens.length) {
+          lines.push("");
+          lines.push("SPL tokens (non-zero balances):");
+          tokens.forEach((t, i) => {
+            const amt =
+              typeof t.uiAmount === "number"
+                ? t.uiAmount.toString()
+                : String(t.amountRaw || "?");
+            lines.push(
+              " " +
+                (i + 1) +
+                ". " +
+                amt +
+                "  (mint: " +
+                t.mint +
+                ", decimals: " +
+                t.decimals +
+                ")"
+            );
+          });
+        } else {
+          lines.push("");
+          lines.push("SPL tokens : none with non-zero balance returned.");
+        }
+
+        lines.push("");
+        lines.push("--- RAW JSON ---");
+        lines.push(JSON.stringify(data, null, 2));
+
+        outputEl.textContent = lines.join("\n");
+        return;
+      }
+
+      if (
+        (endpoint === "/api/token-info" ||
+          endpoint === "/api/token-safety-check" ||
+          endpoint === "/api/cbs-metrics") &&
+        data &&
+        typeof data === "object"
+      ) {
+        outputEl.textContent = JSON.stringify(data, null, 2);
+        return;
+      }
+
+      // Fallback
       outputEl.textContent =
-        typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+        typeof data === "string" ? data : JSON.stringify(data, null, 2);
     }
 
     async function callApi(path) {
       try {
-        const url = API_BASE.replace(/\/+$/, "") + path;
-        setStatus(true, "Calling " + path + " ...");
+        const base = API_BASE.replace(/\/+$/, "");
+        const url = base + path;
+        lastEndpoint = path.split("?")[0];
+
+        setStatus(true, "Calling " + lastEndpoint + " ...");
         const res = await fetch(url);
         const data = await res.json();
+
         if (!res.ok) {
           setStatus(false, "Error " + res.status + " – see JSON");
-          setOutput(data);
+          renderOutput(lastEndpoint, data);
           return;
         }
-        setStatus(true, "OK - " + path.split("?")[0] + " responded");
-        setOutput(data);
+
+        setStatus(true, "OK - " + lastEndpoint + " responded");
+        renderOutput(lastEndpoint, data);
       } catch (e) {
         console.error(e);
         setStatus(false, "Network error calling " + path);
-        setOutput({ error: String(e) });
+        renderOutput(lastEndpoint, { error: String(e) });
       }
     }
 
@@ -518,12 +573,13 @@
         );
       });
 
-    // Placeholders voor toekomstige tools
+    // Nog niet geïmplementeerde endpoints
     document
       .getElementById("btn-holder-info")
       .addEventListener("click", () => {
         setStatus(false, "Holder info API not wired yet");
-        setOutput(
+        renderOutput(
+          "/api/holder-info",
           "Endpoint /api/holder-info not implemented on this backend yet."
         );
       });
@@ -532,13 +588,14 @@
       .getElementById("btn-whale-tracker")
       .addEventListener("click", () => {
         setStatus(false, "Whale tracker API not wired yet");
-        setOutput(
+        renderOutput(
+          "/api/whale-tracker",
           "Endpoint /api/whale-tracker not implemented on this backend yet."
         );
       });
 
     document.getElementById("btn-clear").addEventListener("click", () => {
-      setOutput("");
+      outputEl.textContent = "";
       setStatus(true, "Cleared");
     });
 
@@ -550,7 +607,6 @@
       setStatus(true, "Backend URL updated");
     });
 
-    // initial status
     setStatus(true, "Ready");
   </script>
 </body>
