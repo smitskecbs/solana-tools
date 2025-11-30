@@ -5,7 +5,7 @@
     <title>Solana Tools – SPL Toolkit by Kevin Smits</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Nintendo-stijl font -->
+    <!-- Nintendo-style font -->
     <link
       href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
       rel="stylesheet"
@@ -63,6 +63,20 @@
         text-shadow: 0 0 6px rgba(0, 224, 255, 0.5);
       }
 
+      header p {
+        margin-top: 4px;
+        font-size: 8px;
+        color: var(--muted);
+        max-width: 420px;
+      }
+
+      .header-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+      }
+
       header .badge {
         font-size: 8px;
         padding: 4px 8px;
@@ -75,11 +89,47 @@
         gap: 4px;
       }
 
-      header p {
-        margin-top: 4px;
+      .social-buttons {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .social-btn {
         font-size: 8px;
-        color: var(--muted);
-        max-width: 420px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        text-decoration: none;
+        color: var(--text);
+        background: rgba(6, 12, 38, 0.9);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: 0.12s ease-out;
+      }
+
+      .social-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.6);
+      }
+
+      .social-btn span.dot {
+        width: 4px;
+        height: 4px;
+        border-radius: 999px;
+        background: var(--accent);
+      }
+
+      .social-btn.x {
+        border-color: var(--accent);
+      }
+
+      .social-btn.tg {
+        border-color: var(--success);
       }
 
       .layout {
@@ -453,13 +503,17 @@
           font-size: 14px;
         }
 
+        .header-right {
+          align-items: flex-start;
+        }
+
         .panel {
           padding: 10px;
-          overflow: visible; /* voorkom dat content wordt afgesneden */
+          overflow: visible;
         }
 
         .inputs-grid {
-          grid-template-columns: 1fr; /* wallet + mint onder elkaar op mobiel */
+          grid-template-columns: 1fr;
         }
 
         .button-row {
@@ -471,7 +525,6 @@
           max-width: 180px;
         }
 
-        /* Tabellen scrollbaar op kleine schermen */
         table {
           display: block;
           overflow-x: auto;
@@ -488,9 +541,29 @@
           <h1>SOLANA TOOLS</h1>
           <p>SPL on-chain insights in one Web2 dashboard. Read-only, no keys.</p>
         </div>
-        <div>
+        <div class="header-right">
           <div class="badge">
             <span>BY KEVIN SMITS</span>
+          </div>
+          <div class="social-buttons">
+            <a
+              class="social-btn x"
+              href="https://x.com/smitske180"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="dot"></span>
+              X (Kevin Smits)
+            </a>
+            <a
+              class="social-btn tg"
+              href="https://t.me/smitske"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="dot"></span>
+              Telegram (@smitske)
+            </a>
           </div>
         </div>
       </header>
@@ -821,389 +894,4 @@
 
         let html = "<h3>Wallet overview</h3>";
         html += "<div class='grid-2'>";
-        html += "<div>";
-        html +=
-          "<p><strong>Address:</strong><br />" +
-          escapeHtml(data.address) +
-          "</p>";
-        html +=
-          "<p><strong>SOL balance:</strong> " +
-          (data.sol != null ? data.sol.toFixed(6) : "n/a") +
-          " SOL</p>";
-        html +=
-          "<p><strong>Lamports:</strong> " +
-          (data.lamports != null ? data.lamports.toString() : "n/a") +
-          "</p>";
-        html += "</div>";
 
-        html += "<div>";
-        html +=
-          "<p><strong>RPC:</strong><br />" +
-          escapeHtml(data.rpcUrl || "") +
-          "</p>";
-        html +=
-          "<p><strong>SPL tokens found:</strong> " + tokens.length + "</p>";
-        html +=
-          "<small>Only non-zero SPL balances are shown. Names/decimals come from on-chain token accounts.</small>";
-        html += "</div>";
-        html += "</div>";
-
-        if (tokens.length > 0) {
-          html += "<h3 style='margin-top:8px'>SPL token balances</h3>";
-          html += "<table><thead><tr>";
-          html += "<th>#</th><th>Mint</th><th>Amount</th><th>Decimals</th>";
-          html += "</tr></thead><tbody>";
-
-          tokens.forEach((t, i) => {
-            html += "<tr>";
-            html += "<td>" + (i + 1) + "</td>";
-            html += "<td>" + escapeHtml(t.mint || "") + "</td>";
-            html +=
-              "<td>" +
-              (t.uiAmount != null
-                ? Number(t.uiAmount).toLocaleString()
-                : "0") +
-              "</td>";
-            html += "<td>" + (t.decimals != null ? t.decimals : "?") + "</td>";
-            html += "</tr>";
-          });
-
-          html += "</tbody></table>";
-        } else {
-          html +=
-            "<p style='margin-top:6px'>No SPL token balances detected.</p>";
-        }
-
-        outputInner.innerHTML = html;
-      }
-
-      function renderTokenInfo(data) {
-        let html = "<h3>Token mint info</h3>";
-        html += "<div class='grid-2'>";
-        html += "<div>";
-        html += "<p><strong>Mint:</strong><br />" +
-          escapeHtml(data.mint) + "</p>";
-        html += "<p><strong>Decimals:</strong> " + data.decimals + "</p>";
-        html +=
-          "<p><strong>Supply:</strong> " +
-          Number(data.supply).toLocaleString() +
-          "</p>";
-        html += "</div>";
-
-        html += "<div>";
-        html +=
-          "<p><strong>Mint authority:</strong><br />" +
-          (data.mintAuthority ||
-            "<span style='color:#4bffb1'>None (immutable)</span>") +
-          "</p>";
-        html +=
-          "<p><strong>Freeze authority:</strong><br />" +
-          (data.freezeAuthority ||
-            "<span style='color:#4bffb1'>None (no freeze)</span>") +
-          "</p>";
-        html +=
-          "<p><strong>Initialized:</strong> " +
-          (data.isInitialized ? "Yes" : "No") +
-          "</p>";
-        html += "</div>";
-        html += "</div>";
-
-        outputInner.innerHTML = html;
-      }
-
-      function renderDexMetrics(data) {
-        const ray = Array.isArray(data.raydium) ? data.raydium : [];
-        const others = Array.isArray(data.others) ? data.others : [];
-
-        let html = "<h3>DEX metrics (DexScreener)</h3>";
-        html += "<div class='grid-2'>";
-        html += "<div>";
-        html += "<p><strong>Mint:</strong><br />" +
-          escapeHtml(data.mint) + "</p>";
-        html +=
-          "<p><strong>Total pools:</strong> " + (data.totalPools || 0) + "</p>";
-        html +=
-          "<p><strong>Raydium pools:</strong> " +
-          (data.raydiumCount || 0) +
-          "</p>";
-        html +=
-          "<p><strong>Other DEX pools:</strong> " +
-          (data.otherDexCount || 0) +
-          "</p>";
-        html += "</div>";
-
-        html += "<div>";
-        html +=
-          "<p><strong>Raydium total liquidity:</strong><br />$" +
-          (data.totalLiquidityUsd != null
-            ? data.totalLiquidityUsd.toFixed(2)
-            : "0.00") +
-          "</p>";
-        html +=
-          "<small>Liquidity and prices are read from DexScreener's public API.</small>";
-        html += "</div>";
-        html += "</div>";
-
-        if (ray.length > 0) {
-          html += "<h3 style='margin-top:8px'>Raydium pools</h3>";
-          html += "<table><thead><tr>";
-          html += "<th>#</th><th>Pair</th><th>Price (USD)</th><th>Liquidity</th>";
-          html += "</tr></thead><tbody>";
-          ray.forEach((p, i) => {
-            html += "<tr>";
-            html += "<td>" + (i + 1) + "</td>";
-            const pair =
-              (p.baseToken && p.baseToken.symbol) +
-              " / " +
-              (p.quoteToken && p.quoteToken.symbol);
-            html += "<td>" + escapeHtml(pair) + "</td>";
-            html += "<td>$" + (p.priceUsd || "0.000000") + "</td>";
-            html +=
-              "<td>$" +
-              (p.liquidityUsd != null ? p.liquidityUsd.toFixed(2) : "0.00") +
-              "</td>";
-            html += "</tr>";
-          });
-          html += "</tbody></table>";
-        }
-
-        if (others.length > 0) {
-          html +=
-            "<p style='margin-top:6px'><strong>Other DEX pools:</strong> " +
-            others.length +
-            " (not listed individually here).</p>";
-        }
-
-        outputInner.innerHTML = html;
-      }
-
-      function renderHolderInfo(data) {
-        const holders = Array.isArray(data.holders) ? data.holders : [];
-        const top20 = holders.slice(0, 20);
-
-        let html = "<h3>Holder distribution</h3>";
-        html += "<div class='grid-2'>";
-        html += "<div>";
-        html += "<p><strong>Mint:</strong><br />" +
-          escapeHtml(data.mint) + "</p>";
-        html +=
-          "<p><strong>Total holders:</strong> " +
-          (data.totalHolders != null ? data.totalHolders : "?") +
-          "</p>";
-        html +=
-          "<p><strong>Snapshot holders:</strong> " +
-          (data.filteredCount != null ? data.filteredCount : "?") +
-          "</p>";
-        html += "</div>";
-
-        const c = data.concentration || {};
-        html += "<div>";
-        html +=
-          "<p><strong>Top 1:</strong> " +
-          (c.top1 != null ? c.top1.toFixed(2) : "0.00") +
-          "% of supply</p>";
-        html +=
-          "<p><strong>Top 5:</strong> " +
-          (c.top5 != null ? c.top5.toFixed(2) : "0.00") +
-          "% of supply</p>";
-        html +=
-          "<p><strong>Top 10:</strong> " +
-          (c.top10 != null ? c.top10.toFixed(2) : "0.00") +
-          "% of supply</p>";
-        html += "</div>";
-        html += "</div>";
-
-        if (top20.length > 0) {
-          html += "<h3 style='margin-top:8px'>Top holders (first 20)</h3>";
-          html += "<table><thead><tr>";
-          html += "<th>#</th><th>Owner</th><th>Amount</th><th>% of supply</th>";
-          html += "</tr></thead><tbody>";
-
-          top20.forEach((h, i) => {
-            html += "<tr>";
-            html += "<td>" + (i + 1) + "</td>";
-            html += "<td>" + escapeHtml(h.owner) + "</td>";
-            html +=
-              "<td>" +
-              (h.uiAmount != null
-                ? Number(h.uiAmount).toLocaleString(undefined, {
-                    maximumFractionDigits: 6,
-                  })
-                : "0") +
-              "</td>";
-            html +=
-              "<td>" +
-              (h.percentageOfSupply != null
-                ? h.percentageOfSupply.toFixed(4)
-                : "0.0000") +
-              "%</td>";
-            html += "</tr>";
-          });
-
-          html += "</tbody></table>";
-        } else {
-          html +=
-            "<p style='margin-top:6px'>No holders found in this snapshot.</p>";
-        }
-
-        if (data.note) {
-          html +=
-            "<p style='margin-top:6px'><small>" +
-            escapeHtml(data.note) +
-            "</small></p>";
-        }
-
-        outputInner.innerHTML = html;
-      }
-
-      function renderSafetyCheck(data) {
-        const safety = data.safety || {};
-        const reasons = Array.isArray(safety.reasons) ? safety.reasons : [];
-        const risk = safety.riskLevel || "unknown";
-
-        let pillClass = "yellow";
-        if (risk === "low") pillClass = "green";
-        if (risk === "high") pillClass = "red";
-
-        let html = "<h3>Token safety check</h3>";
-        html += "<div class='grid-2'>";
-        html += "<div>";
-        html += "<p><strong>Mint:</strong><br />" +
-          escapeHtml(data.mint) + "</p>";
-        html +=
-          "<p><strong>Risk level:</strong> <span class='pill " +
-          pillClass +
-          "'>" +
-          risk.toUpperCase() +
-          "</span></p>";
-        html += "</div>";
-
-        html += "<div>";
-        html +=
-          "<p><strong>Immutable mint:</strong> " +
-          (safety.immutableMint ? "Yes" : "No") +
-          "</p>";
-        html +=
-          "<p><strong>Freeze authority set:</strong> " +
-          (safety.canFreeze ? "Yes" : "No") +
-          "</p>";
-        html +=
-          "<p><strong>Has Raydium pools:</strong> " +
-          (safety.hasRaydiumPool ? "Yes" : "No") +
-          "</p>";
-        html += "</div>";
-        html += "</div>";
-
-        if (reasons.length > 0) {
-          html += "<h3 style='margin-top:8px'>Why this rating?</h3>";
-          html += "<ul>";
-          reasons.forEach((r) => {
-            html += "<li>" + escapeHtml(r) + "</li>";
-          });
-          html += "</ul>";
-        }
-
-        html +=
-          "<p style='margin-top:6px'><small>" +
-          escapeHtml(
-            data.disclaimer ||
-              "Heuristic only. Not financial advice. Always DYOR."
-          ) +
-          "</small></p>";
-
-        outputInner.innerHTML = html;
-      }
-
-      function renderWhaleTracker(data) {
-        const whales = Array.isArray(data.whales) ? data.whales : [];
-        const c = data.concentration || {};
-
-        let html = "<h3>Whale tracker</h3>";
-        html += "<div class='grid-2'>";
-        html += "<div>";
-        html += "<p><strong>Mint:</strong><br />" +
-          escapeHtml(data.mint) + "</p>";
-        html +=
-          "<p><strong>Whale threshold:</strong> ≥ " +
-          (data.minPct != null ? data.minPct.toFixed(2) : "1.00") +
-          "% of supply</p>";
-        html +=
-          "<p><strong>Whales found:</strong> " +
-          (whales.length || 0) +
-          "</p>";
-        html += "</div>";
-
-        html += "<div>";
-        html +=
-          "<p><strong>Top 1:</strong> " +
-          (c.top1 != null ? c.top1.toFixed(2) : "0.00") +
-          "%</p>";
-        html +=
-          "<p><strong>Top 5:</strong> " +
-          (c.top5 != null ? c.top5.toFixed(2) : "0.00") +
-          "%</p>";
-        html +=
-          "<p><strong>Top 10:</strong> " +
-          (c.top10 != null ? c.top10.toFixed(2) : "0.00") +
-          "%</p>";
-        html += "</div>";
-        html += "</div>";
-
-        if (whales.length > 0) {
-          html += "<h3 style='margin-top:8px'>Whale wallets</h3>";
-          html += "<table><thead><tr>";
-          html += "<th>#</th><th>Owner</th><th>Amount</th><th>% of supply</th>";
-          html += "</tr></thead><tbody>";
-
-          whales.forEach((w, i) => {
-            html += "<tr>";
-            html += "<td>" + (i + 1) + "</td>";
-            html += "<td>" + escapeHtml(w.owner) + "</td>";
-            html +=
-              "<td>" +
-              (w.uiAmount != null
-                ? Number(w.uiAmount).toLocaleString(undefined, {
-                    maximumFractionDigits: 6,
-                  })
-                : "0") +
-              "</td>";
-            html +=
-              "<td>" +
-              (w.percentageOfSupply != null
-                ? w.percentageOfSupply.toFixed(4)
-                : "0.0000") +
-              "%</td>";
-            html += "</tr>";
-          });
-
-          html += "</tbody></table>";
-        } else {
-          html +=
-            "<p style='margin-top:6px'>No whales found with this threshold.</p>";
-        }
-
-        if (data.note) {
-          html +=
-            "<p style='margin-top:6px'><small>" +
-            escapeHtml(data.note) +
-            "</small></p>";
-        }
-
-        outputInner.innerHTML = html;
-      }
-
-      function escapeHtml(str) {
-        if (str == null) return "";
-        return String(str)
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&#039;");
-      }
-
-      // Init
-      getBaseUrl();
-    </script>
-  </body>
-</html>
