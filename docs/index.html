@@ -455,6 +455,11 @@
 
         .panel {
           padding: 10px;
+          overflow: visible; /* voorkom dat content wordt afgesneden */
+        }
+
+        .inputs-grid {
+          grid-template-columns: 1fr; /* wallet + mint onder elkaar op mobiel */
         }
 
         .button-row {
@@ -791,7 +796,18 @@
           let msg = res.status + " " + res.statusText;
           try {
             const text = await res.text();
-            msg += " – " + text;
+            try {
+              const parsed = JSON.parse(text);
+              if (parsed.message) {
+                msg += " – " + parsed.message;
+              } else if (parsed.error) {
+                msg += " – " + parsed.error;
+              } else {
+                msg += " – " + text;
+              }
+            } catch {
+              msg += " – " + text;
+            }
           } catch (_) {}
           throw new Error(msg);
         }
