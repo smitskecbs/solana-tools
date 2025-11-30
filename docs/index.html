@@ -304,7 +304,7 @@
         border-radius: 10px;
         border: 1px solid var(--border);
         background: radial-gradient(circle at top, #131a3d 0, #050816 60%);
-        padding: 12px 10px 10px 10px; /* extra top-padding */
+        padding: 12px 10px 10px 10px;
         min-height: 170px;
         font-size: 9px;
         overflow: auto;
@@ -325,7 +325,7 @@
       .output-inner {
         padding-left: 16px;
         white-space: normal;
-        overflow-wrap: anywhere; /* lange mints/URLs netjes afbreken */
+        overflow-wrap: anywhere;
       }
 
       .output h3 {
@@ -371,7 +371,7 @@
         padding: 3px 4px;
         border-bottom: 1px solid rgba(50, 60, 100, 0.7);
         text-align: left;
-        overflow-wrap: anywhere; /* addresses breken i.p.v. overlappen */
+        overflow-wrap: anywhere;
       }
 
       th {
@@ -434,6 +434,43 @@
       @media (max-width: 900px) {
         .layout {
           grid-template-columns: minmax(0, 1fr);
+        }
+      }
+
+      @media (max-width: 640px) {
+        body {
+          font-size: 8px;
+          padding: 10px;
+        }
+
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 6px;
+        }
+
+        header h1 {
+          font-size: 14px;
+        }
+
+        .panel {
+          padding: 10px;
+        }
+
+        .button-row {
+          gap: 4px;
+        }
+
+        .status-right {
+          font-size: 7px;
+          max-width: 180px;
+        }
+
+        /* Tabellen scrollbaar op kleine schermen */
+        table {
+          display: block;
+          overflow-x: auto;
+          white-space: nowrap;
         }
       }
     </style>
@@ -559,8 +596,8 @@
                   for SPL tokens
                 </li>
                 <li>
-                  <strong>whale-tracker</strong> → designed for large holder
-                  movements (API coming next)
+                  <strong>whale-tracker</strong> → large holder overview
+                  (backed by /api/whale-tracker)
                 </li>
               </ul>
             </div>
@@ -576,7 +613,7 @@
               <code>GET /api/cbs-metrics?mint=...</code>
               <code>GET /api/holder-info?mint=...</code>
               <code>GET /api/token-safety-check?mint=...</code>
-              <!-- whale-tracker intentionally not wired yet -->
+              <code>GET /api/whale-tracker?mint=...&amp;minPct=1&amp;limit=20</code>
             </div>
 
             <div class="panel-title" style="margin-top: 10px">
@@ -663,7 +700,8 @@
         let mint = mintInput.value.trim();
         if (!mint) {
           // default CBS mint
-          mint = "B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk";
+          mint =
+            "B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk";
           mintInput.value = mint;
         }
         return mint;
@@ -695,21 +733,24 @@
           } else if (tool === "token") {
             const mint = requireMint();
             const url =
-              baseUrl + "/api/token-info?mint=" + encodeURIComponent(mint);
+              baseUrl + "/api/token-info?mint=" +
+              encodeURIComponent(mint);
             const data = await fetchJson(url);
             renderTokenInfo(data);
             setStatus("token info ok", "ok");
           } else if (tool === "holders") {
             const mint = requireMint();
             const url =
-              baseUrl + "/api/holder-info?mint=" + encodeURIComponent(mint);
+              baseUrl + "/api/holder-info?mint=" +
+              encodeURIComponent(mint);
             const data = await fetchJson(url);
             renderHolderInfo(data);
             setStatus("holder info ok", "ok");
           } else if (tool === "dex") {
             const mint = requireMint();
             const url =
-              baseUrl + "/api/cbs-metrics?mint=" + encodeURIComponent(mint);
+              baseUrl + "/api/cbs-metrics?mint=" +
+              encodeURIComponent(mint);
             const data = await fetchJson(url);
             renderDexMetrics(data);
             setStatus("dex metrics ok", "ok");
@@ -723,8 +764,15 @@
             renderSafetyCheck(data);
             setStatus("safety check ok", "ok");
           } else if (tool === "whale") {
-            renderWhaleComingSoon();
-            setStatus("whale tracker (ui only)", "ok");
+            const mint = requireMint();
+            const url =
+              baseUrl +
+              "/api/whale-tracker?mint=" +
+              encodeURIComponent(mint) +
+              "&minPct=1&limit=20";
+            const data = await fetchJson(url);
+            renderWhaleTracker(data);
+            setStatus("whale tracker ok", "ok");
           }
         } catch (err) {
           console.error(err);
@@ -817,7 +865,8 @@
         let html = "<h3>Token mint info</h3>";
         html += "<div class='grid-2'>";
         html += "<div>";
-        html += "<p><strong>Mint:</strong><br />" + escapeHtml(data.mint) + "</p>";
+        html += "<p><strong>Mint:</strong><br />" +
+          escapeHtml(data.mint) + "</p>";
         html += "<p><strong>Decimals:</strong> " + data.decimals + "</p>";
         html +=
           "<p><strong>Supply:</strong> " +
@@ -853,7 +902,8 @@
         let html = "<h3>DEX metrics (DexScreener)</h3>";
         html += "<div class='grid-2'>";
         html += "<div>";
-        html += "<p><strong>Mint:</strong><br />" + escapeHtml(data.mint) + "</p>";
+        html += "<p><strong>Mint:</strong><br />" +
+          escapeHtml(data.mint) + "</p>";
         html +=
           "<p><strong>Total pools:</strong> " + (data.totalPools || 0) + "</p>";
         html +=
@@ -918,7 +968,8 @@
         let html = "<h3>Holder distribution</h3>";
         html += "<div class='grid-2'>";
         html += "<div>";
-        html += "<p><strong>Mint:</strong><br />" + escapeHtml(data.mint) + "</p>";
+        html += "<p><strong>Mint:</strong><br />" +
+          escapeHtml(data.mint) + "</p>";
         html +=
           "<p><strong>Total holders:</strong> " +
           (data.totalHolders != null ? data.totalHolders : "?") +
@@ -1001,7 +1052,8 @@
         let html = "<h3>Token safety check</h3>";
         html += "<div class='grid-2'>";
         html += "<div>";
-        html += "<p><strong>Mint:</strong><br />" + escapeHtml(data.mint) + "</p>";
+        html += "<p><strong>Mint:</strong><br />" +
+          escapeHtml(data.mint) + "</p>";
         html +=
           "<p><strong>Risk level:</strong> <span class='pill " +
           pillClass +
@@ -1046,11 +1098,81 @@
         outputInner.innerHTML = html;
       }
 
-      function renderWhaleComingSoon() {
-        const html =
-          "<h3>Whale tracker</h3>" +
-          "<p>This UI button is ready, but the <code>/api/whale-tracker</code> endpoint isn't wired on your backend yet.</p>" +
-          "<p style='margin-top:4px'>You can implement it later in your <strong>solana-tools-api</strong> project (for example using your <em>whale-tracker</em> package) and keep this page as-is.</p>";
+      function renderWhaleTracker(data) {
+        const whales = Array.isArray(data.whales) ? data.whales : [];
+        const c = data.concentration || {};
+
+        let html = "<h3>Whale tracker</h3>";
+        html += "<div class='grid-2'>";
+        html += "<div>";
+        html += "<p><strong>Mint:</strong><br />" +
+          escapeHtml(data.mint) + "</p>";
+        html +=
+          "<p><strong>Whale threshold:</strong> ≥ " +
+          (data.minPct != null ? data.minPct.toFixed(2) : "1.00") +
+          "% of supply</p>";
+        html +=
+          "<p><strong>Whales found:</strong> " +
+          (whales.length || 0) +
+          "</p>";
+        html += "</div>";
+
+        html += "<div>";
+        html +=
+          "<p><strong>Top 1:</strong> " +
+          (c.top1 != null ? c.top1.toFixed(2) : "0.00") +
+          "%</p>";
+        html +=
+          "<p><strong>Top 5:</strong> " +
+          (c.top5 != null ? c.top5.toFixed(2) : "0.00") +
+          "%</p>";
+        html +=
+          "<p><strong>Top 10:</strong> " +
+          (c.top10 != null ? c.top10.toFixed(2) : "0.00") +
+          "%</p>";
+        html += "</div>";
+        html += "</div>";
+
+        if (whales.length > 0) {
+          html += "<h3 style='margin-top:8px'>Whale wallets</h3>";
+          html += "<table><thead><tr>";
+          html += "<th>#</th><th>Owner</th><th>Amount</th><th>% of supply</th>";
+          html += "</tr></thead><tbody>";
+
+          whales.forEach((w, i) => {
+            html += "<tr>";
+            html += "<td>" + (i + 1) + "</td>";
+            html += "<td>" + escapeHtml(w.owner) + "</td>";
+            html +=
+              "<td>" +
+              (w.uiAmount != null
+                ? Number(w.uiAmount).toLocaleString(undefined, {
+                    maximumFractionDigits: 6,
+                  })
+                : "0") +
+              "</td>";
+            html +=
+              "<td>" +
+              (w.percentageOfSupply != null
+                ? w.percentageOfSupply.toFixed(4)
+                : "0.0000") +
+              "%</td>";
+            html += "</tr>";
+          });
+
+          html += "</tbody></table>";
+        } else {
+          html +=
+            "<p style='margin-top:6px'>No whales found with this threshold.</p>";
+        }
+
+        if (data.note) {
+          html +=
+            "<p style='margin-top:6px'><small>" +
+            escapeHtml(data.note) +
+            "</small></p>";
+        }
+
         outputInner.innerHTML = html;
       }
 
