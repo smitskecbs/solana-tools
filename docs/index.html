@@ -89,6 +89,25 @@
         gap: 4px;
       }
 
+      /* Avatar (profile photo) */
+
+      .avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 999px;
+        border: 2px solid var(--accent);
+        overflow: hidden;
+        box-shadow: 0 0 10px rgba(0, 224, 255, 0.6);
+        background: #020514;
+      }
+
+      .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
       .social-buttons {
         display: flex;
         gap: 6px;
@@ -130,6 +149,34 @@
       .social-btn:hover {
         transform: translateY(-1px);
         box-shadow: 0 6px 14px rgba(0, 0, 0, 0.6);
+      }
+
+      /* About / CV block */
+
+      .about {
+        font-size: 8px;
+        color: var(--muted);
+        text-align: right;
+        max-width: 280px;
+        margin-top: 4px;
+      }
+
+      .about p {
+        margin-bottom: 3px;
+      }
+
+      .about a {
+        color: var(--accent-strong);
+        text-decoration: none;
+      }
+
+      .about a:hover {
+        text-decoration: underline;
+      }
+
+      .about small {
+        font-size: 7px;
+        color: var(--muted);
       }
 
       .layout {
@@ -507,6 +554,10 @@
           align-items: flex-start;
         }
 
+        .about {
+          text-align: left;
+        }
+
         .panel {
           padding: 10px;
           overflow: visible;
@@ -542,6 +593,9 @@
           <p>SPL on-chain insights in one Web2 dashboard. Read-only, no keys.</p>
         </div>
         <div class="header-right">
+          <div class="avatar">
+            <img src="kevin-smits.png" alt="Kevin Smits" />
+          </div>
           <div class="badge">
             <span>BY KEVIN SMITS</span>
           </div>
@@ -564,6 +618,37 @@
               <span class="dot"></span>
               Telegram (@smitske)
             </a>
+          </div>
+          <div class="about">
+            <p>
+              Solana builder from the Netherlands. I ship read-only SPL tools,
+              dashboards and on-chain experiments.
+            </p>
+            <p>
+              <strong>Open-source repo:</strong>
+              <a
+                href="https://github.com/smitskecbs/solana-tools"
+                target="_blank"
+                rel="noopener noreferrer"
+                >github.com/smitskecbs/solana-tools</a
+              >
+            </p>
+            <p>
+              <strong>Main project:</strong>
+              <a
+                href="https://cbs-coin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                >CBS Coin – Community Builds Sovereignty</a
+              >
+            </p>
+            <p>
+              <small>
+                Note: whale tracker &amp; holder info currently work best for
+                small/mid-cap tokens. Very large tokens (like JUP) may time out
+                on free RPC/meta limits.
+              </small>
+            </p>
           </div>
         </div>
       </header>
