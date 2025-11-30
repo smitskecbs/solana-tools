@@ -3,10 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Solana Tools – SPL Toolkit by Kevin Smits</title>
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Nintendo-stijl font -->
     <link
@@ -39,8 +36,8 @@
       body {
         background: radial-gradient(circle at top, #101633 0, #050816 55%);
         color: var(--text);
-        font-family: "Press Start 2P", system-ui, -apple-system, BlinkMacSystemFont,
-          "Segoe UI", sans-serif;
+        font-family: "Press Start 2P", system-ui, -apple-system,
+          BlinkMacSystemFont, "Segoe UI", sans-serif;
         font-size: 10px;
         line-height: 1.6;
         padding: 16px;
@@ -94,7 +91,12 @@
       .panel {
         border-radius: 12px;
         border: 1px solid var(--border);
-        background: radial-gradient(circle at top left, #131a3d 0, #090f22 40%, #050816 100%);
+        background: radial-gradient(
+          circle at top left,
+          #131a3d 0,
+          #090f22 40%,
+          #050816 100%
+        );
         padding: 12px;
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
         position: relative;
@@ -105,9 +107,16 @@
         content: "";
         position: absolute;
         inset: -60%;
-        background:
-          radial-gradient(circle at 0 0, rgba(0, 224, 255, 0.12) 0, transparent 50%),
-          radial-gradient(circle at 100% 100%, rgba(0, 245, 157, 0.08) 0, transparent 55%);
+        background: radial-gradient(
+            circle at 0 0,
+            rgba(0, 224, 255, 0.12) 0,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 100% 100%,
+            rgba(0, 245, 157, 0.08) 0,
+            transparent 55%
+          );
         opacity: 0.8;
         pointer-events: none;
       }
@@ -295,7 +304,7 @@
         border-radius: 10px;
         border: 1px solid var(--border);
         background: radial-gradient(circle at top, #131a3d 0, #050816 60%);
-        padding: 10px;
+        padding: 12px 10px 10px 10px; /* extra top-padding */
         min-height: 170px;
         font-size: 9px;
         overflow: auto;
@@ -310,11 +319,13 @@
         font-size: 8px;
         color: var(--accent);
         opacity: 0.7;
+        pointer-events: none;
       }
 
       .output-inner {
-        padding-left: 14px;
+        padding-left: 16px;
         white-space: normal;
+        overflow-wrap: anywhere; /* lange mints/URLs netjes afbreken */
       }
 
       .output h3 {
@@ -360,6 +371,7 @@
         padding: 3px 4px;
         border-bottom: 1px solid rgba(50, 60, 100, 0.7);
         text-align: left;
+        overflow-wrap: anywhere; /* addresses breken i.p.v. overlappen */
       }
 
       th {
@@ -492,9 +504,7 @@
               <button id="btnSafety" class="secondary">
                 <span class="dot"></span> Safety check
               </button>
-              <button id="btnClear" class="secondary">
-                ✕ Clear output
-              </button>
+              <button id="btnClear" class="secondary">✕ Clear output</button>
             </div>
 
             <div class="status-bar">
@@ -529,21 +539,24 @@
 
             <div class="tools-list">
               <ul>
-                <li><strong>wallet-info</strong> → basic wallet balance + SPL list</li>
                 <li>
-                  <strong>token-info</strong> → SPL mint metadata, decimals, supply
+                  <strong>wallet-info</strong> → basic wallet balance + SPL list
                 </li>
                 <li>
-                  <strong>cbs-metrics</strong> → DexScreener Raydium prices &amp;
-                  liquidity
+                  <strong>token-info</strong> → SPL mint metadata, decimals,
+                  supply
+                </li>
+                <li>
+                  <strong>cbs-metrics</strong> → DexScreener Raydium prices
+                  &amp; liquidity
                 </li>
                 <li>
                   <strong>holder-info</strong> → snapshot of SPL holders + top
                   distribution
                 </li>
                 <li>
-                  <strong>token-safety-check</strong> → heuristic risk check for
-                  SPL tokens
+                  <strong>token-safety-check</strong> → heuristic risk check
+                  for SPL tokens
                 </li>
                 <li>
                   <strong>whale-tracker</strong> → designed for large holder
@@ -583,8 +596,8 @@
                 />
               </div>
               <div class="hint">
-                Host your Node/TypeScript tools (solana-tools) behind a small API
-                and point this UI to it. All calls are client-side.
+                Host your Node/TypeScript tools (solana-tools) behind a small
+                API and point this UI to it. All calls are client-side.
               </div>
             </div>
           </div>
@@ -745,7 +758,10 @@
         let html = "<h3>Wallet overview</h3>";
         html += "<div class='grid-2'>";
         html += "<div>";
-        html += "<p><strong>Address:</strong><br />" + escapeHtml(data.address) + "</p>";
+        html +=
+          "<p><strong>Address:</strong><br />" +
+          escapeHtml(data.address) +
+          "</p>";
         html +=
           "<p><strong>SOL balance:</strong> " +
           (data.sol != null ? data.sol.toFixed(6) : "n/a") +
@@ -761,7 +777,8 @@
           "<p><strong>RPC:</strong><br />" +
           escapeHtml(data.rpcUrl || "") +
           "</p>";
-        html += "<p><strong>SPL tokens found:</strong> " + tokens.length + "</p>";
+        html +=
+          "<p><strong>SPL tokens found:</strong> " + tokens.length + "</p>";
         html +=
           "<small>Only non-zero SPL balances are shown. Names/decimals come from on-chain token accounts.</small>";
         html += "</div>";
@@ -779,7 +796,9 @@
             html += "<td>" + escapeHtml(t.mint || "") + "</td>";
             html +=
               "<td>" +
-              (t.uiAmount != null ? Number(t.uiAmount).toLocaleString() : "0") +
+              (t.uiAmount != null
+                ? Number(t.uiAmount).toLocaleString()
+                : "0") +
               "</td>";
             html += "<td>" + (t.decimals != null ? t.decimals : "?") + "</td>";
             html += "</tr>";
@@ -787,7 +806,8 @@
 
           html += "</tbody></table>";
         } else {
-          html += "<p style='margin-top:6px'>No SPL token balances detected.</p>";
+          html +=
+            "<p style='margin-top:6px'>No SPL token balances detected.</p>";
         }
 
         outputInner.innerHTML = html;
@@ -808,7 +828,8 @@
         html += "<div>";
         html +=
           "<p><strong>Mint authority:</strong><br />" +
-          (data.mintAuthority || "<span style='color:#4bffb1'>None (immutable)</span>") +
+          (data.mintAuthority ||
+            "<span style='color:#4bffb1'>None (immutable)</span>") +
           "</p>";
         html +=
           "<p><strong>Freeze authority:</strong><br />" +
@@ -833,7 +854,8 @@
         html += "<div class='grid-2'>";
         html += "<div>";
         html += "<p><strong>Mint:</strong><br />" + escapeHtml(data.mint) + "</p>";
-        html += "<p><strong>Total pools:</strong> " + (data.totalPools || 0) + "</p>";
+        html +=
+          "<p><strong>Total pools:</strong> " + (data.totalPools || 0) + "</p>";
         html +=
           "<p><strong>Raydium pools:</strong> " +
           (data.raydiumCount || 0) +
@@ -851,7 +873,8 @@
             ? data.totalLiquidityUsd.toFixed(2)
             : "0.00") +
           "</p>";
-        html += "<small>Liquidity and prices are read from DexScreener's public API.</small>";
+        html +=
+          "<small>Liquidity and prices are read from DexScreener's public API.</small>";
         html += "</div>";
         html += "</div>";
 
@@ -879,7 +902,8 @@
         }
 
         if (others.length > 0) {
-          html += "<p style='margin-top:6px'><strong>Other DEX pools:</strong> " +
+          html +=
+            "<p style='margin-top:6px'><strong>Other DEX pools:</strong> " +
             others.length +
             " (not listed individually here).</p>";
         }
@@ -951,11 +975,15 @@
 
           html += "</tbody></table>";
         } else {
-          html += "<p style='margin-top:6px'>No holders found in this snapshot.</p>";
+          html +=
+            "<p style='margin-top:6px'>No holders found in this snapshot.</p>";
         }
 
         if (data.note) {
-          html += "<p style='margin-top:6px'><small>" + escapeHtml(data.note) + "</small></p>";
+          html +=
+            "<p style='margin-top:6px'><small>" +
+            escapeHtml(data.note) +
+            "</small></p>";
         }
 
         outputInner.innerHTML = html;
