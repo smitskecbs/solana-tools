@@ -1,702 +1,1043 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Solana Tools – SPL Toolkit by Kevin Smits</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <head>
+    <meta charset="UTF-8" />
+    <title>Solana Tools – SPL Toolkit by Kevin Smits</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
 
-  <!-- Old-school Nintendo style fonts -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap"
-    rel="stylesheet"
-  />
+    <!-- Nintendo-stijl font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      min-height: 100vh;
-      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
-      color: #e5e7eb;
-      font-family: "Space Mono", monospace;
-      display: flex;
-      justify-content: center;
-      padding: 24px;
-    }
-
-    .app {
-      width: 1200px;
-      max-width: 100%;
-      border: 4px solid #22d3ee;
-      box-shadow: 0 0 0 4px #0f172a, 0 0 40px rgba(34, 211, 238, 0.4);
-      background: #020617;
-      padding: 20px 24px 28px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .app::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image: linear-gradient(
-        rgba(255, 255, 255, 0.03) 1px,
-        transparent 1px
-      );
-      background-size: 100% 3px;
-      pointer-events: none;
-      mix-blend-mode: soft-light;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .title-block {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    h1 {
-      font-family: "Press Start 2P", system-ui;
-      font-size: 18px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: #facc15;
-      text-shadow: 2px 2px 0 #000, 0 0 8px #facc15;
-    }
-
-    .subtitle {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: #9ca3af;
-    }
-
-    .badge-ks {
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      padding: 6px 10px;
-      border: 2px solid #22d3ee;
-      background: #020617;
-      color: #e5e7eb;
-      box-shadow: 2px 2px 0 #000;
-    }
-
-    main {
-      display: grid;
-      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.4fr);
-      gap: 18px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .panel {
-      border: 3px solid #22d3ee;
-      background: rgba(15, 23, 42, 0.96);
-      padding: 14px 14px 16px;
-      box-shadow: 3px 3px 0 #000;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .panel + .panel {
-      margin-top: 10px;
-    }
-
-    .panel-title {
-      font-family: "Press Start 2P", system-ui;
-      font-size: 11px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: #a5b4fc;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .panel-title span.label {
-      font-size: 8px;
-      padding: 2px 6px;
-      border: 1px solid #4ade80;
-      color: #bbf7d0;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1.65fr);
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .field-label {
-      font-size: 9px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-      color: #9ca3af;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 8px 9px;
-      border: 2px solid #22d3ee;
-      background: #020617;
-      color: #e5e7eb;
-      font-family: "Space Mono", monospace;
-      font-size: 11px;
-      outline: none;
-      box-shadow: inset 0 0 0 1px #0f172a;
-    }
-
-    input[type="text"]::placeholder {
-      color: #6b7280;
-    }
-
-    .button-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin: 10px 0 8px;
-    }
-
-    button.pixel-btn {
-      font-family: "Press Start 2P", system-ui;
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      border: 2px solid #22d3ee;
-      background: #020617;
-      color: #e5e7eb;
-      padding: 6px 8px;
-      cursor: pointer;
-      box-shadow: 2px 2px 0 #000;
-      transition: transform 0.05s ease, box-shadow 0.05s ease,
-        background 0.1s ease, color 0.1s ease;
-      white-space: nowrap;
-    }
-
-    button.pixel-btn:hover {
-      transform: translate(-1px, -1px);
-      box-shadow: 3px 3px 0 #000;
-      background: #0f172a;
-    }
-
-    button.pixel-btn:active {
-      transform: translate(1px, 1px);
-      box-shadow: 1px 1px 0 #000;
-      background: #22d3ee;
-      color: #020617;
-    }
-
-    button.pixel-btn.secondary {
-      border-color: #f97316;
-      color: #fed7aa;
-    }
-
-    button.pixel-btn.secondary:hover {
-      background: #7c2d12;
-    }
-
-    .status-bar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 10px;
-      margin-bottom: 6px;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border: 2px solid #111827;
-      background: #22c55e;
-      box-shadow: 0 0 6px #22c55e;
-    }
-
-    .status-text {
-      color: #a5b4fc;
-    }
-
-    .output-box {
-      background: #020617;
-      border: 2px solid #4b5563;
-      padding: 8px;
-      min-height: 190px;
-      max-height: 260px;
-      overflow: auto;
-      font-family: "Space Mono", monospace;
-      font-size: 11px;
-      color: #e5e7eb;
-      line-height: 1.4;
-      white-space: pre;
-    }
-
-    .tiny {
-      font-size: 9px;
-      color: #6b7280;
-      margin-top: 4px;
-    }
-
-    .list {
-      list-style: none;
-      font-size: 10px;
-      line-height: 1.6;
-      color: #e5e7eb;
-    }
-
-    .list li {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .list li::before {
-      content: "▸";
-      color: #22d3ee;
-      font-size: 9px;
-    }
-
-    .mono-line {
-      font-size: 9px;
-      color: #9ca3af;
-      margin-bottom: 4px;
-      white-space: nowrap;
-    }
-
-    .mono-line code {
-      color: #e5e7eb;
-    }
-
-    .backend-input-row {
-      display: flex;
-      gap: 6px;
-      margin-top: 6px;
-    }
-
-    .backend-input-row input {
-      flex: 1;
-      font-size: 10px;
-    }
-
-    @media (max-width: 960px) {
-      main {
-        grid-template-columns: minmax(0, 1fr);
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
-    }
-  </style>
-</head>
 
-<body>
-  <div class="app">
-    <header>
-      <div class="title-block">
-        <h1>SOLANA TOOLS</h1>
-        <div class="subtitle">SPL on-chain insights · Web2 style · read-only</div>
+      :root {
+        --bg: #050816;
+        --bg-panel: #090f22;
+        --bg-panel-alt: #101632;
+        --accent: #00e0ff;
+        --accent-soft: rgba(0, 224, 255, 0.16);
+        --accent-strong: #00f59d;
+        --border: #242b4a;
+        --text: #f5f7ff;
+        --muted: #9ca6d9;
+        --danger: #ff4b81;
+        --success: #4bffb1;
+        --warning: #ffd166;
+      }
+
+      body {
+        background: radial-gradient(circle at top, #101633 0, #050816 55%);
+        color: var(--text);
+        font-family: "Press Start 2P", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        font-size: 10px;
+        line-height: 1.6;
+        padding: 16px;
+      }
+
+      .page {
+        max-width: 1220px;
+        margin: 0 auto;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        gap: 12px;
+      }
+
+      header h1 {
+        font-size: 18px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        text-shadow: 0 0 6px rgba(0, 224, 255, 0.5);
+      }
+
+      header .badge {
+        font-size: 8px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      header p {
+        margin-top: 4px;
+        font-size: 8px;
+        color: var(--muted);
+        max-width: 420px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+        gap: 16px;
+      }
+
+      .panel {
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: radial-gradient(circle at top left, #131a3d 0, #090f22 40%, #050816 100%);
+        padding: 12px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .panel::before {
+        content: "";
+        position: absolute;
+        inset: -60%;
+        background:
+          radial-gradient(circle at 0 0, rgba(0, 224, 255, 0.12) 0, transparent 50%),
+          radial-gradient(circle at 100% 100%, rgba(0, 245, 157, 0.08) 0, transparent 55%);
+        opacity: 0.8;
+        pointer-events: none;
+      }
+
+      .panel-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .panel-title {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .panel-title span {
+        color: var(--muted);
+        font-size: 8px;
+      }
+
+      .pill {
+        padding: 2px 6px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        font-size: 8px;
+        text-transform: uppercase;
+      }
+
+      .pill.green {
+        border-color: var(--success);
+        color: var(--success);
+      }
+
+      .pill.red {
+        border-color: var(--danger);
+        color: var(--danger);
+      }
+
+      .pill.yellow {
+        border-color: var(--warning);
+        color: var(--warning);
+      }
+
+      /* Inputs */
+
+      .inputs-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .field-label {
+        font-size: 8px;
+        color: var(--muted);
+        margin-bottom: 2px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+      }
+
+      input[type="text"] {
+        background: rgba(3, 8, 30, 0.96);
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        padding: 7px 8px;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 9px;
+        outline: none;
+      }
+
+      input[type="text"]:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px rgba(0, 224, 255, 0.35);
+      }
+
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+
+      button {
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: linear-gradient(145deg, #141b3d, #090f22);
+        color: var(--text);
+        padding: 6px 10px;
+        font-family: inherit;
+        font-size: 8px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: 0.12s ease-out;
+      }
+
+      button span.dot {
+        width: 4px;
+        height: 4px;
+        border-radius: 999px;
+        background: var(--muted);
+      }
+
+      button.primary {
+        border-color: var(--accent);
+        background: linear-gradient(145deg, #00e0ff, #00f59d);
+        color: #050816;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.6);
+      }
+
+      button:active {
+        transform: translateY(0);
+        box-shadow: none;
+      }
+
+      button.secondary {
+        background: rgba(6, 12, 38, 0.9);
+      }
+
+      .status-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 4px;
+        font-size: 8px;
+        color: var(--muted);
+        gap: 8px;
+      }
+
+      .status-left {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: var(--danger);
+        box-shadow: 0 0 6px rgba(255, 75, 129, 0.7);
+      }
+
+      .status-dot.ok {
+        background: var(--success);
+        box-shadow: 0 0 6px rgba(75, 255, 177, 0.7);
+      }
+
+      .status-dot.idle {
+        background: var(--muted);
+        box-shadow: none;
+      }
+
+      .status-label {
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .status-right {
+        max-width: 260px;
+        text-align: right;
+      }
+
+      /* Output console */
+
+      .output {
+        margin-top: 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: radial-gradient(circle at top, #131a3d 0, #050816 60%);
+        padding: 10px;
+        min-height: 170px;
+        font-size: 9px;
+        overflow: auto;
+        position: relative;
+      }
+
+      .output::before {
+        content: "▶";
+        position: absolute;
+        left: 8px;
+        top: 6px;
+        font-size: 8px;
+        color: var(--accent);
+        opacity: 0.7;
+      }
+
+      .output-inner {
+        padding-left: 14px;
+        white-space: normal;
+      }
+
+      .output h3 {
+        font-size: 9px;
+        margin-bottom: 6px;
+        color: var(--accent-strong);
+      }
+
+      .output p {
+        margin-bottom: 4px;
+      }
+
+      .output ul,
+      .output ol {
+        margin-left: 14px;
+        margin-bottom: 6px;
+      }
+
+      .output li {
+        margin-bottom: 3px;
+      }
+
+      .output small {
+        font-size: 8px;
+        color: var(--muted);
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 4px;
+        font-size: 8px;
+      }
+
+      th,
+      td {
+        padding: 3px 4px;
+        border-bottom: 1px solid rgba(50, 60, 100, 0.7);
+        text-align: left;
+      }
+
+      th {
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted);
+        font-weight: normal;
+      }
+
+      tr:nth-child(even) td {
+        background: rgba(8, 14, 40, 0.7);
+      }
+
+      /* Right column */
+
+      .tools-list {
+        font-size: 8px;
+        color: var(--muted);
+      }
+
+      .tools-list ul {
+        margin-left: 14px;
+        margin-top: 4px;
+      }
+
+      .tools-list li {
+        margin-bottom: 3px;
+      }
+
+      .api-contract {
+        font-size: 8px;
+        margin-top: 6px;
+      }
+
+      .api-contract code {
+        font-family: "Press Start 2P", monospace;
+        background: rgba(3, 8, 30, 0.9);
+        padding: 2px 4px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        display: block;
+        margin-bottom: 2px;
+        overflow-x: auto;
+      }
+
+      .base-url-box {
+        margin-top: 8px;
+      }
+
+      .base-url-box input {
+        width: 100%;
+      }
+
+      .hint {
+        margin-top: 4px;
+        font-size: 8px;
+        color: var(--muted);
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="page">
+      <header>
+        <div>
+          <h1>SOLANA TOOLS</h1>
+          <p>SPL on-chain insights in one Web2 dashboard. Read-only, no keys.</p>
+        </div>
+        <div>
+          <div class="badge">
+            <span>BY KEVIN SMITS</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="layout">
+        <!-- LEFT: INPUT + OUTPUT ------------------------------------------------>
+        <section class="panel">
+          <div class="panel-content">
+            <div class="panel-title">
+              <div>WALLET &amp; TOKEN INPUT</div>
+              <span>Fill once, then click any tool</span>
+            </div>
+
+            <div class="inputs-grid">
+              <div class="field">
+                <label class="field-label" for="walletAddress">
+                  Wallet address
+                </label>
+                <input
+                  id="walletAddress"
+                  type="text"
+                  placeholder="Enter Solana wallet (public key)"
+                />
+              </div>
+              <div class="field">
+                <label class="field-label" for="tokenMint">
+                  Token mint
+                </label>
+                <input
+                  id="tokenMint"
+                  type="text"
+                  placeholder="Enter SPL token mint (default: CBS)"
+                />
+              </div>
+            </div>
+
+            <div class="button-row">
+              <button id="btnWallet" class="secondary">
+                <span class="dot"></span> Wallet info
+              </button>
+              <button id="btnToken" class="secondary">
+                <span class="dot"></span> Token info
+              </button>
+              <button id="btnHolders" class="secondary">
+                <span class="dot"></span> Holder info
+              </button>
+              <button id="btnDex" class="secondary">
+                <span class="dot"></span> DEX metrics
+              </button>
+              <button id="btnWhale" class="secondary">
+                <span class="dot"></span> Whale tracker
+              </button>
+              <button id="btnSafety" class="secondary">
+                <span class="dot"></span> Safety check
+              </button>
+              <button id="btnClear" class="secondary">
+                ✕ Clear output
+              </button>
+            </div>
+
+            <div class="status-bar">
+              <div class="status-left">
+                <div id="statusDot" class="status-dot idle"></div>
+                <div id="statusText" class="status-label">idle</div>
+              </div>
+              <div class="status-right" id="statusUrl">
+                Backend base URL: not configured
+              </div>
+            </div>
+
+            <div class="output" id="output">
+              <div class="output-inner" id="outputInner">
+                <p>
+                  Ready.<br />
+                  1) Paste your wallet + mint.<br />
+                  2) Click a tool above to query your backend API.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- RIGHT: DOCS ---------------------------------------------------------->
+        <section class="panel">
+          <div class="panel-content">
+            <div class="panel-title">
+              <div>AVAILABLE TOOLS</div>
+              <span>Mapped to solana-tools repo</span>
+            </div>
+
+            <div class="tools-list">
+              <ul>
+                <li><strong>wallet-info</strong> → basic wallet balance + SPL list</li>
+                <li>
+                  <strong>token-info</strong> → SPL mint metadata, decimals, supply
+                </li>
+                <li>
+                  <strong>cbs-metrics</strong> → DexScreener Raydium prices &amp;
+                  liquidity
+                </li>
+                <li>
+                  <strong>holder-info</strong> → snapshot of SPL holders + top
+                  distribution
+                </li>
+                <li>
+                  <strong>token-safety-check</strong> → heuristic risk check for
+                  SPL tokens
+                </li>
+                <li>
+                  <strong>whale-tracker</strong> → designed for large holder
+                  movements (API coming next)
+                </li>
+              </ul>
+            </div>
+
+            <div class="panel-title" style="margin-top: 10px">
+              <div>EXPECTED BACKEND ENDPOINTS</div>
+              <span class="pill">API contract</span>
+            </div>
+
+            <div class="api-contract">
+              <code>GET /api/wallet-info?address=...</code>
+              <code>GET /api/token-info?mint=...</code>
+              <code>GET /api/cbs-metrics?mint=...</code>
+              <code>GET /api/holder-info?mint=...</code>
+              <code>GET /api/token-safety-check?mint=...</code>
+              <!-- whale-tracker intentionally not wired yet -->
+            </div>
+
+            <div class="panel-title" style="margin-top: 10px">
+              <div>BACKEND BASE URL</div>
+              <span class="pill">Config</span>
+            </div>
+
+            <div class="base-url-box">
+              <div class="field">
+                <label class="field-label" for="apiBaseUrl">
+                  API base URL
+                </label>
+                <input
+                  id="apiBaseUrl"
+                  type="text"
+                  value="https://solana-tools-api.onrender.com"
+                />
+              </div>
+              <div class="hint">
+                Host your Node/TypeScript tools (solana-tools) behind a small API
+                and point this UI to it. All calls are client-side.
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
-      <div class="badge-ks">BY KEVIN SMITS</div>
-    </header>
+    </div>
 
-    <main>
-      <!-- LEFT: Inputs + output -->
-      <section class="panel">
-        <div class="panel-title">
-          <span>Wallet &amp; Token Console</span>
-          <span class="label">INPUTS</span>
-        </div>
+    <script>
+      const apiBaseUrlInput = document.getElementById("apiBaseUrl");
+      const walletInput = document.getElementById("walletAddress");
+      const mintInput = document.getElementById("tokenMint");
+      const outputInner = document.getElementById("outputInner");
+      const statusDot = document.getElementById("statusDot");
+      const statusText = document.getElementById("statusText");
+      const statusUrl = document.getElementById("statusUrl");
 
-        <div class="grid-2">
-          <div>
-            <div class="field-label">Wallet address</div>
-            <input
-              id="wallet-input"
-              type="text"
-              placeholder="Enter Solana wallet (public key)"
-            />
-          </div>
-          <div>
-            <div class="field-label">Token mint</div>
-            <input
-              id="mint-input"
-              type="text"
-              placeholder="Enter SPL token mint (default: CBS)"
-              value="B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk"
-            />
-          </div>
-        </div>
+      // Buttons
+      document
+        .getElementById("btnWallet")
+        .addEventListener("click", () => handleToolClick("wallet"));
+      document
+        .getElementById("btnToken")
+        .addEventListener("click", () => handleToolClick("token"));
+      document
+        .getElementById("btnHolders")
+        .addEventListener("click", () => handleToolClick("holders"));
+      document
+        .getElementById("btnDex")
+        .addEventListener("click", () => handleToolClick("dex"));
+      document
+        .getElementById("btnWhale")
+        .addEventListener("click", () => handleToolClick("whale"));
+      document
+        .getElementById("btnSafety")
+        .addEventListener("click", () => handleToolClick("safety"));
+      document.getElementById("btnClear").addEventListener("click", () => {
+        outputInner.innerHTML =
+          "<p>Console cleared. Choose a tool to run a new query.</p>";
+        setStatus("idle", "idle");
+      });
 
-        <div class="button-row">
-          <button id="btn-wallet-info" class="pixel-btn">Wallet info</button>
-          <button id="btn-token-info" class="pixel-btn">Token info</button>
-          <button id="btn-holder-info" class="pixel-btn">Holder info</button>
-          <button id="btn-cbs-metrics" class="pixel-btn">DEX metrics</button>
-          <button id="btn-whale-tracker" class="pixel-btn">Whale tracker</button>
-          <button id="btn-token-safety" class="pixel-btn secondary">
-            Token safety
-          </button>
-          <button id="btn-clear" class="pixel-btn" style="margin-left:auto;">
-            Clear
-          </button>
-        </div>
-
-        <div class="status-bar">
-          <div id="status-dot" class="status-dot"></div>
-          <div id="status" class="status-text">Ready</div>
-        </div>
-
-        <div id="output" class="output-box"></div>
-        <div class="tiny">
-          Read-only tools: this UI never asks for private keys and does no transactions.
-        </div>
-      </section>
-
-      <!-- RIGHT SIDE -->
-      <div style="display:flex; flex-direction:column; gap:10px;">
-        <section class="panel">
-          <div class="panel-title">
-            <span>Available tools</span>
-            <span class="label">solana-tools</span>
-          </div>
-          <ul class="list">
-            <li><code>wallet-info</code> – SOL balance &amp; SPL token balances</li>
-            <li><code>token-info</code> – token decimals, supply, authorities</li>
-            <li><code>cbs-metrics</code> – DexScreener prices &amp; liquidity</li>
-            <li><code>holder-info</code> – SPL holder snapshot (coming soon)</li>
-            <li><code>whale-tracker</code> – large holder / movement alerts (coming)</li>
-            <li><code>token-safety-check</code> – risk heuristics (immutable, LP, freeze)</li>
-          </ul>
-        </section>
-
-        <section class="panel">
-          <div class="panel-title">
-            <span>Expected backend endpoints</span>
-            <span class="label">API contract</span>
-          </div>
-          <div class="mono-line">
-            GET <code>/api/wallet-info?address=...</code>
-          </div>
-          <div class="mono-line">
-            GET <code>/api/token-info?mint=...</code>
-          </div>
-          <div class="mono-line">
-            GET <code>/api/cbs-metrics?mint=...</code>
-          </div>
-          <div class="mono-line">
-            GET <code>/api/holder-info?mint=...</code>
-          </div>
-          <div class="mono-line">
-            GET <code>/api/whale-tracker?mint=...&amp;address=...</code>
-          </div>
-          <div class="mono-line">
-            GET <code>/api/token-safety-check?mint=...</code>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-title">
-            <span>Backend base URL</span>
-            <span class="label">Config</span>
-          </div>
-          <div id="backend-label" class="mono-line"></div>
-          <div class="backend-input-row">
-            <input
-              id="backend-input"
-              type="text"
-              placeholder="https://your-backend-domain.com"
-            />
-          </div>
-          <div class="tiny">
-            Default points to the public <code>solana-tools-api</code> instance on Render.
-            You can host your own and override the URL here.
-          </div>
-        </section>
-      </div>
-    </main>
-  </div>
-
-  <script>
-    const walletInput = document.getElementById("wallet-input");
-    const mintInput = document.getElementById("mint-input");
-    const outputEl = document.getElementById("output");
-    const statusEl = document.getElementById("status");
-    const statusDot = document.getElementById("status-dot");
-    const backendLabel = document.getElementById("backend-label");
-    const backendInput = document.getElementById("backend-input");
-
-    // Default backend = jouw Render API
-    let API_BASE = "https://solana-tools-api.onrender.com";
-
-    backendInput.value = API_BASE;
-    backendLabel.textContent = "Backend base URL: " + API_BASE;
-
-    function setStatus(ok, text) {
-      statusEl.textContent = text;
-      statusDot.style.background = ok ? "#22c55e" : "#f97373";
-      statusDot.style.boxShadow = ok ? "0 0 6px #22c55e" : "0 0 6px #f97373";
-    }
-
-    function renderWalletInfo(data) {
-      const lines = [];
-      lines.push("=== WALLET INFO ===");
-      lines.push("Address : " + (data.address || "?"));
-
-      if (typeof data.sol === "number") {
-        lines.push("SOL     : " + data.sol.toFixed(6) + " SOL");
+      function getBaseUrl() {
+        let url = apiBaseUrlInput.value.trim();
+        if (url.endsWith("/")) url = url.slice(0, -1);
+        statusUrl.textContent = "Backend base URL: " + (url || "not set");
+        return url;
       }
 
-      const tokens = Array.isArray(data.tokens) ? data.tokens : [];
-      if (tokens.length) {
-        lines.push("");
-        lines.push("SPL tokens (non-zero balances):");
-        tokens.forEach((t, i) => {
-          const amt =
-            typeof t.uiAmount === "number"
-              ? t.uiAmount.toString()
-              : String(t.amountRaw || "?");
-          lines.push(
-            " " +
-              (i + 1) +
-              ". " +
-              amt +
-              "  (mint: " +
-              t.mint +
-              ", decimals: " +
-              t.decimals +
-              ")"
-          );
-        });
-      } else {
-        lines.push("");
-        lines.push("SPL tokens : none with non-zero balance returned.");
+      function setStatus(message, level) {
+        statusText.textContent = message.toUpperCase();
+        statusDot.classList.remove("ok", "idle");
+        if (level === "ok") {
+          statusDot.classList.add("ok");
+        } else if (level === "idle") {
+          statusDot.classList.add("idle");
+        } else {
+          // error
+          statusDot.classList.remove("ok", "idle");
+        }
       }
 
-      outputEl.textContent = lines.join("\n");
-    }
-
-    function renderTokenInfo(data) {
-      const lines = [];
-      lines.push("=== TOKEN INFO ===");
-      lines.push("Mint      : " + (data.mint || "?"));
-      lines.push("Decimals  : " + (data.decimals ?? "?"));
-      lines.push("Supply    : " + (data.supply ?? "?"));
-      lines.push(
-        "Mint auth : " +
-          (data.mintAuthority === null
-            ? "revoked (immutable)"
-            : data.mintAuthority || "unknown")
-      );
-      lines.push(
-        "Freeze    : " +
-          (data.freezeAuthority === null
-            ? "revoked"
-            : data.freezeAuthority || "unknown")
-      );
-      outputEl.textContent = lines.join("\n");
-    }
-
-    function renderDexMetrics(data) {
-      const lines = [];
-      lines.push("=== DEX METRICS ===");
-      lines.push("Mint          : " + (data.mint || "?"));
-      lines.push("Total pools   : " + (data.totalPools ?? 0));
-      lines.push("Raydium pools : " + (data.raydiumCount ?? 0));
-      lines.push(
-        "Other DEXes   : " + (data.otherDexCount ?? 0)
-      );
-      if (typeof data.totalLiquidityUsd === "number") {
-        lines.push(
-          "Total Raydium liquidity: $" +
-            data.totalLiquidityUsd.toFixed(2)
-        );
+      function requireMint() {
+        let mint = mintInput.value.trim();
+        if (!mint) {
+          // default CBS mint
+          mint = "B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk";
+          mintInput.value = mint;
+        }
+        return mint;
       }
 
-      const ray = Array.isArray(data.raydium) ? data.raydium : [];
-      if (ray.length) {
-        lines.push("");
-        lines.push("Raydium pairs:");
-        ray.forEach((p, i) => {
-          lines.push(
-            " " +
-              (i + 1) +
-              ". " +
-              (p.baseToken?.symbol || "?") +
-              "/" +
-              (p.quoteToken?.symbol || "?") +
-              " – $" +
-              (p.priceUsd || "?") +
-              " (liq: $" +
-              (p.liquidityUsd ?? "?") +
-              ")"
-          );
-        });
+      async function handleToolClick(tool) {
+        const baseUrl = getBaseUrl();
+        if (!baseUrl) {
+          alert("Set your API base URL first.");
+          return;
+        }
+
+        try {
+          setStatus("working", "error");
+
+          if (tool === "wallet") {
+            const addr = walletInput.value.trim();
+            if (!addr) {
+              alert("Fill in a wallet address first.");
+              return;
+            }
+            const url =
+              baseUrl +
+              "/api/wallet-info?address=" +
+              encodeURIComponent(addr);
+            const data = await fetchJson(url);
+            renderWalletInfo(data);
+            setStatus("wallet info ok", "ok");
+          } else if (tool === "token") {
+            const mint = requireMint();
+            const url =
+              baseUrl + "/api/token-info?mint=" + encodeURIComponent(mint);
+            const data = await fetchJson(url);
+            renderTokenInfo(data);
+            setStatus("token info ok", "ok");
+          } else if (tool === "holders") {
+            const mint = requireMint();
+            const url =
+              baseUrl + "/api/holder-info?mint=" + encodeURIComponent(mint);
+            const data = await fetchJson(url);
+            renderHolderInfo(data);
+            setStatus("holder info ok", "ok");
+          } else if (tool === "dex") {
+            const mint = requireMint();
+            const url =
+              baseUrl + "/api/cbs-metrics?mint=" + encodeURIComponent(mint);
+            const data = await fetchJson(url);
+            renderDexMetrics(data);
+            setStatus("dex metrics ok", "ok");
+          } else if (tool === "safety") {
+            const mint = requireMint();
+            const url =
+              baseUrl +
+              "/api/token-safety-check?mint=" +
+              encodeURIComponent(mint);
+            const data = await fetchJson(url);
+            renderSafetyCheck(data);
+            setStatus("safety check ok", "ok");
+          } else if (tool === "whale") {
+            renderWhaleComingSoon();
+            setStatus("whale tracker (ui only)", "ok");
+          }
+        } catch (err) {
+          console.error(err);
+          outputInner.innerHTML =
+            "<h3>Request failed</h3><p>" +
+            (err && err.message ? err.message : String(err)) +
+            "</p>";
+          setStatus("error", "error");
+        }
       }
 
-      outputEl.textContent = lines.join("\n");
-    }
-
-    function renderTokenSafety(data) {
-      const lines = [];
-      lines.push("=== TOKEN SAFETY CHECK ===");
-      lines.push("Mint      : " + (data.mint || "?"));
-      const s = data.safety || {};
-      lines.push("Risk      : " + (s.riskLevel || "unknown"));
-      lines.push(
-        "Immutable : " + (s.immutableMint ? "yes" : "no")
-      );
-      lines.push(
-        "Can freeze: " + (s.canFreeze ? "yes" : "no")
-      );
-      if (typeof s.lowLiquidity === "boolean") {
-        lines.push("Low liquidity : " + (s.lowLiquidity ? "yes" : "no"));
-      }
-      if (typeof (data.dex?.totalLiquidityUsd) === "number") {
-        lines.push(
-          "Total liquidity: $" +
-            data.dex.totalLiquidityUsd.toFixed(2)
-        );
-      }
-
-      const reasons = Array.isArray(s.reasons) ? s.reasons : [];
-      if (reasons.length) {
-        lines.push("");
-        lines.push("Reasons:");
-        reasons.forEach((r, i) => {
-          lines.push(" " + (i + 1) + ". " + r);
-        });
-      }
-
-      if (data.disclaimer) {
-        lines.push("");
-        lines.push("Note: " + data.disclaimer);
-      }
-
-      outputEl.textContent = lines.join("\n");
-    }
-
-    function renderPlainText(text) {
-      outputEl.textContent = text;
-    }
-
-    async function callApi(kind, path) {
-      try {
-        const base = API_BASE.replace(/\/+$/, "");
-        const url = base + path;
-
-        setStatus(true, "Calling " + kind + " ...");
+      async function fetchJson(url) {
+        statusUrl.textContent = "Calling: " + url;
         const res = await fetch(url);
-        const data = await res.json();
-
         if (!res.ok) {
-          setStatus(false, "Error " + res.status + " – see raw JSON in console");
-          console.error("API error", kind, data);
-          renderPlainText("Error " + res.status + ": " + (data.error || "see console"));
-          return;
+          let msg = res.status + " " + res.statusText;
+          try {
+            const text = await res.text();
+            msg += " – " + text;
+          } catch (_) {}
+          throw new Error(msg);
         }
-
-        setStatus(true, "OK - " + kind + " responded");
-
-        if (kind === "wallet-info") return renderWalletInfo(data);
-        if (kind === "token-info") return renderTokenInfo(data);
-        if (kind === "cbs-metrics") return renderDexMetrics(data);
-        if (kind === "token-safety") return renderTokenSafety(data);
-
-        // fallback
-        renderPlainText(JSON.stringify(data, null, 2));
-      } catch (e) {
-        console.error(e);
-        setStatus(false, "Network error calling " + kind);
-        renderPlainText("Network error: " + String(e));
+        return res.json();
       }
-    }
 
-    // Buttons
-    document
-      .getElementById("btn-wallet-info")
-      .addEventListener("click", () => {
-        const addr = walletInput.value.trim();
-        if (!addr) {
-          setStatus(false, "Fill wallet address first");
-          return;
+      // RENDER FUNCTIONS ------------------------------------------------------
+
+      function renderWalletInfo(data) {
+        const tokens = Array.isArray(data.tokens) ? data.tokens : [];
+
+        let html = "<h3>Wallet overview</h3>";
+        html += "<div class='grid-2'>";
+        html += "<div>";
+        html += "<p><strong>Address:</strong><br />" + escapeHtml(data.address) + "</p>";
+        html +=
+          "<p><strong>SOL balance:</strong> " +
+          (data.sol != null ? data.sol.toFixed(6) : "n/a") +
+          " SOL</p>";
+        html +=
+          "<p><strong>Lamports:</strong> " +
+          (data.lamports != null ? data.lamports.toString() : "n/a") +
+          "</p>";
+        html += "</div>";
+
+        html += "<div>";
+        html +=
+          "<p><strong>RPC:</strong><br />" +
+          escapeHtml(data.rpcUrl || "") +
+          "</p>";
+        html += "<p><strong>SPL tokens found:</strong> " + tokens.length + "</p>";
+        html +=
+          "<small>Only non-zero SPL balances are shown. Names/decimals come from on-chain token accounts.</small>";
+        html += "</div>";
+        html += "</div>";
+
+        if (tokens.length > 0) {
+          html += "<h3 style='margin-top:8px'>SPL token balances</h3>";
+          html += "<table><thead><tr>";
+          html += "<th>#</th><th>Mint</th><th>Amount</th><th>Decimals</th>";
+          html += "</tr></thead><tbody>";
+
+          tokens.forEach((t, i) => {
+            html += "<tr>";
+            html += "<td>" + (i + 1) + "</td>";
+            html += "<td>" + escapeHtml(t.mint || "") + "</td>";
+            html +=
+              "<td>" +
+              (t.uiAmount != null ? Number(t.uiAmount).toLocaleString() : "0") +
+              "</td>";
+            html += "<td>" + (t.decimals != null ? t.decimals : "?") + "</td>";
+            html += "</tr>";
+          });
+
+          html += "</tbody></table>";
+        } else {
+          html += "<p style='margin-top:6px'>No SPL token balances detected.</p>";
         }
-        callApi("wallet-info", "/api/wallet-info?address=" + encodeURIComponent(addr));
-      });
 
-    document
-      .getElementById("btn-token-info")
-      .addEventListener("click", () => {
-        const mint =
-          mintInput.value.trim() ||
-          "B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk";
-        callApi("token-info", "/api/token-info?mint=" + encodeURIComponent(mint));
-      });
+        outputInner.innerHTML = html;
+      }
 
-    document
-      .getElementById("btn-cbs-metrics")
-      .addEventListener("click", () => {
-        const mint =
-          mintInput.value.trim() ||
-          "B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk";
-        callApi("cbs-metrics", "/api/cbs-metrics?mint=" + encodeURIComponent(mint));
-      });
+      function renderTokenInfo(data) {
+        let html = "<h3>Token mint info</h3>";
+        html += "<div class='grid-2'>";
+        html += "<div>";
+        html += "<p><strong>Mint:</strong><br />" + escapeHtml(data.mint) + "</p>";
+        html += "<p><strong>Decimals:</strong> " + data.decimals + "</p>";
+        html +=
+          "<p><strong>Supply:</strong> " +
+          Number(data.supply).toLocaleString() +
+          "</p>";
+        html += "</div>";
 
-    document
-      .getElementById("btn-token-safety")
-      .addEventListener("click", () => {
-        const mint =
-          mintInput.value.trim() ||
-          "B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk";
-        callApi(
-          "token-safety",
-          "/api/token-safety-check?mint=" + encodeURIComponent(mint)
-        );
-      });
+        html += "<div>";
+        html +=
+          "<p><strong>Mint authority:</strong><br />" +
+          (data.mintAuthority || "<span style='color:#4bffb1'>None (immutable)</span>") +
+          "</p>";
+        html +=
+          "<p><strong>Freeze authority:</strong><br />" +
+          (data.freezeAuthority ||
+            "<span style='color:#4bffb1'>None (no freeze)</span>") +
+          "</p>";
+        html +=
+          "<p><strong>Initialized:</strong> " +
+          (data.isInitialized ? "Yes" : "No") +
+          "</p>";
+        html += "</div>";
+        html += "</div>";
 
-    // Nog niet geïmplementeerde endpoints in backend
-    document
-      .getElementById("btn-holder-info")
-      .addEventListener("click", () => {
-        setStatus(false, "Holder info API not wired yet");
-        renderPlainText(
-          "Endpoint /api/holder-info is nog niet geïmplementeerd op deze backend."
-        );
-      });
+        outputInner.innerHTML = html;
+      }
 
-    document
-      .getElementById("btn-whale-tracker")
-      .addEventListener("click", () => {
-        setStatus(false, "Whale tracker API not wired yet");
-        renderPlainText(
-          "Endpoint /api/whale-tracker is nog niet geïmplementeerd op deze backend."
-        );
-      });
+      function renderDexMetrics(data) {
+        const ray = Array.isArray(data.raydium) ? data.raydium : [];
+        const others = Array.isArray(data.others) ? data.others : [];
 
-    document.getElementById("btn-clear").addEventListener("click", () => {
-      outputEl.textContent = "";
-      setStatus(true, "Cleared");
-    });
+        let html = "<h3>DEX metrics (DexScreener)</h3>";
+        html += "<div class='grid-2'>";
+        html += "<div>";
+        html += "<p><strong>Mint:</strong><br />" + escapeHtml(data.mint) + "</p>";
+        html += "<p><strong>Total pools:</strong> " + (data.totalPools || 0) + "</p>";
+        html +=
+          "<p><strong>Raydium pools:</strong> " +
+          (data.raydiumCount || 0) +
+          "</p>";
+        html +=
+          "<p><strong>Other DEX pools:</strong> " +
+          (data.otherDexCount || 0) +
+          "</p>";
+        html += "</div>";
 
-    backendInput.addEventListener("change", () => {
-      const v = backendInput.value.trim();
-      if (!v) return;
-      API_BASE = v.replace(/\/+$/, "");
-      backendLabel.textContent = "Backend base URL: " + API_BASE;
-      setStatus(true, "Backend URL updated");
-    });
+        html += "<div>";
+        html +=
+          "<p><strong>Raydium total liquidity:</strong><br />$" +
+          (data.totalLiquidityUsd != null
+            ? data.totalLiquidityUsd.toFixed(2)
+            : "0.00") +
+          "</p>";
+        html += "<small>Liquidity and prices are read from DexScreener's public API.</small>";
+        html += "</div>";
+        html += "</div>";
 
-    setStatus(true, "Ready");
-  </script>
-</body>
+        if (ray.length > 0) {
+          html += "<h3 style='margin-top:8px'>Raydium pools</h3>";
+          html += "<table><thead><tr>";
+          html += "<th>#</th><th>Pair</th><th>Price (USD)</th><th>Liquidity</th>";
+          html += "</tr></thead><tbody>";
+          ray.forEach((p, i) => {
+            html += "<tr>";
+            html += "<td>" + (i + 1) + "</td>";
+            const pair =
+              (p.baseToken && p.baseToken.symbol) +
+              " / " +
+              (p.quoteToken && p.quoteToken.symbol);
+            html += "<td>" + escapeHtml(pair) + "</td>";
+            html += "<td>$" + (p.priceUsd || "0.000000") + "</td>";
+            html +=
+              "<td>$" +
+              (p.liquidityUsd != null ? p.liquidityUsd.toFixed(2) : "0.00") +
+              "</td>";
+            html += "</tr>";
+          });
+          html += "</tbody></table>";
+        }
+
+        if (others.length > 0) {
+          html += "<p style='margin-top:6px'><strong>Other DEX pools:</strong> " +
+            others.length +
+            " (not listed individually here).</p>";
+        }
+
+        outputInner.innerHTML = html;
+      }
+
+      function renderHolderInfo(data) {
+        const holders = Array.isArray(data.holders) ? data.holders : [];
+        const top20 = holders.slice(0, 20);
+
+        let html = "<h3>Holder distribution</h3>";
+        html += "<div class='grid-2'>";
+        html += "<div>";
+        html += "<p><strong>Mint:</strong><br />" + escapeHtml(data.mint) + "</p>";
+        html +=
+          "<p><strong>Total holders:</strong> " +
+          (data.totalHolders != null ? data.totalHolders : "?") +
+          "</p>";
+        html +=
+          "<p><strong>Snapshot holders:</strong> " +
+          (data.filteredCount != null ? data.filteredCount : "?") +
+          "</p>";
+        html += "</div>";
+
+        const c = data.concentration || {};
+        html += "<div>";
+        html +=
+          "<p><strong>Top 1:</strong> " +
+          (c.top1 != null ? c.top1.toFixed(2) : "0.00") +
+          "% of supply</p>";
+        html +=
+          "<p><strong>Top 5:</strong> " +
+          (c.top5 != null ? c.top5.toFixed(2) : "0.00") +
+          "% of supply</p>";
+        html +=
+          "<p><strong>Top 10:</strong> " +
+          (c.top10 != null ? c.top10.toFixed(2) : "0.00") +
+          "% of supply</p>";
+        html += "</div>";
+        html += "</div>";
+
+        if (top20.length > 0) {
+          html += "<h3 style='margin-top:8px'>Top holders (first 20)</h3>";
+          html += "<table><thead><tr>";
+          html += "<th>#</th><th>Owner</th><th>Amount</th><th>% of supply</th>";
+          html += "</tr></thead><tbody>";
+
+          top20.forEach((h, i) => {
+            html += "<tr>";
+            html += "<td>" + (i + 1) + "</td>";
+            html += "<td>" + escapeHtml(h.owner) + "</td>";
+            html +=
+              "<td>" +
+              (h.uiAmount != null
+                ? Number(h.uiAmount).toLocaleString(undefined, {
+                    maximumFractionDigits: 6,
+                  })
+                : "0") +
+              "</td>";
+            html +=
+              "<td>" +
+              (h.percentageOfSupply != null
+                ? h.percentageOfSupply.toFixed(4)
+                : "0.0000") +
+              "%</td>";
+            html += "</tr>";
+          });
+
+          html += "</tbody></table>";
+        } else {
+          html += "<p style='margin-top:6px'>No holders found in this snapshot.</p>";
+        }
+
+        if (data.note) {
+          html += "<p style='margin-top:6px'><small>" + escapeHtml(data.note) + "</small></p>";
+        }
+
+        outputInner.innerHTML = html;
+      }
+
+      function renderSafetyCheck(data) {
+        const safety = data.safety || {};
+        const reasons = Array.isArray(safety.reasons) ? safety.reasons : [];
+        const risk = safety.riskLevel || "unknown";
+
+        let pillClass = "yellow";
+        if (risk === "low") pillClass = "green";
+        if (risk === "high") pillClass = "red";
+
+        let html = "<h3>Token safety check</h3>";
+        html += "<div class='grid-2'>";
+        html += "<div>";
+        html += "<p><strong>Mint:</strong><br />" + escapeHtml(data.mint) + "</p>";
+        html +=
+          "<p><strong>Risk level:</strong> <span class='pill " +
+          pillClass +
+          "'>" +
+          risk.toUpperCase() +
+          "</span></p>";
+        html += "</div>";
+
+        html += "<div>";
+        html +=
+          "<p><strong>Immutable mint:</strong> " +
+          (safety.immutableMint ? "Yes" : "No") +
+          "</p>";
+        html +=
+          "<p><strong>Freeze authority set:</strong> " +
+          (safety.canFreeze ? "Yes" : "No") +
+          "</p>";
+        html +=
+          "<p><strong>Has Raydium pools:</strong> " +
+          (safety.hasRaydiumPool ? "Yes" : "No") +
+          "</p>";
+        html += "</div>";
+        html += "</div>";
+
+        if (reasons.length > 0) {
+          html += "<h3 style='margin-top:8px'>Why this rating?</h3>";
+          html += "<ul>";
+          reasons.forEach((r) => {
+            html += "<li>" + escapeHtml(r) + "</li>";
+          });
+          html += "</ul>";
+        }
+
+        html +=
+          "<p style='margin-top:6px'><small>" +
+          escapeHtml(
+            data.disclaimer ||
+              "Heuristic only. Not financial advice. Always DYOR."
+          ) +
+          "</small></p>";
+
+        outputInner.innerHTML = html;
+      }
+
+      function renderWhaleComingSoon() {
+        const html =
+          "<h3>Whale tracker</h3>" +
+          "<p>This UI button is ready, but the <code>/api/whale-tracker</code> endpoint isn't wired on your backend yet.</p>" +
+          "<p style='margin-top:4px'>You can implement it later in your <strong>solana-tools-api</strong> project (for example using your <em>whale-tracker</em> package) and keep this page as-is.</p>";
+        outputInner.innerHTML = html;
+      }
+
+      function escapeHtml(str) {
+        if (str == null) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      // Init
+      getBaseUrl();
+    </script>
+  </body>
 </html>
-
