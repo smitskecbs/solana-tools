@@ -1,87 +1,135 @@
-# Solana Tools – CLI toolkit for Solana (by Kevin Smits)
+# Solana Tools — CLI Toolkit for SPL Token & Wallet Insights (by Kevin Smits)
 
-**Solana Tools** is a small TypeScript/Node monorepo with terminal utilities for:
+Solana Tools is a lightweight TypeScript monorepo providing terminal utilities to inspect wallets, analyze SPL token holders, check DEX liquidity (Raydium), run heuristic safety checks, and take SPL holder snapshots for airdrops.
 
-- Inspecting Solana wallets (SOL + SPL balances, recent activity)
-- Analyzing SPL token holder distributions
-- Checking DEX liquidity (Raydium, etc.) via DexScreener
-- Taking snapshots of SPL holders for airdrops
-- Powering a Web2 dashboard + API server on top of the same logic
-
-All tools are **read-only** (no private keys required).
-
-They are built for:
-
-- Builders who want quick on-chain insights from the terminal  
-- Token creators who need holder snapshots, whale overviews, or DEX metrics  
-- People exploring Solana research/analytics without spinning up a full backend
-
-Built by **Kevin Smits** (Netherlands)  
-X: [@smitske180](https://x.com/smitske180)
-
+All tools are read-only and require **no private keys**.
 
 ---
 
-## Repo structure
+## 🧰 Tools Included
 
-This is a small monorepo with multiple packages and an optional API + Web2 dashboard:
-
-- `packages/wallet-info` – wallet analysis (SOL balance, SPL tokens, recent tx)
-- `packages/holder-info` – SPL token holder distribution + concentration
-- `packages/cbs-metrics` – DexScreener-based DEX metrics for a given SPL mint
-- `packages/snapshot-airdrop` – snapshot SPL holders and export for airdrops
-
-Optional:
-
-- `api-server/` – Express API that wraps the tools for use in Web2 frontends
-- `docs/` – static Web2 dashboard (HTML) that calls the `api-server` endpoints
-
-Each package under `packages/*` has its **own `README.md`** with more detailed usage, flags and examples.  
-This root README is meant as the **high-level overview + quickstart**.
-
+| Package | Purpose |
+|--------|---------|
+| `wallet-info` | Inspect a wallet (SOL + SPL balances, recent transactions) |
+| `holder-info` | Aggregated SPL holder distribution + concentration metrics |
+| `whale-tracker` | Largest token accounts and whale concentration overview |
+| `cbs-metrics` | DEX pool + liquidity metrics for an SPL mint via DexScreener |
+| `snapshot-airdrop` | Take SPL holder snapshots and export CSV/JSON |
 
 ---
 
-## Tech stack
+## 🚀 Tech Stack & Vision
 
-- **Language:** TypeScript  
-- **Runtime:** Node.js (tested with Node 18/20)
+- Language: **TypeScript**
+- Runtime: **Node.js 18/20**
+- Data sources: Public Solana RPC + **DexScreener API**
+- Optimized for: Small & mid-cap SPL tokens
+- Migration path: Some packages include a `Kit` variant using `@solana/kit` (Solana v2-style APIs)
 
-- **Solana:**
-  - Primarily using `@solana/web3.js`
-  - Some tools also have **Solana Kit** (`@solana/kit`) variants (`dev:kit` scripts)
-
-- **Scripts & bundling:**
-  - [`tsx`](https://github.com/esbuild-kit/tsx) for TypeScript execution
-  - `npm` workspaces for managing multiple packages in one repo
-
-- **On-chain / off-chain data:**
-  - RPC (Helius or public RPC)
-  - DexScreener public API for DEX metrics
-
+**Built by Kevin Smits (Netherlands)**  
+X (Twitter): `@smitske180`  
+Telegram: `@smitske`
 
 ---
 
-## Prerequisites
-
-- **Node.js** 18 or 20 (LTS recommended)  
-- **npm** 10+  
-
-Optional but recommended:
-
-- A **Helius API key** (for better RPC performance & rate limits), especially for:
-  - Large tokens (many token accounts)
-  - Frequent queries (e.g. snapshots, scans)
-
-
----
-
-## Installation
-
-Clone the repo and install dependencies once:
+## ✅ Quickstart Installation
 
 ```bash
 git clone https://github.com/smitskecbs/solana-tools.git
 cd solana-tools
 npm install
+```
 
+---
+
+## ⚙️ Optional: `.env` Configuration (For Better Stability)
+
+Create a `.env` file in the repo root:
+
+```env
+HELIUS_API_KEY=5b9477d2-aa3f-4a4d-8776-9649b7221023
+# Optional override:
+# RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
+PORT=3000
+```
+
+Behavior priority in code:
+
+1. Uses `RPC_URL` if defined
+2. Otherwise, builds Helius RPC using `HELIUS_API_KEY`
+3. Otherwise falls back to public Solana RPC
+
+---
+
+## ▶️ Running Tools from Terminal
+
+All packages are workspaces. Use:
+
+```bash
+npm run dev -w ./packages/<tool-name> -- [args]
+npm run dev:kit -w ./packages/<tool-name> -- [args]
+```
+
+---
+
+### 🔍 Wallet Inspection
+
+```bash
+npm run dev -w ./packages/wallet-info -- 3g7qECanbhXrX6HGrkqUCCNgzSdtDmjQUidUv7LdgRQH
+```
+
+---
+
+### 📊 SPL Holder Distribution
+
+```bash
+npm run dev:kit -w ./packages/holder-info -- --mint B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk --limit 20
+```
+
+---
+
+### 🐋 Whale Tracker
+
+```bash
+npm run dev:kit -w ./packages/whale-tracker -- --mint B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk --minPct 1 --limit 20
+```
+
+---
+
+### 📦 DEX Metrics (Liquidity / Pools)
+
+```bash
+npm run dev -w ./packages/cbs-metrics -- --mint B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk
+```
+
+---
+
+### 🧾 Take Holder Snapshot (for airdrops)
+
+```bash
+npm run dev:kit -w ./packages/snapshot-airdrop -- --mint B9z8cEWFmc7LvQtjKsaLoKqW5MJmGRCWqs1DPKupCfkk --min 1 --out snapshots
+```
+
+---
+
+## ⚠️ Current Limitations
+
+- `holder-info` and `whale-tracker` may fail on **very large tokens** (JUP, USDC, etc.)
+- Public RPC can throw `429 Too Many Requests` errors when scanning large account lists
+- Some scans may be approximate when memory or rate limits are reached on free hosting tiers
+- The toolkit is actively optimized for efficiency and reliability in future updates.
+
+---
+
+## 📜 License
+
+Source-available toolkit intended for learning, research, and non-malicious analytics.  
+(The official MIT/Apache license may be added later.)
+
+---
+
+## 🤝 Contributing & Feedback
+
+- Open an issue or Pull Request if you find a bug or want a feature.
+- Terminal utilities evolve continuously while Kevin builds in public (attribution always appreciated).
+````markdown
