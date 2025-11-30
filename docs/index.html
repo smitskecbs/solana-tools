@@ -1152,12 +1152,12 @@
         html +=
           "<p><strong>Mint:</strong><br />" + escapeHtml(data.mint) + "</p>";
         html +=
-          "<p><strong>Total holders:</strong> " +
-          (data.totalHolders != null ? data.totalHolders : "?") +
+          "<p><strong>RPC snapshot owners:</strong> " +
+          (data.filteredCount != null ? data.filteredCount : "?") +
           "</p>";
         html +=
-          "<p><strong>Snapshot holders:</strong> " +
-          (data.filteredCount != null ? data.filteredCount : "?") +
+          "<p><strong>Top holders shown:</strong> " +
+          (top20.length != null ? top20.length : "?") +
           "</p>";
         html += "</div>";
 
@@ -1211,12 +1211,17 @@
             "<p style='margin-top:6px'>No holders found in this snapshot.</p>";
         }
 
+        // combined disclaimer
+        let noteText =
+          "Counts are based on a live RPC snapshot. Indexers like Helius / Jupiter can show a higher historical holder count.";
         if (data.note) {
-          html +=
-            "<p style='margin-top:6px'><small>" +
-            escapeHtml(data.note) +
-            "</small></p>";
+          noteText += " " + data.note;
         }
+
+        html +=
+          "<p style='margin-top:6px'><small>" +
+          escapeHtml(noteText) +
+          "</small></p>";
 
         outputInner.innerHTML = html;
       }
